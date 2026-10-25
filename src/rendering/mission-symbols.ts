@@ -1,8 +1,6 @@
 import {positionsAt,type World} from '../simulation/world';
-import {flightAt} from '../simulation/spaceflight/flight';
-import {propagateCoast} from '../simulation/spaceflight/coast';
+import {flightViewAt} from './flight-view';
 import type {FlightState} from '../simulation/spaceflight/types';
-import {gravityForRadius} from '../simulation/spaceflight/gravity';
 import type {Civilization,Mission} from '../simulation/civilization';
 import type {Vec2} from '../simulation/orbits';
 
