@@ -11,7 +11,7 @@ export type Civilization={version:1;id:string;homeId:string;seed:string;time:num
 const TECH:readonly Technology[]=['astronomy','rocketry','orbitalFlight','satellites'];
 const RESEARCH_COST=[30,60,100,150];
 const RESEARCH_SECONDS=[900,1800,3600,7200];
-const LAUNCH_COST=45,PREP_SECONDS=1200,FLIGHT_SECONDS=300,RECOVERY_SECONDS=3000,MAX_MISSIONS=60,MAX_EVENTS=120;
+const LAUNCH_COST=45,PREP_SECONDS=1200,FLIGHT_SECONDS=300,RECOVERY_SECONDS=172800,MAX_MISSIONS=60,MAX_EVENTS=120;
 const round=(v:number):number=>Math.round(v*1e6)/1e6;
 function accrue(c:Civilization,until:number):void{const minutes=Math.floor(until/60)-Math.floor(c.accruedAt/60);if(minutes>0){c.resources=round(Math.min(300,c.resources+minutes*.65));c.knowledge=round(c.knowledge+minutes*.45);}c.accruedAt=until;}
 const probability=(seed:string,id:string):number=>seededRandom('orbiter:mission:v1:'+seed+':'+id)();
