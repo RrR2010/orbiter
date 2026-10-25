@@ -84,6 +84,15 @@ export function resolveAutonomousFlightV2(plan:AutonomousFlightPlanV2,planet:Pla
  const outcome=goalAchieved?'achieved':orbital?'partial':'failed';
  const reason=goalAchieved?'Orbit targets met':orbital?'Operational orbit, target missed':'No stable orbit';
  checkpoints.push({timeS:state.timeS,state,kind:goalAchieved?'goal':orbital?'partial':'abort',reason});
+ // The insertion attempt can fail while the vehicle is still airborne.
+ // Keep the mission physically alive through ballistic descent to first impact.
+ if(!orbital&&orbit.surfaceIntersecting&&Math.hypot(state.position.x,state.position.y)>planet.radiusM){
+  const fall=propagateUntilImpact(state,planet,Math.min(86400,orbit.periodS??86400));
+  if(fall.impacted){
+   state=fall.state;
+   checkpoints.push({timeS:state.timeS,state,kind:'impact',reason:'Vehicle impacted after unsuccessful orbital insertion'});
+  }
+ }
  return {version:2,plan,checkpoints,terminal:state,outcome,reason,orbital,goalAchieved};
 }
 
