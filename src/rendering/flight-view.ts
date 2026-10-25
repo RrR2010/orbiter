@@ -2,7 +2,10 @@ import type {Mission} from '../simulation/civilization';
 import {gravityForRadius} from '../simulation/spaceflight/gravity';
 import {analyzeTrajectory} from '../simulation/spaceflight/conics';
 import {sampleAutonomousFlightWithPlanet} from '../simulation/spaceflight/flight-v2';
-import type {FlightSnapshot} from '../simulation/spaceflight/flight';
+import type {FlightState} from '../simulation/spaceflight/types';
+import type {Trajectory} from '../simulation/spaceflight/types';
+
+type FlightSnapshot=Readonly<{state:FlightState;orbit:Trajectory;phase:'ascent'|'insertion'|'coast'|'circularization'|'impact'|'failure';impacted:boolean}>;
 
 /** V2 read-only trajectory: completed flights continue in analytical coast. */
 export function flightViewAt(mission:Mission,radiusM:number,time:number):FlightSnapshot|null{
