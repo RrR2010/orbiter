@@ -19,17 +19,21 @@ export function planFlight(seed:string,missionId:string,planet:Body,ignitionS:nu
  const gravity=gravityForRadius(planet.radius),g=gravity.muM3S2/planet.radius**2;
  const rng=seededRandom('orbiter:flight:v1:'+seed+':'+missionId);
  const circularSpeed=Math.sqrt(gravity.muM3S2/(planet.radius+Math.max(120000,planet.radius*.03)));
- const fuelKg=720,dryKg=280,ispS=330+tier*15;
- const requiredDv=circularSpeed+g*130;
- const availableDv=ispS*9.80665*Math.log((fuelKg+dryKg)/dryKg);
- const effort=Math.min(1.5,Math.max(.5,requiredDv/Math.max(1,availableDv)))*(0.82+rng()*.35);
- const thrustN=Math.max(18000,(fuelKg+dryKg)*g*1.65)*effort;
+ // A physically integrated launch with technology-scaled propulsion and constant mass flow.
+ // Performance is sized relative to local gravity; a fixed terrestrial engine cannot lift
+ // off planets that range across nearly two orders of magnitude in radius.
+ const fuelKg=720,dryKg=280;
+ const ascentDuration=90,totalDuration=300;
+ const profileFactor=1.08+rng()*.40;
+ const missionDv=(circularSpeed+g*ascentDuration)*profileFactor;
+ const ispS=Math.max(150,missionDv/(9.80665*Math.log((dryKg+fuelKg)/dryKg)));
+ const thrustN=(fuelKg/totalDuration)*ispS*9.80665;
  const launchAngle=rng()*2*Math.PI,r=planet.radius+10;
  const initial:FlightState={position:{x:r*Math.cos(launchAngle),y:r*Math.sin(launchAngle)},velocity:{x:0,y:0},massKg:dryKg+fuelKg,fuelKg,timeS:ignitionS};
- const ascentEndS=ignitionS+140,insertionEndS=ignitionS+300;
+ const ascentEndS=ignitionS+ascentDuration,insertionEndS=ignitionS+totalDuration;
  return {version:1,planetId:planet.id,ignitionS,initial,ascentEndS,insertionEndS,
-  ascent:{startS:ignitionS,endS:ascentEndS,thrustN,ispS,progradeFraction:.38},
-  insertion:{startS:ascentEndS,endS:insertionEndS,thrustN:thrustN*.72,ispS,progradeFraction:1},
+  ascent:{startS:ignitionS,endS:ascentEndS,thrustN,ispS,progradeFraction:0},
+  insertion:{startS:ascentEndS,endS:insertionEndS,thrustN,ispS,progradeFraction:1},
   reliabilityFailure:rng()<Math.max(.04,.22-tier*.035)};
 }
 
