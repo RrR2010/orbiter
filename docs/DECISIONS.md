@@ -18,6 +18,10 @@ Registrar decisões não triviais com motivo, alternativas e consequências. Nã
 
 **Estado:** aceita. **Decisão:** um agente executor por fase; PR com evidência; revisão de gate antes de avançar; ideias novas capturadas sem scope creep. **Motivo:** continuidade de um projeto vibecoded entre contextos independentes. **Consequência:** documentos versionados são autoridade operacional, não chats.
 
+## ADR-0005 — Persistência mínima regenerativa (2026-10-24)
+
+**Estado:** aceita para Fase 1. **Contexto:** salvar snapshots completos adicionaria acoplamento e migrações desnecessárias. **Opções:** IndexedDB/snapshot integral ou localStorage com metadados determinísticos. **Decisão:** armazenar seed, versão, tempo e câmera no localStorage; regenerar corpos por seed. **Motivo:** simplicidade e teste de identidade. **Consequências:** alterações no algoritmo gerador exigirão versionamento/migração; não há evolução offline.
+
 ## Novo ADR (template)
 
 ```markdown

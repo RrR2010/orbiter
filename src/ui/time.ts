@@ -1,0 +1,2 @@
+/** Format simulated elapsed seconds without hiding progression at low warp. */
+export function formatSimulatedTime(seconds:number):string{const total=Math.max(0,Math.floor(seconds)),days=Math.floor(total/86400),hours=Math.floor(total%86400/3600),minutes=Math.floor(total%3600/60),secs=total%60,pad=(n:number)=>String(n).padStart(2,'0');return 'T + '+(days?days+' '+(days===1?'dia':'dias')+', ':'')+pad(hours)+':'+pad(minutes)+':'+pad(secs);}

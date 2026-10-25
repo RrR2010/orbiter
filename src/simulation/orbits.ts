@@ -1,0 +1,5 @@
+/** Keplerian ellipses in a fixed 2D orbital plane; metres and seconds. */
+export type Vec2=Readonly<{x:number;y:number}>;
+export type Orbit=Readonly<{semiMajorAxis:number;eccentricity:number;phase:number;periapsisAngle:number;period:number}>;
+export function orbitalPeriod(a:number,mu:number):number{return 2*Math.PI*Math.sqrt(a**3/mu);}
+export function orbitalPosition(o:Orbit,t:number):Vec2{const {semiMajorAxis:a,eccentricity:e,phase,periapsisAngle:w,period}=o;if(!(a>0&&period>0&&e>=0&&e<1)||![a,e,phase,w,period,t].every(Number.isFinite))throw new Error('Invalid orbit');const M=((phase+2*Math.PI*(t%period)/period)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);let E=e<.8?M:Math.PI;for(let i=0;i<28;i++){const d=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));E-=d;if(Math.abs(d)<1e-13)break;}const x=a*(Math.cos(E)-e),y=a*Math.sqrt(1-e*e)*Math.sin(E);return{x:x*Math.cos(w)-y*Math.sin(w),y:x*Math.sin(w)+y*Math.cos(w)};}
