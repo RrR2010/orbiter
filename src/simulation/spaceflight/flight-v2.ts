@@ -1,3 +1,4 @@
+import {executeAscentV2} from './ascent-v2';
 import {planMissionObjective,type MissionTarget} from './objectives';
 import {gravityForRadius} from './gravity';
 import {homeLaunchSite,sitePosition} from './surface-site';
@@ -47,24 +48,17 @@ export function createAutonomousFlightV2(seed:string,id:string,planet:Body,ignit
  */
 export function resolveAutonomousFlightV2(plan:AutonomousFlightPlanV2,planet:PlanetGravity):AutonomousFlightResultV2{
  let state=plan.initial;
- const checkpoints:FlightCheckpointV2[]=[{timeS:state.timeS,state,kind:'burn-start',reason:'Ignition at permanent launch site'}];
- const wantedAltitude=plan.goal.apoapsisAltitudeM;
- const radial={x:state.position.x/Math.hypot(state.position.x,state.position.y),y:state.position.y/Math.hypot(state.position.x,state.position.y)};
- const tangential={x:-radial.y,y:radial.x};
- // Approximate insertion as a bounded, fuel-constrained first-stage orbit target.
- // This is a physically seeded kick, not an orbit assignment: the resulting orbit is measured.
- const radius=Math.hypot(state.position.x,state.position.y);
- const mu=planet.muM3S2;
- const speed=Math.sqrt(mu/Math.max(radius,planet.radiusM+wantedAltitude));
- const targetVelocity={x:tangential.x*speed*(1+plan.navigationError),y:tangential.y*speed*(1+plan.navigationError)};
- const deltaV=Math.hypot(targetVelocity.x-state.velocity.x,targetVelocity.y-state.velocity.y);
- const fuelNeed=state.massKg*(1-Math.exp(-deltaV/(plan.ispS*9.80665)));
- const consumed=Math.min(state.fuelKg*.82,fuelNeed);
- const granted=plan.ispS*9.80665*Math.log(state.massKg/(state.massKg-consumed));
- const ratio=deltaV>0?granted/deltaV:0;
- state={...state,velocity:{x:state.velocity.x+(targetVelocity.x-state.velocity.x)*ratio,y:state.velocity.y+(targetVelocity.y-state.velocity.y)*ratio},
-  fuelKg:state.fuelKg-consumed,massKg:state.massKg-consumed,timeS:state.timeS+Math.max(1,consumed*plan.ispS*9.80665/plan.thrustN)};
- checkpoints.push({timeS:state.timeS,state,kind:'burn-end',reason:'Ascent energy and fuel constraint'});
+ const checkpoints:FlightCheckpointV2[]=[];
+ const ascent=executeAscentV2(state,planet,{
+  targetApoapsisAltitudeM:plan.goal.apoapsisAltitudeM,
+  thrustN:plan.thrustN,ispS:plan.ispS,profile:plan.ascentProfile,
+  navigationError:plan.navigationError,stepS:1,reservedFuelKg:Math.min(state.fuelKg*.23,350)
+ });
+ checkpoints.push(...ascent.checkpoints.slice(1));
+ state=ascent.state;
+ if(ascent.outcome==='impact'){
+  return {version:2,plan,checkpoints,terminal:state,outcome:'failed',reason:'Surface collision during ascent',orbital:false,goalAchieved:false};
+ }
  const engine={thrustN:plan.thrustN*.35,ispS:plan.ispS,stepS:2};
  const correction=executeGuidanceV2(state,planet,plan.goal,engine);
  checkpoints.push(...correction.checkpoints);
