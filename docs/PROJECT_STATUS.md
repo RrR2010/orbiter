@@ -1,10 +1,10 @@
 # Estado operacional — Orbiter
 
 **Atualização:** 2026-10-25
-**Fase atual:** 2 — Observatório e Telemetria (implementada; aguardando integração do PR #4).
+**Fase atual:** 2 — Observatório e Telemetria, integrada à main.
 **Fase 1 integrada:** PR #2, merge `81bd3e9425ceea07cb071585220d3f33bfe1bcf3`.
-**Situação:** implementação da Issue #3 na branch `phase/02-observatory-telemetry`; merge condicionado aos gates.
-**Próxima ação:** integrar PR #4 por squash após CI verde do HEAD; registrar SHA do merge e fechar Issue #3. Validação funcional humana aprovada, inclusive enquadramento uniforme de planetas.
+**Fase 2 integrada:** PR #4, squash merge `61651381bfb3763184d05fdd959b979a871a00ba`. Issue #3 encerrada.
+**Próxima ação:** retornar à orquestradora para avaliação do produto e autorização explícita da próxima fase; Fase 3 não iniciada.
 
 ## Baseline funcional
 
@@ -16,7 +16,7 @@ Física híbrida; observador com intervenções opcionais; um sistema planetári
 |---|---|---|
 | 0 — Fundação | Aprovada | documentação inicial |
 | 1 — Planetário vivo | **Aprovado para merge** | check GitHub Actions #61 verde, lockfile, npm ci, revisão técnica, ensaio visual 15 min com exceção aceita |
-| 2 — Observatório | Aprovado funcionalmente, integração em andamento | Issue #3, PR #4, CI #96, seleção/telemetria/follow/zoom validados visualmente |
+| 2 — Observatório | **Integrada** | Issue #3 encerrada; PR #4 squash `6165138`; CI #99 verde (npm ci, lint, typecheck, tests, build e audit); validação funcional humana de seleção, telemetria, follow, zoom manual e enquadramento uniforme |
 
 ## Riscos residuais aceitos da Fase 1
 
@@ -32,4 +32,4 @@ AGENTS.md e docs/WORKFLOW.md v2 permitem ao executor, com autorização de iníc
 
 ## Feedback e retorno
 
-O humano volta após integração com link do merge e impressões funcionais. Orquestradora avalia e prepara a Fase 2; os próximos executores não precisam retornar durante o ciclo normal. Não marcar Fase 1 como integrada antes de merge verificado.
+O humano retorna à orquestradora com PR #4 integrado e feedback. A próxima fase requer nova autorização explícita; não iniciar Fase 3 automaticamente.
