@@ -54,7 +54,7 @@ export function resolveAutonomousFlightV2(plan:AutonomousFlightPlanV2,planet:Pla
   thrustN:plan.thrustN,ispS:plan.ispS,profile:plan.ascentProfile,
   navigationError:plan.navigationError,stepS:1,reservedFuelKg:Math.min(state.fuelKg*.23,350)
  });
- checkpoints.push(...ascent.checkpoints.slice(1));
+ checkpoints.push(...ascent.checkpoints);
  state=ascent.state;
  if(ascent.outcome==='impact'){
   return {version:2,plan,checkpoints,terminal:state,outcome:'failed',reason:'Surface collision during ascent',orbital:false,goalAchieved:false};
