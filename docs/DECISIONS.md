@@ -50,3 +50,7 @@ Registrar decisões não triviais com motivo, alternativas e consequências. Nã
 ## ADR-0009 — Follow sem atraso e zoom manual independente (2026-10-25)
 
 **Estado:** aceita, complementa ADR-0008. **Decisão:** acompanhar o alvo em sua posição analítica atual mais um deslocamento transitório suavizado; não usar interpolação permanente entre posição absoluta antiga e nova. Aplicar zoom automático apenas na transição inicial de foco, cancelando-o no primeiro comando manual de zoom, sem cancelar follow. **Motivo:** em alto warp o alvo percorre grandes distâncias por frame e a interpolação absoluta causava atraso visível; zoom contínuo impedia zoom out. **Consequência:** câmera não cria fatos simulados e permanece centralizada no corpo após a transição.
+
+## ADR-0010 — Strategic event scheduler and isolated save (2026-10-25)
+
+**Estado:** provisória, aguardando validação da Fase 3. **Decisão:** processar eventos da civilização segundo `nextAt`, sem resultados aleatórios por frame; transportar o débito de tempo simulado entre frames; manter estado estratégico numa chave isolada (`orbiter.civilization.v1`) para preservar saves astronômicos v1. **Motivo:** determinismo sob warp e migração aditiva. **Consequências:** log e missões individuais têm limites fixos, sucesso/falha decorrem de seed e ID; avanço offline permanece desabilitado. Animações de satélite são representacionais, não integração orbital de uma nave.
