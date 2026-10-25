@@ -55,3 +55,9 @@ Adicionado `src/simulation/spaceflight/coast.ts` com propagador universal de doi
 ## Bloco A — Correções complementares (2026-10-25)
 
 `sampleBurnAt` consulta queimas desde checkpoint de ignição imutável, evitando dependência de partição do render, ao custo de reintegração por consulta. `coast.ts` reduz o tempo de propagação de trajetórias ligadas módulo período e ajusta a busca de impacto à duração orbital, com limite de 32.768 amostras. **Pendente:** garantir discretização exata para targets fracionários sem recomputação, e detecção rigorosa de impactos rasantes por raiz analítica. Testes escritos e commitados, ainda não executados; sem Actions e sem merge.
+
+## Bloco B — Primeira integração física de lançamentos (2026-10-25)
+
+Foi introduzido `spaceflight/flight.ts` (plano de ignição determinístico, queimas de subida/inserção, estado gravitacional local, telemetria orbital e classificação física). Novas missões passam a armazenar `mission.flight` e a resolver seu resultado pela trajetória calculada; missões persistidas sem o campo permanecem como legado e não têm seus desfechos reescritos. Novo teste compara resultado persistido com plano de voo.
+
+**Gate ainda aberto:** a arquitetura das queimas está em protótipo e não tem ainda guidance contínuo, atmosfera ou inserção automatizada calibrada para a enorme faixa de raios planetários do gerador. O teste legado que exige primeiro satélite bem-sucedido pode falhar até calibrarmos o perfil físico; não afirmar A2/A3. O processo de simulação física ainda não foi instrumentado para custo de longo prazo. A UI/renderer ainda apresentam os símbolos legados, sem trajetória real. `npm ci`, `npm run validate`, `npm audit` e smoke devem ser executados localmente pelo humano antes do CI final. Não fazer merge.
