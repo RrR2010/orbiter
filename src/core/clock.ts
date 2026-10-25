@@ -1,0 +1,3 @@
+/** Simulation time in seconds; independent of rendering and wall-clock APIs. */
+export type Warp=0|1|100|10000;
+export class SimulationClock{constructor(private seconds=0,private speed:Warp=100){if(!Number.isFinite(seconds)||seconds<0)throw new Error('Invalid time');}get time():number{return this.seconds;}get warp():Warp{return this.speed;}setWarp(value:Warp):void{this.speed=value;}advance(elapsed:number):number{if(!Number.isFinite(elapsed)||elapsed<0)throw new Error('Invalid elapsed time');this.seconds+=elapsed*this.speed;return this.seconds;}}
