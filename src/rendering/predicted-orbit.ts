@@ -2,7 +2,7 @@ import type {Vec2} from '../simulation/orbits';
 import {analyzeTrajectory} from '../simulation/spaceflight/conics';
 import type {FlightState,PlanetGravity} from '../simulation/spaceflight/types';
 
-export type PredictedOrbit=Readonly<{points:readonly Vec2[];closed:boolean;periapsisM:number;apoapsisM:number|null;impactRisk:boolean}>;
+export type PredictedOrbit=Readonly<{points:readonly Vec2[];closed:boolean;periapsisM:number;apoapsisM:number|null;impactRisk:boolean;apoapsisPoint:Vec2;periapsisPoint:Vec2|null}>;
 
 /** Sample an osculating ellipse in SI without advancing simulation or mutating the vehicle.
  * Surface-intersecting sections are omitted, so a suborbital path ends at the surface.
@@ -21,5 +21,5 @@ export function predictLocalOrbit(state:FlightState,planet:PlanetGravity,segment
   const p={x:px*cos-py*sin,y:px*sin+py*cos};
   points.push(Math.hypot(p.x,p.y)>planet.radiusM?p:{x:NaN,y:NaN});
  }
- return {points,closed:!orbit.surfaceIntersecting,periapsisM:orbit.periapsisM,apoapsisM:orbit.apoapsisM,impactRisk:orbit.surfaceIntersecting};
+ return {points,closed:!orbit.surfaceIntersecting,periapsisM:orbit.periapsisM,apoapsisM:orbit.apoapsisM,impactRisk:orbit.surfaceIntersecting,apoapsisPoint:{x:-orbit.apoapsisM*cos,y:-orbit.apoapsisM*sin},periapsisPoint:orbit.periapsisM>planet.radiusM?{x:orbit.periapsisM*cos,y:orbit.periapsisM*sin}:null};
 }
