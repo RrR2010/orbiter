@@ -2,6 +2,7 @@ import type {Mission} from '../simulation/civilization';
 import {flightAt} from '../simulation/spaceflight/flight';
 import {gravityForRadius} from '../simulation/spaceflight/gravity';
 import {propagateCoast} from '../simulation/spaceflight/coast';
+import {flightResolutionTime} from '../simulation/spaceflight/flight';
 import type {FlightSnapshot} from '../simulation/spaceflight/flight';
 
 /** Physics-derived read model: burn checkpoints are cached by plan identity, never by frame time. */
@@ -11,6 +12,7 @@ export function flightViewAt(mission:Mission,radiusM:number,time:number):FlightS
  const plan=mission.flight;if(!plan)return null;
  const planet=gravityForRadius(radiusM),end=plan.insertionEndS;
  if(time>end){
+  if(plan.useApoapsisBurn&&plan.objective){const resolution=flightResolutionTime(plan,planet);if(time<=resolution)return flightAt(plan,planet,time);const terminal=flightAt(plan,planet,resolution);if(terminal.impacted||terminal.phase==='failure')return terminal;return {...terminal,state:propagateCoast(terminal.state,planet,time-resolution),phase:'coast'};}
   let checkpoint=checkpoints.get(plan);
   if(!checkpoint){checkpoint=flightAt(plan,planet,end);checkpoints.set(plan,checkpoint);}
   if(checkpoint.impacted||checkpoint.phase==='failure')return checkpoint;
