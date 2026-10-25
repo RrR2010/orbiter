@@ -1,28 +1,28 @@
-import {planFlight,flightAt,flightSucceeded,flightResolutionTime,type FlightPlan} from './spaceflight/flight';
+import {createAutonomousFlightV2,resolveAutonomousFlightV2,type AutonomousFlightResultV2} from './spaceflight/flight-v2';
 import {gravityForRadius} from './spaceflight/gravity';
 import {seededRandom} from '../core/random';
 import type {World} from './world';
 
 export type Technology='astronomy'|'rocketry'|'orbitalFlight'|'satellites';
 export type MissionStatus='preparing'|'ascending'|'success'|'failure';
-export type Mission={id:string;originId:string;targetId:string;startedAt:number;launchAt:number;resolvedAt:number;status:MissionStatus;success:boolean|null;vehicleId:string;flight?:FlightPlan};
+export type Mission={id:string;originId:string;targetId:string;startedAt:number;launchAt:number;resolvedAt:number;status:MissionStatus;success:boolean|null;vehicleId:string;flight?:AutonomousFlightResultV2};
 export type SpaceEvent={id:string;time:number;kind:'research'|'preparation'|'launch'|'success'|'failure';missionId:string|null;detail:string};
-export type Civilization={version:1;id:string;homeId:string;seed:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number};
+export type Civilization={version:2;id:string;homeId:string;seed:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number};
 const TECH:readonly Technology[]=['astronomy','rocketry','orbitalFlight','satellites'];
 const RESEARCH_COST=[30,60,100,150];
 const RESEARCH_SECONDS=[900,1800,3600,7200];
 export const RESOURCE_CAP=300,RESOURCE_INCOME_PER_DAY=18,LAUNCH_RESOURCE_COST=70;
-const PREP_SECONDS=1200,FLIGHT_SECONDS=300,RECOVERY_SECONDS=172800,MAX_MISSIONS=60,MAX_EVENTS=120;
+const PREP_SECONDS=1200,RECOVERY_SECONDS=172800,MAX_MISSIONS=60,MAX_EVENTS=120;
 const round=(v:number):number=>Math.round(v*1e6)/1e6;
 function accrue(c:Civilization,until:number):void{const minutes=Math.floor(until/60)-Math.floor(c.accruedAt/60);if(minutes>0){c.resources=round(Math.min(RESOURCE_CAP,c.resources+minutes*RESOURCE_INCOME_PER_DAY/1440));c.knowledge=round(c.knowledge+minutes*.45);}c.accruedAt=until;}
-const probability=(seed:string,id:string):number=>seededRandom('orbiter:mission:v1:'+seed+':'+id)();
+const probability=(seed:string,id:string):number=>seededRandom('orbiter:mission:v2:'+seed+':'+id)();
 
 /** Initialize at the current simulation time; never fabricate historical launches. */
 export function createCivilization(world:World,time=0):Civilization{
  const planets=world.bodies.filter(b=>b.kind==='planet');
  const home=planets[Math.floor(probability(world.seed,'home')*planets.length)];
  if(!home||!Number.isFinite(time)||time<0)throw new Error('Invalid civilization origin');
- return {version:1,id:'civilization-0',homeId:home.id,seed:world.seed,time,accruedAt:time,stage:0,knowledge:0,resources:80,nextAt:time+RESEARCH_SECONDS[0],missionSerial:0,missions:[],events:[],successes:0,failures:0};
+ return {version:2,id:'civilization-0',homeId:home.id,seed:world.seed,time,accruedAt:time,stage:0,knowledge:0,resources:80,nextAt:time+RESEARCH_SECONDS[0],missionSerial:0,missions:[],events:[],successes:0,failures:0};
 }
 function record(c:Civilization,time:number,kind:SpaceEvent['kind'],detail:string,missionId:string|null=null):void{
  c.events.push({id:'event-'+time+'-'+kind+'-'+c.missionSerial,time,kind,detail,missionId});
@@ -42,15 +42,20 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
   const mission=c.missions.find(m=>m.status==='preparing'||m.status==='ascending');
   if(mission?.status==='preparing'){
    const home=world.bodies.find(b=>b.id===mission.originId);
-   if(!mission.flight&&home)mission.flight=planFlight(world.seed,mission.id,home,time,c.stage);
-   mission.status='ascending';record(c,time,'launch','Launch ignition',mission.id);const gravity=home?gravityForRadius(home.radius):null;c.nextAt=mission.flight&&gravity?flightResolutionTime(mission.flight,gravity):time+FLIGHT_SECONDS;
+   if(!home||home.kind!=='planet')throw new Error('Missing V2 launch planet');
+   if(!mission.flight){
+    const plan=createAutonomousFlightV2(world.seed,mission.id,home,time,c.stage);
+    mission.flight=resolveAutonomousFlightV2(plan,gravityForRadius(home.radius));
+   }
+   mission.status='ascending';
+   record(c,time,'launch','V2 autonomous launch ignition',mission.id);
+   c.nextAt=Math.max(time+1,mission.flight.terminal.timeS);
   }else if(mission?.status==='ascending'){
-   const home=world.bodies.find(b=>b.id===mission.originId);
-   const planet=home?gravityForRadius(home.radius):null;
-   mission.success=mission.flight&&planet?flightSucceeded(flightAt(mission.flight,planet,time),planet):probability(world.seed,mission.id)<Math.min(.94,.35+c.stage*.12+Math.min(.2,c.successes*.035));
+   mission.success=mission.flight?.orbital??false;
    mission.status=mission.success?'success':'failure';mission.resolvedAt=time;
    if(mission.success)c.successes++;else c.failures++;
-   record(c,time,mission.success?'success':'failure',mission.success?'Satellite reached operational orbit':'Launch ended without a stable orbit',mission.id);
+   const detail=mission.flight?.reason??'Missing flight result';
+   record(c,time,mission.success?'success':'failure',detail,mission.id);
    c.nextAt=time+RECOVERY_SECONDS;
   }else if(c.stage<TECH.length){
    const cost=RESEARCH_COST[c.stage];
@@ -75,17 +80,17 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
  return processed;
 }
 export function serializeCivilization(c:Civilization):string{return JSON.stringify(c);}
-/** Fail closed on corrupted strategic records; preserve older astronomical saves separately. */
+/** V2 only. All legacy V1 strategic records are rejected. */
 export function parseCivilization(raw:string|null,world:World,time:number):Civilization{
  if(!raw)return createCivilization(world,time);
  try{
   const c:unknown=JSON.parse(raw);if(!c||typeof c!=='object')throw Error();
   const v=c as Civilization;
-  if(v.version!==1||v.id!=='civilization-0'||v.seed!==world.seed||!world.bodies.some(b=>b.id===v.homeId&&b.kind==='planet')||
+  if(v.version!==2||v.id!=='civilization-0'||v.seed!==world.seed||!world.bodies.some(b=>b.id===v.homeId&&b.kind==='planet')||
    ![v.time,v.accruedAt,v.nextAt,v.resources,v.knowledge,v.stage,v.missionSerial,v.successes,v.failures].every(Number.isFinite)||
    v.stage<0||v.stage>TECH.length||v.time<0||v.accruedAt!==v.time||v.nextAt<=v.time||v.missionSerial<0||!Number.isSafeInteger(v.stage)||!Number.isSafeInteger(v.missionSerial)||
    !Array.isArray(v.events)||!Array.isArray(v.missions)||v.events.length>MAX_EVENTS||v.missions.length>MAX_MISSIONS||
-   v.missions.some(m=>!m.id||!['preparing','ascending','success','failure'].includes(m.status)))throw Error();
+   v.missions.some(m=>!m.id||!['preparing','ascending','success','failure'].includes(m.status)||m.flight?.version!==undefined&&m.flight.version!==2))throw Error();
   // Astronomy is authoritative; a future strategic save must not rewind orbital time.
   if(v.time>time)throw Error();
   return v;
