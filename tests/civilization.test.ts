@@ -1,4 +1,7 @@
 import {describe,it,expect} from 'vitest';
+import {flightAt} from '../src/simulation/spaceflight/flight';
+import {gravityForRadius} from '../src/simulation/spaceflight/gravity';
+import {flightSucceeded} from '../src/simulation/spaceflight/flight';
 import {generateWorld} from '../src/simulation/world';
 import {createCivilization,advanceCivilization,parseCivilization,serializeCivilization,technology} from '../src/simulation/civilization';
 describe('autonomous space age',()=>{
@@ -59,6 +62,21 @@ describe('autonomous space age',()=>{
   const snapshot=serializeCivilization(limited);
   expect(advanceCivilization(limited,world,target,2)).toBe(0);
   expect(serializeCivilization(limited)).toBe(snapshot);
+ });
+ it('records simulated flight plans without rewriting already settled missions',()=>{
+  const c=createCivilization(world);
+  advanceCivilization(c,world,3e6,10000);
+  const flown=c.missions.filter(m=>m.flight);
+  expect(flown.length).toBeGreaterThan(0);
+  for(const mission of flown){
+   const origin=world.bodies.find(b=>b.id===mission.originId)!;
+   const physics=gravityForRadius(origin.radius);
+   const snapshot=flightAt(mission.flight!,physics,mission.resolvedAt||c.time);
+   if(mission.status==='success'||mission.status==='failure')expect(mission.success).toBe(flightSucceeded(snapshot,physics));
+  }
+  const original=structuredClone(c);
+  const restored=parseCivilization(serializeCivilization(c),world,c.time);
+  expect(restored).toEqual(original);
  });
  it('migrates missing strategic saves at current time without inventing past events',()=>{
   const c=parseCivilization(null,world,1234567);
