@@ -39,7 +39,7 @@ export function createAutonomousFlightV2(seed:string,id:string,planet:Body,ignit
  return {version:2,id,planetId:planet.id,ignitionS,
   initial:{position:sitePosition(homeLaunchSite(seed,planet.id),radius),velocity:{x:0,y:0},massKg:dryKg+fuelKg,fuelKg,timeS:ignitionS},
   target,goal:{periapsisAltitudeM:target.periapsisAltitudeM,apoapsisAltitudeM:target.apoapsisAltitudeM,toleranceM:Math.max(20000,radius*.003)},
-  thrustN:thrustN*scale,ispS,ascentProfile:profile,navigationError:deviation};
+  thrustN:Math.max(thrustN*scale,(dryKg+fuelKg)*g*1.65),ispS,ascentProfile:profile,navigationError:deviation};
 }
 
 /** Bounded authoritative trajectory run, once per launch event, never once per render frame.
