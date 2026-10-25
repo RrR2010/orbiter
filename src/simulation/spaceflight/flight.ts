@@ -1,3 +1,5 @@
+import {planApoapsisCircularization} from './maneuvers';
+import {propagateCoast} from './coast';
 import {planMissionObjective,type MissionTarget} from './objectives';
 import {homeLaunchSite,sitePosition} from './surface-site';
 import {seededRandom} from '../../core/random';
@@ -11,7 +13,7 @@ import type {Burn,FlightState,PlanetGravity,Trajectory} from './types';
 export type FlightPlan=Readonly<{
  version:1;planetId:string;ignitionS:number;initial:FlightState;
  ascent:Burn;insertion:Burn;ascentEndS:number;insertionEndS:number;
- reliabilityFailure:boolean;objective?:MissionTarget;
+ reliabilityFailure:boolean;objective?:MissionTarget;useApoapsisBurn?:boolean;
 }>;
 export type FlightSnapshot=Readonly<{state:FlightState;orbit:Trajectory;phase:'ascent'|'insertion'|'coast'|'impact'|'failure';impacted:boolean}>;
 
@@ -39,7 +41,7 @@ export function planFlight(seed:string,missionId:string,planet:Body,ignitionS:nu
  return {version:1,planetId:planet.id,ignitionS,initial,ascentEndS,insertionEndS,
   ascent:{startS:ignitionS,endS:ascentEndS,thrustN,ispS,progradeFraction:0},
   insertion:{startS:ascentEndS,endS:insertionEndS,thrustN,ispS,progradeFraction:1},
-  reliabilityFailure:rng()<Math.max(.04,.22-tier*.035),objective};
+  reliabilityFailure:rng()<Math.max(.04,.22-tier*.035),objective,useApoapsisBurn:objective.objective!=='suborbitalSurvey'};
 }
 
 /** Flight is sampled from its immutable ignition state, never incremented by a render frame. */
@@ -64,8 +66,18 @@ export function flightAt(plan:FlightPlan,planet:PlanetGravity,targetS:number):Fl
  }
  if(!impacted&&targetS>plan.insertionEndS){
   const dt=targetS-plan.insertionEndS;
-  const coast=propagateUntilImpact(s,planet,dt);
-  s=coast.state;impacted=coast.impacted;
+  const maneuver=plan.useApoapsisBurn&&plan.objective?planApoapsisCircularization(s,planet,plan.objective.periapsisAltitudeM,plan.insertion.ispS):null;
+  if(maneuver&&targetS>=maneuver.atS){
+   const before=propagateUntilImpact(s,planet,maneuver.atS-plan.insertionEndS);
+   if(before.impacted){s=before.state;impacted=true;}
+   else{
+    const coast=propagateUntilImpact(maneuver.after,planet,targetS-maneuver.atS);
+    s=coast.state;impacted=coast.impacted;
+   }
+  }else{
+   const coast=propagateUntilImpact(s,planet,dt);
+   s=coast.state;impacted=coast.impacted;
+  }
   phase=impacted?'impact':'coast';
  }
  const orbit=analyzeTrajectory(s,planet);
@@ -78,4 +90,13 @@ export function flightAt(plan:FlightPlan,planet:PlanetGravity,targetS:number):Fl
 export function flightSucceeded(snapshot:FlightSnapshot,planet:PlanetGravity):boolean{
  return snapshot.phase!=='impact'&&snapshot.phase!=='failure'&&snapshot.orbit.kind==='elliptic'&&
  snapshot.orbit.periapsisM>planet.radiusM+Math.min(120000,planet.radiusM*.02);
+}
+
+/** Planned orbital insertion cannot be judged before the apoapsis maneuver has occurred. */
+export function flightResolutionTime(plan:FlightPlan,planet:PlanetGravity):number{
+ if(!plan.useApoapsisBurn||!plan.objective)return plan.insertionEndS;
+ const atBurnEnd=flightAt(plan,planet,plan.insertionEndS);
+ if(atBurnEnd.impacted)return plan.insertionEndS;
+ const maneuver=planApoapsisCircularization(atBurnEnd.state,planet,plan.objective.periapsisAltitudeM,plan.insertion.ispS);
+ return maneuver&&maneuver.atS-plan.insertionEndS<=86400?maneuver.atS+1:plan.insertionEndS;
 }
