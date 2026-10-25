@@ -7,7 +7,7 @@ npm install
 npm run dev
 ```
 
-Abrir o endereço informado pelo Vite (normalmente http://localhost:5173). Validações: `npm run typecheck`, `npm run lint`, `npm test` e `npm run build`.
+Abrir o endereço informado pelo Vite (normalmente http://localhost:5173). Validação completa: `npm run validate` (executa lint, typecheck, tests e build, sem parar na primeira falha; mostra PASS/FAIL por etapa e encerra com erro se qualquer uma falhar). Comandos individuais: `npm run typecheck`, `npm run lint`, `npm test` e `npm run build`.
 
 ## Demonstração guiada
 
