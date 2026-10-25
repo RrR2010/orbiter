@@ -15,6 +15,11 @@ describe('event-based flight executor v2',()=>{
   expect(a.end.fuelKg).toBeLessThan(state.fuelKg);
   expect(a.end.timeS).toBeGreaterThan(state.timeS);
   expect(a.checkpoints.some(c=>c.kind==='burn-end')).toBe(true);
+  expect(a.checkpoints.some(c=>c.kind==='burn-progress')).toBe(true);
+  const beginning=a.checkpoints.find(c=>c.kind==='burn-start')!;
+  const progress=a.checkpoints.find(c=>c.kind==='burn-progress')!;
+  expect(progress.state.fuelKg).toBeLessThan(beginning.state.fuelKg);
+  expect(analyzeTrajectory(progress.state,planet).periapsisM).toBeGreaterThan(analyzeTrajectory(beginning.state,planet).periapsisM);
   expect(analyzeTrajectory(a.end,planet).periapsisM).toBeGreaterThan(0);
  });
  it('honors fuel exhaustion and does not invent impulse',()=>{
