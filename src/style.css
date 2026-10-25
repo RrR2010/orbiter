@@ -5,3 +5,8 @@
 @media(max-width:760px){.observatory{top:142px;right:12px;max-height:calc(100vh - 220px)}.show-inspector{top:142px;right:12px}}
 
 .settings{margin-top:12px;padding-top:10px;border-top:1px solid #ffffff22}.settings summary{cursor:pointer;color:#c6daee}.settings label{display:block;margin-top:10px}.settings select{margin-bottom:0}
+
+.flight-spotlight{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);max-width:min(560px,80vw);z-index:5;padding:11px 18px;border:1px solid #75c6d4;border-radius:10px;background:rgba(11,35,57,.9);color:#e6f6ff;box-shadow:0 5px 24px rgba(0,0,0,.34);font-size:13px;pointer-events:none;text-align:center}
+.space-mission-detail{font-size:11px;line-height:1.5;margin-top:10px;color:#9fd9e9;border-top:1px solid #ffffff20;padding-top:9px}
+
+.launch-watch{display:flex;align-items:flex-start;gap:8px;margin:10px 0;padding:9px;border:1px solid #34475d;border-radius:8px;line-height:1.35;cursor:pointer}.launch-watch input{margin-top:2px;accent-color:#8ed5eb;flex-shrink:0}

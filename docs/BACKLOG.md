@@ -33,3 +33,11 @@ Não é uma lista de promessas. Ideias entram aqui primeiro, recebem triagem no 
 ## Regra
 
 Se for correção de bug que bloqueia critério da fase atual, registrar na issue/PR da fase e classificar `now`. Nenhum item `later` deve entrar na implementação por entusiasmo do agente.
+
+### IDEA-013 — Satellite selection and camera follow
+- **Origem:** Fase 3, integração inicial
+- **Experiência desejada:** selecionar o veículo/satélite diretamente no Canvas e acompanhar trajetória representacional com inspector específico
+- **Motivação:** observabilidade durante missão
+- **Risco/dependências:** generalização do seletor e do follow; cuidar para não misturar trajetória representacional e física
+- **Triagem:** now
+- **Status:** pendente de conclusão do gate A4 da Fase 3
