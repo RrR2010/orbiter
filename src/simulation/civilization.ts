@@ -5,7 +5,7 @@ export type Technology='astronomy'|'rocketry'|'orbitalFlight'|'satellites';
 export type MissionStatus='preparing'|'ascending'|'success'|'failure';
 export type Mission={id:string;originId:string;targetId:string;startedAt:number;launchAt:number;resolvedAt:number;status:MissionStatus;success:boolean|null;vehicleId:string};
 export type SpaceEvent={id:string;time:number;kind:'research'|'preparation'|'launch'|'success'|'failure';missionId:string|null;detail:string};
-export type Civilization={version:1;id:string;homeId:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number};
+export type Civilization={version:1;id:string;homeId:string;seed:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number};
 const TECH:readonly Technology[]=['astronomy','rocketry','orbitalFlight','satellites'];
 const RESEARCH_COST=[30,60,100,150];
 const RESEARCH_SECONDS=[900,1800,3600,7200];
@@ -19,10 +19,10 @@ export function createCivilization(world:World,time=0):Civilization{
  const planets=world.bodies.filter(b=>b.kind==='planet');
  const home=planets[Math.floor(probability(world.seed,'home')*planets.length)];
  if(!home||!Number.isFinite(time)||time<0)throw new Error('Invalid civilization origin');
- return {version:1,id:'civilization-0',homeId:home.id,time,accruedAt:time,stage:0,knowledge:0,resources:80,nextAt:time+RESEARCH_SECONDS[0],missionSerial:0,missions:[],events:[],successes:0,failures:0};
+ return {version:1,id:'civilization-0',homeId:home.id,seed:world.seed,time,accruedAt:time,stage:0,knowledge:0,resources:80,nextAt:time+RESEARCH_SECONDS[0],missionSerial:0,missions:[],events:[],successes:0,failures:0};
 }
 function record(c:Civilization,time:number,kind:SpaceEvent['kind'],detail:string,missionId:string|null=null):void{
- c.events.push({id:'event-'+(c.successes+c.failures)+'-'+c.stage+'-'+c.missionSerial+'-'+kind,time,kind,detail,missionId});
+ c.events.push({id:'event-'+time+'-'+kind+'-'+c.missionSerial,time,kind,detail,missionId});
  if(c.events.length>MAX_EVENTS)c.events.splice(0,c.events.length-MAX_EVENTS);
 }
 export function technology(c:Readonly<Civilization>):readonly Technology[]{return TECH.slice(0,c.stage);}
@@ -75,9 +75,9 @@ export function parseCivilization(raw:string|null,world:World,time:number):Civil
  try{
   const c:unknown=JSON.parse(raw);if(!c||typeof c!=='object')throw Error();
   const v=c as Civilization;
-  if(v.version!==1||v.id!=='civilization-0'||!world.bodies.some(b=>b.id===v.homeId&&b.kind==='planet')||
+  if(v.version!==1||v.id!=='civilization-0'||v.seed!==world.seed||!world.bodies.some(b=>b.id===v.homeId&&b.kind==='planet')||
    ![v.time,v.accruedAt,v.nextAt,v.resources,v.knowledge,v.stage,v.missionSerial,v.successes,v.failures].every(Number.isFinite)||
-   v.stage<0||v.stage>TECH.length||v.time<0||v.accruedAt>v.time||v.nextAt<=v.time||v.missionSerial<0||
+   v.stage<0||v.stage>TECH.length||v.time<0||v.accruedAt!==v.time||v.nextAt<=v.time||v.missionSerial<0||!Number.isSafeInteger(v.stage)||!Number.isSafeInteger(v.missionSerial)||
    !Array.isArray(v.events)||!Array.isArray(v.missions)||v.events.length>MAX_EVENTS||v.missions.length>MAX_MISSIONS||
    v.missions.some(m=>!m.id||!['preparing','ascending','success','failure'].includes(m.status)))throw Error();
   // Astronomy is authoritative; a future strategic save must not rewind orbital time.
