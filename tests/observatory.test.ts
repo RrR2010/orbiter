@@ -16,7 +16,7 @@ describe('observatory commands',()=>{
   it('focuses on moons and follows the current Keplerian position at high warp',()=>{
     const state=structuredClone(DEFAULT_OBSERVATORY),camera={x:0,y:0,zoom:1};
     expect(focusBody(camera,state,world,0,moon.id)).toBe(true);
-    expect(camera.zoom).toBeGreaterThan(1);expect(state.follow).toBe(true);
+    expect(camera.zoom).toBeGreaterThan(400);expect(state.follow).toBe(true);
     updateFollow(camera,state,world,1e7);
     expect(camera).toMatchObject(positionsAt(world,1e7).get(moon.id)!);
     resetView(camera,state);expect(camera).toEqual({x:0,y:0,zoom:1});expect(state.follow).toBe(false);
