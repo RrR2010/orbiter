@@ -32,7 +32,7 @@ export function focusBody(camera:Camera,state:ObservatoryState,world:World,time:
   if(!positionsAt(world,time).has(id))return false;
   const target=positionsAt(world,time).get(id)!;
   const reference=body.orbit?.semiMajorAxis;
-  const zoomTarget=reference?Math.max(.035,Math.min(20000,body.kind==='moon'?8*AU/reference:2*AU/reference)):1;
+  const zoomTarget=body.kind==='planet'?5:body.kind==='moon'&&reference?Math.max(.035,Math.min(20000,8*AU/reference)):1;
   transitions.set(state,{offsetX:camera.x-target.x,offsetY:camera.y-target.y,zoomTarget});
   state.selectedId=id;state.follow=true;
   return true;
