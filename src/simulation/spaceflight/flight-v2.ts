@@ -1,0 +1,104 @@
+import {planMissionObjective,type MissionTarget} from './objectives';
+import {gravityForRadius} from './gravity';
+import {homeLaunchSite,sitePosition} from './surface-site';
+import {analyzeTrajectory} from './conics';
+import {executeGuidanceV2,type FlightCheckpointV2} from './executor-v2';
+import {decideGuidance,type OrbitalGoal} from './guidance-v2';
+import {propagateCoast} from './coast';
+import {seededRandom} from '../../core/random';
+import type {Body} from '../world';
+import type {FlightState,PlanetGravity} from './types';
+
+export type AutonomousFlightPlanV2=Readonly<{
+ version:2;id:string;planetId:string;ignitionS:number;initial:FlightState;
+ target:MissionTarget;goal:OrbitalGoal;thrustN:number;ispS:number;
+ ascentProfile:'vertical'|'gradual'|'tangential';navigationError:number;
+}>;
+export type AutonomousFlightResultV2=Readonly<{
+ version:2;plan:AutonomousFlightPlanV2;checkpoints:readonly FlightCheckpointV2[];
+ terminal:FlightState;outcome:'achieved'|'partial'|'failed';reason:string;
+ orbital:boolean;goalAchieved:boolean;
+}>;
+
+/** Seed-scoped mission identity: render/camera/warp cannot affect planning. */
+export function createAutonomousFlightV2(seed:string,id:string,planet:Body,ignitionS:number,tier:number):AutonomousFlightPlanV2{
+ if(planet.kind!=='planet')throw new Error('V2 launch requires planet');
+ const rng=seededRandom('orbiter:autonomous-v2:'+seed+':'+id);
+ const target=planMissionObjective(seed,id,planet.radius,ignitionS,tier);
+ const radius=planet.radius,gravity=gravityForRadius(radius);
+ const missionRadius=radius+Math.max(50000,target.apoapsisAltitudeM);
+ const circularSpeed=Math.sqrt(gravity.muM3S2/missionRadius);
+ const g=gravity.muM3S2/(radius*radius);
+ const ispS=360+Math.max(0,tier)*20;
+ const fuelKg=1450,dryKg=550,availableDv=ispS*9.80665*Math.log((fuelKg+dryKg)/dryKg);
+ const thrustN=(dryKg+fuelKg)*g*(1.6+rng()*.5);
+ const desiredSpeed=Math.sqrt(gravity.muM3S2/(radius+Math.max(100000,target.periapsisAltitudeM)));
+ const scale=Math.max(.5,Math.min(2,desiredSpeed/Math.max(1,availableDv)));
+ const deviation=(rng()-.5)*2*(.13/(tier+1));
+ const profiles=['vertical','gradual','tangential'] as const;
+ const profile=target.objective==='suborbitalSurvey'?'vertical':profiles[Math.floor(rng()*profiles.length)];
+ return {version:2,id,planetId:planet.id,ignitionS,
+  initial:{position:sitePosition(homeLaunchSite(seed,planet.id),radius),velocity:{x:0,y:0},massKg:dryKg+fuelKg,fuelKg,timeS:ignitionS},
+  target,goal:{periapsisAltitudeM:target.periapsisAltitudeM,apoapsisAltitudeM:target.apoapsisAltitudeM,toleranceM:Math.max(20000,radius*.003)},
+  thrustN:thrustN*scale,ispS,ascentProfile:profile,navigationError:deviation};
+}
+
+/** Bounded authoritative trajectory run, once per launch event, never once per render frame.
+ * V2 ascent is an early control prototype: subsequent improvements will replace its fixed ascent
+ * decision cadence with an apoapsis feedback loop.
+ */
+export function resolveAutonomousFlightV2(plan:AutonomousFlightPlanV2,planet:PlanetGravity):AutonomousFlightResultV2{
+ let state=plan.initial;
+ const checkpoints:FlightCheckpointV2[]=[{timeS:state.timeS,state,kind:'burn-start',reason:'Ignition at permanent launch site'}];
+ const wantedAltitude=plan.goal.apoapsisAltitudeM;
+ const radial={x:state.position.x/Math.hypot(state.position.x,state.position.y),y:state.position.y/Math.hypot(state.position.x,state.position.y)};
+ const tangential={x:-radial.y,y:radial.x};
+ // Approximate insertion as a bounded, fuel-constrained first-stage orbit target.
+ // This is a physically seeded kick, not an orbit assignment: the resulting orbit is measured.
+ const radius=Math.hypot(state.position.x,state.position.y);
+ const mu=planet.muM3S2;
+ const speed=Math.sqrt(mu/Math.max(radius,planet.radiusM+wantedAltitude));
+ const targetVelocity={x:tangential.x*speed*(1+plan.navigationError),y:tangential.y*speed*(1+plan.navigationError)};
+ const deltaV=Math.hypot(targetVelocity.x-state.velocity.x,targetVelocity.y-state.velocity.y);
+ const fuelNeed=state.massKg*(1-Math.exp(-deltaV/(plan.ispS*9.80665)));
+ const consumed=Math.min(state.fuelKg*.82,fuelNeed);
+ const granted=plan.ispS*9.80665*Math.log(state.massKg/(state.massKg-consumed));
+ const ratio=deltaV>0?granted/deltaV:0;
+ state={...state,velocity:{x:state.velocity.x+(targetVelocity.x-state.velocity.x)*ratio,y:state.velocity.y+(targetVelocity.y-state.velocity.y)*ratio},
+  fuelKg:state.fuelKg-consumed,massKg:state.massKg-consumed,timeS:state.timeS+Math.max(1,consumed*plan.ispS*9.80665/plan.thrustN)};
+ checkpoints.push({timeS:state.timeS,state,kind:'burn-end',reason:'Ascent energy and fuel constraint'});
+ const engine={thrustN:plan.thrustN*.35,ispS:plan.ispS,stepS:2};
+ const correction=executeGuidanceV2(state,planet,plan.goal,engine);
+ checkpoints.push(...correction.checkpoints);
+ state=correction.end;
+ const orbit=analyzeTrajectory(state,planet);
+ const orbital=orbit.kind==='elliptic'&&!orbit.surfaceIntersecting;
+ const decision=decideGuidance(state,planet,plan.goal,plan.ispS);
+ const goalAchieved=decision.action==='goal-achieved';
+ const outcome=goalAchieved?'achieved':orbital?'partial':'failed';
+ const reason=goalAchieved?'Orbit targets met':orbital?'Operational orbit, target missed':'No stable orbit';
+ checkpoints.push({timeS:state.timeS,state,kind:goalAchieved?'goal':orbital?'partial':'abort',reason});
+ return {version:2,plan,checkpoints,terminal:state,outcome,reason,orbital,goalAchieved};
+}
+
+/** Query immutable checkpoints at arbitrary simulated time; no physics authority depends on focus. */
+export function sampleAutonomousFlightWithPlanet(result:AutonomousFlightResultV2,planet:PlanetGravity,atS:number):FlightState{
+ const checkpoints=result.checkpoints;
+ if(atS<=checkpoints[0].timeS)return checkpoints[0].state;
+ let prev=checkpoints[0];
+ for(const checkpoint of checkpoints){
+  if(checkpoint.timeS>atS){
+   if(prev.kind==='burn-start'&&checkpoint.timeS>prev.timeS){
+    const fraction=(atS-prev.timeS)/(checkpoint.timeS-prev.timeS);
+    return {...prev.state,
+     position:{x:prev.state.position.x+(checkpoint.state.position.x-prev.state.position.x)*fraction,y:prev.state.position.y+(checkpoint.state.position.y-prev.state.position.y)*fraction},
+     velocity:{x:prev.state.velocity.x+(checkpoint.state.velocity.x-prev.state.velocity.x)*fraction,y:prev.state.velocity.y+(checkpoint.state.velocity.y-prev.state.velocity.y)*fraction},
+     massKg:prev.state.massKg+(checkpoint.state.massKg-prev.state.massKg)*fraction,
+     fuelKg:prev.state.fuelKg+(checkpoint.state.fuelKg-prev.state.fuelKg)*fraction,timeS:atS};
+   }
+   return propagateCoast(prev.state,planet,atS-prev.timeS);
+  }
+  prev=checkpoint;
+ }
+ return propagateCoast(result.terminal,planet,atS-result.terminal.timeS);
+}
