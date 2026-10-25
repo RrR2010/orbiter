@@ -36,6 +36,18 @@ describe('autonomous space age',()=>{
   expect(c.missions.length).toBeLessThanOrEqual(60);
   expect(c.successes+c.failures).toBeGreaterThan(100);
  });
+ it('rejects unrelated universes and keeps event identities unique',()=>{
+  const c=createCivilization(world);advanceCivilization(c,world,8e6,10000);
+  expect(new Set(c.events.map(e=>e.id)).size).toBe(c.events.length);
+  const foreign=generateWorld('another universe');
+  const migrated=parseCivilization(serializeCivilization(c),foreign,c.time);
+  expect(migrated.seed).toBe(foreign.seed);expect(migrated.events).toEqual([]);
+ });
+ it('finds both successful and unsuccessful missions without frame-driven RNG',()=>{
+  const c=createCivilization(world);advanceCivilization(c,world,8e6,10000);
+  expect(c.missions.some(m=>m.status==='success')).toBe(true);
+  expect(c.missions.some(m=>m.status==='failure')).toBe(true);
+ });
  it('migrates missing strategic saves at current time without inventing past events',()=>{
   const c=parseCivilization(null,world,1234567);
   expect(c.time).toBe(1234567);expect(c.events).toEqual([]);expect(c.missions).toEqual([]);
