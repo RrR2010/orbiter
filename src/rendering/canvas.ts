@@ -1,3 +1,4 @@
+import {drawVehicleGlyph} from './vehicle-glyph';
 import {homeLaunchSite,sitePosition} from '../simulation/spaceflight/surface-site';
 import {drawSprite} from './atlas';
 import {predictLocalOrbit} from './predicted-orbit';
@@ -34,4 +35,4 @@ if(selected){
  };
  if(forecast.apoapsisM!==null)drawApsis(forecast.apoapsisPoint,'AP',forecast.apoapsisM);
  if(forecast.periapsisPoint)drawApsis(forecast.periapsisPoint,'PE',forecast.periapsisM);
-}}}}if(civilization)for(const symbol of missionSymbols(world,civilization,time)){const p=project(symbol.position),active=symbol.state==='ascent'||symbol.state==='circularization',x=p.x,y=p.y;ctx.strokeStyle=symbol.state==='circularization'?'#ffdc83':active?'#ffbd77':'#74d7ec';ctx.fillStyle=ctx.strokeStyle;if(!drawSprite(ctx,active?'rocket':'satellite',x,y,active?16:14)){ctx.beginPath();ctx.arc(x,y,active?3:2,0,Math.PI*2);ctx.fill();}if(active){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-9,y+5);ctx.stroke();}}ctx.restore();}}
+}}}}if(civilization)for(const symbol of missionSymbols(world,civilization,time)){const p=project(symbol.position),active=symbol.state==='ascent'||symbol.state==='circularization',x=p.x,y=p.y;ctx.strokeStyle=symbol.state==='circularization'?'#ffdc83':active?'#ffbd77':'#74d7ec';ctx.fillStyle=ctx.strokeStyle;drawVehicleGlyph(ctx,x,y,active?18:16,active?'rocket':'satellite',symbol.flightState?.velocity??null,symbol.mission.id===selectedMissionId);if(active){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-9,y+5);ctx.stroke();}}ctx.restore();}}
