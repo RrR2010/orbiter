@@ -74,3 +74,8 @@ Registrar decisões não triviais com motivo, alternativas e consequências. Nã
 ## ADR-0015 — Fase de experiência visual antes da exploração (2026-10-25)
 
 **Estado:** aceita. **Decisão:** antecipar uma fase dedicada a linguagem visual, HUD, iconografia, telemetria observável e lifecycle de rastros como Fase 4. Reindexar a exploração interplanetária para Fase 5, narrativa para 6, economia para 7 e estabilidade longa para 8. **Motivo:** a simulação de voo V2 já existe, mas sua leitura pelo observador é insuficiente para sustentar a complexidade de exploração. **Condições:** discovery funcional antes de mudanças UX, sem telemetria fabricada e sem reescrita gratuita da física; documentação de design vira contrato obrigatório das features futuras. **Referência:** `docs/phases/PHASE_04.md` e Issue #8.
+
+
+## ADR-0016 — Mission Control contextual e observação opt-in (2026-10-25)
+
+**Estado:** implementação candidata na Fase 4, sujeita a validação local e smoke humano. **Contexto:** PO escolheu a terceira direção visual, operação espacial cinematográfica contida, após duas rodadas de Discovery. **Decisão:** preservar panorama Canvas dominante; painel contextual somente para seleção, telemetria derivada em view model read-only, agenda de lançamentos conhecidos pelo scheduler com marcação de acompanhamento em chave observatória independente, setas tangenciais estáticas e glifos Canvas originais. **Alternativas:** painel permanente intrusivo ou instrumentos fictícios, rejeitados. **Consequências:** não altera física/saves V2; dados indisponíveis são N/D; não promete atitude 3D, manobras novas ou multi-civilização. Consulte `docs/design/DISCOVERY_PHASE_04.md`. **Pendente:** smoke, verificações locais e gate CI final.
