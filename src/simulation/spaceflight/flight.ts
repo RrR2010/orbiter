@@ -12,9 +12,11 @@ import type {Burn,FlightState,PlanetGravity,Trajectory} from './types';
 export type FlightPlan=Readonly<{
  version:1;planetId:string;ignitionS:number;initial:FlightState;
  ascent:Burn;insertion:Burn;ascentEndS:number;insertionEndS:number;
- reliabilityFailure:boolean;objective?:MissionTarget;useApoapsisBurn?:boolean;
+ reliabilityFailure:boolean;objective?:MissionTarget;useApoapsisBurn?:boolean;orbitalReserveKg?:number;
 }>;
 export type FlightSnapshot=Readonly<{state:FlightState;orbit:Trajectory;phase:'ascent'|'insertion'|'coast'|'impact'|'failure';impacted:boolean}>;
+
+function objectiveReserveForTier(tier:number):number{return Math.max(90,Math.min(200,125+tier*9));}
 
 /** Create a seeded local launch profile. All stochastic decisions occur at planning time. */
 export function planFlight(seed:string,missionId:string,planet:Body,ignitionS:number,tier:number):FlightPlan{
@@ -26,14 +28,17 @@ export function planFlight(seed:string,missionId:string,planet:Body,ignitionS:nu
  // Performance is sized relative to local gravity; a fixed terrestrial engine cannot lift
  // off planets that range across nearly two orders of magnitude in radius.
  const fuelKg=720,dryKg=280;
+ // Keep a dedicated orbital-stage reserve for the later apoapsis burn.
+ const orbitalReserveKg=objectiveReserveForTier(tier);
  const ascentDuration=90,totalDuration=300;
  const objective=planMissionObjective(seed,missionId,planet.radius,ignitionS,tier);
  const targetRadius=planet.radius+Math.max(10000,objective.apoapsisAltitudeM);
  const targetSpeed=Math.sqrt(gravity.muM3S2/targetRadius);
  const profileFactor=(objective.objective==='suborbitalSurvey'?.5:objective.objective==='highApoapsis'?1.48:1.08)+rng()*.26;
  const missionDv=(Math.max(circularSpeed*.8,targetSpeed)+g*ascentDuration)*profileFactor;
- const ispS=Math.max(150,missionDv/(9.80665*Math.log((dryKg+fuelKg)/dryKg)));
- const thrustN=(fuelKg/totalDuration)*ispS*9.80665;
+ const ascentFuelKg=fuelKg-orbitalReserveKg;
+ const ispS=Math.max(150,missionDv/(9.80665*Math.log((dryKg+fuelKg)/(dryKg+orbitalReserveKg))));
+ const thrustN=(ascentFuelKg/totalDuration)*ispS*9.80665;
  const profileRoll=rng();
  const guidanceProfile=objective.objective==='suborbitalSurvey'?'vertical':profileRoll<.32?'vertical':profileRoll<.7?'gradual':'tangential';
  const ascentStart=guidanceProfile==='tangential'?.22:guidanceProfile==='gradual'?.05:0;
@@ -46,7 +51,7 @@ export function planFlight(seed:string,missionId:string,planet:Body,ignitionS:nu
  return {version:1,planetId:planet.id,ignitionS,initial,ascentEndS,insertionEndS,
   ascent:{startS:ignitionS,endS:ascentEndS,thrustN,ispS,progradeFraction:ascentStart,endProgradeFraction:ascentEnd},
   insertion:{startS:ascentEndS,endS:insertionEndS,thrustN,ispS,progradeFraction:insertionStart,endProgradeFraction:insertionEnd},
-  reliabilityFailure:rng()<Math.max(.04,.22-tier*.035),objective,useApoapsisBurn:objective.objective!=='suborbitalSurvey'};
+  reliabilityFailure:rng()<Math.max(.04,.22-tier*.035),objective,useApoapsisBurn:objective.objective!=='suborbitalSurvey',orbitalReserveKg};
 }
 
 /** Flight is sampled from its immutable ignition state, never incremented by a render frame. */
