@@ -12,7 +12,7 @@ Abrir o endereço informado pelo Vite (normalmente http://localhost:5173). Valid
 ## Demonstração guiada
 
 1. Observar o sistema e suas órbitas; arrastar para pan, usar scroll ou teclas +/− para zoom.
-2. Usar Espaço para pausar/retomar e teclas 1–4 para alterar velocidade (1×, 100×, 10.000×, 1.000.000×); os campos de texto continuam recebendo digitação normalmente. Alternar 1×, 100×, 10.000× e 1.000.000×, pausar e retomar; verificar que não existe salto abrupto de tempo.
+2. Usar Espaço para pausar/retomar e teclas 1–5 para alterar velocidade (1×, 100×, 10.000×, 100.000×, 1.000.000×); os campos de texto continuam recebendo digitação normalmente. Alternar 1×, 100×, 10.000× e 1.000.000×, pausar e retomar; verificar que não existe salto abrupto de tempo.
 3. Ativar Tela cheia, redimensionar a janela e verificar controles e proporções.
 4. Observar o relógio em horas:minutos:segundos (e dias após 24h). Anotar seed e tempo, recarregar e confirmar retomada no mesmo universo.
 5. Alterar a seed, confirmar no diálogo e comparar o novo sistema; observar por 30 minutos.
@@ -25,4 +25,4 @@ O `localStorage` usa formato validado `orbiter.phase1.v1` e persiste seed, tempo
 
 ## Evidências pendentes
 
-O agente preparou testes automatizados, mas não conseguiu instalar o ambiente npm nem abrir o app servido pelo Vite no contexto de execução. A execução real de lint/typecheck/test/build, screenshot em navegador, FPS/memória e ensaio de 30 minutos precisa ser concluída antes de considerar A6/A7 aprovados. Não substituir medições por estimativas.
+O agente preparou testes automatizados, mas não conseguiu instalar o ambiente npm nem abrir o app servido pelo Vite no contexto de execução. Foi observado pelo humano em 2026-10-24 que typecheck, 14 testes e build passam. O lint falhou ao analisar `dist/`; a exclusão de artefatos foi corrigida e aguarda revalidação. Screenshot em navegador, FPS/memória e ensaio de 30 minutos precisa ser concluído antes de considerar A6/A7 aprovados. Não substituir medições por estimativas.
