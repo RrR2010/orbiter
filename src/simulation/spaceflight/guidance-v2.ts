@@ -31,7 +31,10 @@ export function decideGuidance(state:FlightState,planet:PlanetGravity,goal:Orbit
   const desiredRp=Math.min(desiredPe,ra);
   const currentApSpeed=Math.sqrt(Math.max(0,planet.muM3S2*(2/ra-2/(ra+orbit.periapsisM))));
   const targetApSpeed=Math.sqrt(Math.max(0,planet.muM3S2*(2/ra-2/(ra+desiredRp))));
-  return {action:at-state.timeS>1?'coast-to-apoapsis':'raise-periapsis',desiredDeltaVMs:Math.max(0,targetApSpeed-currentApSpeed),targetTimeS:at,reason:'Raise periapsis at apoapsis'};
+  const r=Math.hypot(state.position.x,state.position.y);
+  const radialSpeed=(state.position.x*state.velocity.x+state.position.y*state.velocity.y)/r;
+  const atApoapsis=Math.abs(r-ra)<=Math.max(100,ra*1e-6)&&Math.abs(radialSpeed)<1;
+  return {action:atApoapsis?'raise-periapsis':'coast-to-apoapsis',desiredDeltaVMs:Math.max(0,targetApSpeed-currentApSpeed),targetTimeS:atApoapsis?state.timeS:at,reason:'Raise periapsis at apoapsis'};
  }
  return {action:'partial-orbit',desiredDeltaVMs:0,targetTimeS:null,reason:'Orbit differs from mission target'};
 }
