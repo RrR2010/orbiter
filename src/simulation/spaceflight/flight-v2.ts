@@ -6,7 +6,7 @@ import {homeLaunchSite,sitePosition} from './surface-site';
 import {analyzeTrajectory} from './conics';
 import {executeGuidanceV2,type FlightCheckpointV2} from './executor-v2';
 import {decideGuidance,type OrbitalGoal} from './guidance-v2';
-import {propagateCoast} from './coast';
+import {propagateCoast,propagateUntilImpact} from './coast';
 import {seededRandom} from '../../core/random';
 import type {Body} from '../world';
 import type {FlightState,PlanetGravity} from './types';
@@ -56,7 +56,23 @@ export function resolveAutonomousFlightV2(plan:AutonomousFlightPlanV2,planet:Pla
  if(ascent.outcome==='impact'){
   return {version:2,plan,checkpoints,terminal:state,outcome:'failed',reason:'Surface collision during ascent',orbital:false,goalAchieved:false};
  }
- if(plan.target.objective==='suborbitalSurvey'){const orbit=analyzeTrajectory(state,planet);const achieved=orbit.apoapsisM!==null&&orbit.apoapsisM-planet.radiusM>=plan.goal.apoapsisAltitudeM-plan.goal.toleranceM;const reason=achieved?'Suborbital survey altitude reached':'Suborbital survey altitude missed';checkpoints.push({timeS:state.timeS,state,kind:achieved?'goal':'partial',reason});return {version:2,plan,checkpoints,terminal:state,outcome:achieved?'achieved':'failed',reason,orbital:false,goalAchieved:achieved};}
+ if(plan.target.objective==='suborbitalSurvey'){
+  const trajectory=analyzeTrajectory(state,planet);
+  const achieved=trajectory.apoapsisM!==null&&trajectory.apoapsisM-planet.radiusM>=plan.goal.apoapsisAltitudeM-plan.goal.toleranceM;
+  const reason=achieved?'Suborbital survey altitude reached':'Suborbital survey altitude missed';
+  checkpoints.push({timeS:state.timeS,state,kind:achieved?'goal':'partial',reason});
+  // A completed scientific mission is not a permanent satellite.
+  // Coast to the surface once, store the impact and never propagate through the planet.
+  if(trajectory.surfaceIntersecting){
+   const impact=propagateUntilImpact(state,planet,Math.min(86400,trajectory.periodS??86400));
+   if(impact.impacted){
+    state=impact.state;
+    checkpoints.push({timeS:state.timeS,state,kind:'impact',reason:'Suborbital vehicle impacted after survey'});
+   }
+  }
+  return {version:2,plan,checkpoints,terminal:state,outcome:achieved?'achieved':'failed',reason,orbital:false,goalAchieved:achieved};
+ }
+
  const engine={thrustN:plan.thrustN*.35,ispS:plan.ispS,stepS:2};
  const correction=executeGuidanceV2(state,planet,plan.goal,engine);
  checkpoints.push(...correction.checkpoints);
