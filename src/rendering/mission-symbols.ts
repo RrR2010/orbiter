@@ -9,12 +9,12 @@ export type MissionSymbol={mission:Mission;position:Vec2;physical:boolean;flight
 export function missionSymbols(world:World,c:Civilization,time:number):MissionSymbol[]{
  const home=positionsAt(world,time).get(c.homeId),planet=world.bodies.find(b=>b.id===c.homeId);
  if(!home||!planet)return [];
- return c.missions.slice(-12).filter(m=>m.status==='ascending'||m.status==='success').map(m=>{
+ return c.missions.slice(-12).filter(m=>m.status==='ascending'||m.status==='success').map((m):MissionSymbol|null=>{
   if(m.flight){
    const sampled=flightViewAt(m,planet.radius,Math.max(m.flight.plan.ignitionS,time));
    if(!sampled)return null;
    return {mission:m,position:{x:home.x+sampled.state.position.x,y:home.y+sampled.state.position.y},physical:true,flightState:sampled.state,state:m.status==='success'?'orbiting':sampled.phase==='circularization'?'circularization':sampled.phase==='ascent'||sampled.phase==='insertion'?'ascent':'coast'};
   }
   return {mission:m,position:home,physical:false,state:'legacy' as const};
- }).filter((symbol):symbol is NonNullable<typeof symbol>=>symbol!==null);
+ }).filter((symbol):symbol is MissionSymbol=>symbol!==null);
 }
