@@ -1,5 +1,5 @@
 /** Clock commands are the single entry point for human and future automatic warp policies. */
-export const WARP_LEVELS=[1,100,10000,1000000] as const;
+export const WARP_LEVELS=[1,100,10000,100000,1000000] as const;
 export type ActiveWarp=typeof WARP_LEVELS[number];
 export type Warp=0|ActiveWarp;
 export type ClockCommand={type:'set-warp';warp:Warp}|{type:'toggle-pause'};
