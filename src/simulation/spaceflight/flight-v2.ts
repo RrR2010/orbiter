@@ -78,7 +78,7 @@ export function sampleAutonomousFlightWithPlanet(result:AutonomousFlightResultV2
  let prev=checkpoints[0];
  for(const checkpoint of checkpoints){
   if(checkpoint.timeS>atS){
-   if(checkpoint.timeS>prev.timeS&&(prev.kind==='burn-start'||prev.reason==='Ascent telemetry checkpoint')&&(checkpoint.reason==='Ascent telemetry checkpoint'||checkpoint.reason.startsWith('Ascent '))){
+   if(checkpoint.timeS>prev.timeS&&((prev.kind==='burn-start'||prev.reason==='Ascent telemetry checkpoint')&&(checkpoint.reason==='Ascent telemetry checkpoint'||checkpoint.reason.startsWith('Ascent '))||(prev.kind==='burn-start'||prev.kind==='burn-progress')&&(checkpoint.kind==='burn-progress'||checkpoint.kind==='burn-end'))){
     const fraction=(atS-prev.timeS)/(checkpoint.timeS-prev.timeS);
     return {...prev.state,
      position:{x:prev.state.position.x+(checkpoint.state.position.x-prev.state.position.x)*fraction,y:prev.state.position.y+(checkpoint.state.position.y-prev.state.position.y)*fraction},
