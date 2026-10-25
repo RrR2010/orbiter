@@ -1,9 +1,9 @@
 # Fase 1 — execução e validação humana
 
-Requisitos: Node.js 22+ e npm. Na raiz do repositório (temporariamente `npm install` até o lockfile estar versionado; depois, em ambiente limpo, usar `npm ci`):
+Requisitos: Node.js 22+ e npm. Na raiz do repositório, use `npm ci` para instalar exatamente as versões fixadas no `package-lock.json`:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -12,7 +12,7 @@ Abrir o endereço informado pelo Vite (normalmente http://localhost:5173). Valid
 ## Demonstração guiada
 
 1. Observar o sistema e suas órbitas; arrastar para pan, usar scroll ou teclas +/− para zoom.
-2. Usar Espaço para pausar/retomar e teclas 1–5 para alterar velocidade (1×, 100×, 10.000×, 100.000×, 1.000.000×); os campos de texto continuam recebendo digitação normalmente. verificar que não existe salto abrupto de tempo.
+2. Usar Espaço para pausar/retomar e teclas 1–5 para alterar velocidade (1×, 100×, 10.000×, 100.000×, 1.000.000×); os campos de texto continuam recebendo digitação normalmente. Verificar que não existe salto abrupto de tempo.
 3. Ativar Tela cheia, redimensionar a janela e verificar controles e proporções.
 4. Observar o relógio em horas:minutos:segundos (e dias após 24h). Anotar seed e tempo, recarregar e confirmar retomada no mesmo universo.
 5. Alterar a seed, confirmar no diálogo e comparar o novo sistema; observar a estabilidade da animação. O product owner aceitou um ensaio de 15 minutos para esta fase.
