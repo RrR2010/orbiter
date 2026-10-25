@@ -1,10 +1,10 @@
 # Estado operacional — Orbiter
 
 **Atualização:** 2026-10-25
-**Fase atual:** 1 — Planetário vivo, revisão final APROVADA.
-**PR de integração:** https://github.com/RrR2010/orbiter/pull/2 (head conferido `1fd2f63`; CI #61 verde).
-**Situação no momento deste registro:** merge **autorizado**, ainda não realizado. Próxima fase NÃO autorizada.
-**Próxima ação:** integrar PR #2 à main; fechar issue #1 e registrar merge SHA. Após integração, a orquestradora prepara o brief da Fase 2.
+**Fase atual:** 2 — Observatório e Telemetria (implementada; aguardando integração do PR #4).
+**Fase 1 integrada:** PR #2, merge `81bd3e9425ceea07cb071585220d3f33bfe1bcf3`.
+**Situação:** implementação da Issue #3 na branch `phase/02-observatory-telemetry`; merge condicionado aos gates.
+**Próxima ação:** integrar PR #4 por squash após CI verde do HEAD; registrar SHA do merge e fechar Issue #3. Validação funcional humana aprovada, inclusive enquadramento uniforme de planetas.
 
 ## Baseline funcional
 
@@ -16,7 +16,7 @@ Física híbrida; observador com intervenções opcionais; um sistema planetári
 |---|---|---|
 | 0 — Fundação | Aprovada | documentação inicial |
 | 1 — Planetário vivo | **Aprovado para merge** | check GitHub Actions #61 verde, lockfile, npm ci, revisão técnica, ensaio visual 15 min com exceção aceita |
-| 2 — Observatório | Não autorizada | depende de Fase 1 integrada e brief específico |
+| 2 — Observatório | Aprovado funcionalmente, integração em andamento | Issue #3, PR #4, CI #96, seleção/telemetria/follow/zoom validados visualmente |
 
 ## Riscos residuais aceitos da Fase 1
 
