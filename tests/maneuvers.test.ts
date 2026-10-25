@@ -24,6 +24,8 @@ describe('apoapsis maneuvers',()=>{
  });
  it('refuses a maneuver if no fuel or if periapsis already exceeds the target',()=>{
   expect(planApoapsisCircularization(initial,planet,50000,350)).toBeNull();
-  expect(planApoapsisCircularization({...initial,fuelKg:0},planet,450000,350)).toBeNull();
+  const empty={...initial,fuelKg:0};
+  expect(planApoapsisCircularization(empty,planet,450000,350)).toBeNull();
+  expect(empty.massKg).toBe(initial.massKg);
  });
 });
