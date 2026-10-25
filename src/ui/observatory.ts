@@ -7,6 +7,11 @@ export const DEFAULT_LAYERS:Layers={orbits:true,labels:true,belt:true};
 export type ObservatoryState={selectedId:string|null;follow:boolean;layers:Layers;ambient:boolean;cameraSpeed:number};
 export const DEFAULT_OBSERVATORY:ObservatoryState={selectedId:null,follow:false,layers:{...DEFAULT_LAYERS},ambient:false,cameraSpeed:3};
 export const OBSERVATORY_KEY='orbiter.observatory.v1';
+/** Transient screen-navigation animation, deliberately excluded from persistent state. */
+type CameraTransition={offsetX:number;offsetY:number;zoomTarget:number|null};
+const transitions=new WeakMap<ObservatoryState,CameraTransition>();
+export function cancelCameraZoom(state:ObservatoryState):void{const transition=transitions.get(state);if(transition)transition.zoomTarget=null;}
+
 export function parseObservatory(raw:string|null):ObservatoryState{
   if(!raw)return structuredClone(DEFAULT_OBSERVATORY);
   try{
@@ -19,12 +24,16 @@ export function parseObservatory(raw:string|null):ObservatoryState{
 }
 export function selectBody(state:ObservatoryState,world:World,id:string|null):void{
   state.selectedId=id&&world.bodies.some(b=>b.id===id)?id:null;
-  state.follow=false;
+  state.follow=false;transitions.delete(state);
 }
 export function focusBody(camera:Camera,state:ObservatoryState,world:World,time:number,id:string):boolean{
   const body=world.bodies.find(b=>b.id===id);
   if(!body)return false;
   if(!positionsAt(world,time).has(id))return false;
+  const target=positionsAt(world,time).get(id)!;
+  const reference=body.orbit?.semiMajorAxis;
+  const zoomTarget=reference?Math.max(.035,Math.min(20000,body.kind==='moon'?8*AU/reference:2*AU/reference)):1;
+  transitions.set(state,{offsetX:camera.x-target.x,offsetY:camera.y-target.y,zoomTarget});
   state.selectedId=id;state.follow=true;
   return true;
 }
@@ -32,14 +41,21 @@ export function updateFollow(camera:Camera,state:ObservatoryState,world:World,ti
   if(!state.follow||!state.selectedId)return;
   const target=positionsAt(world,time).get(state.selectedId);
   if(!target){state.follow=false;return;}
-  const body=world.bodies.find(b=>b.id===state.selectedId);const reference=body?.orbit?.semiMajorAxis;
-  const zoom=reference?Math.max(.035,Math.min(20000,body?.kind==='moon'?8*AU/reference:2*AU/reference)):1;
-  const factor=1-Math.exp(-state.cameraSpeed*Math.max(0,elapsed));
-  camera.x+=(target.x-camera.x)*factor;camera.y+=(target.y-camera.y)*factor;
-  camera.zoom*=Math.exp((Math.log(zoom)-Math.log(camera.zoom))*factor);
+  const transition=transitions.get(state);
+  if(!transition){camera.x=target.x;camera.y=target.y;return;}
+  const decay=Math.exp(-state.cameraSpeed*Math.max(0,elapsed));
+  transition.offsetX*=decay;transition.offsetY*=decay;
+  // Animate the offset relative to the moving body, never its absolute position.
+  // Thus even extreme time warp has no follow lag once the transition settles.
+  camera.x=target.x+transition.offsetX;camera.y=target.y+transition.offsetY;
+  if(transition.zoomTarget!==null){
+    camera.zoom*=Math.exp((Math.log(transition.zoomTarget)-Math.log(camera.zoom))*(1-decay));
+    if(Math.abs(Math.log(transition.zoomTarget/camera.zoom))<.001){camera.zoom=transition.zoomTarget;transition.zoomTarget=null;}
+  }
+  if(Math.hypot(transition.offsetX,transition.offsetY)<1 && transition.zoomTarget===null)transitions.delete(state);
 }
 export function resetView(camera:Camera,state:ObservatoryState):void{
-  state.follow=false;camera.x=0;camera.y=0;camera.zoom=1;
+  state.follow=false;transitions.delete(state);camera.x=0;camera.y=0;camera.zoom=1;
 }
 export function orbitalSpeed(body:Body,time:number):number|null{
   const o=body.orbit;if(!o)return null;
