@@ -21,3 +21,10 @@ Espaço pausa; 1–5 alteram warp; +/- zoom; F foca e acompanha corpo selecionad
 
 ## Limites
 Canvas depende de navegador e GPU local para desempenho; FPS/memória necessitam de observação real. Frame clamp de 0,1 s da Fase 1 permanece, e eventos agendados ainda não existem. Seleção por mapa requer corpo visível; a árvore/lista permite alcançar corpos muito pequenos. O ajuste semântico de zoom de luas é contextual e não altera a escala da simulação.
+
+## Ajustes de experiência após teste humano
+
+- Atalhos globais de pausa/velocidade permanecem ativos quando botões, lista de corpos e campos de configuração do painel estão focados; a única exceção é a entrada editável de seed (e outras áreas de texto editáveis).
+- Ao selecionar outro corpo enquanto o acompanhamento está ativo, a câmera redireciona o follow ao novo corpo. Se o follow estava desligado, a seleção apenas altera o inspector.
+- **Configurações da câmera** oferece quatro velocidades (suave, normal, rápida e quase instantânea), gravadas em `orbiter.observatory.v1`, com default compatível para preferências antigas. O follow usa interpolação exponencial de posição e zoom baseada no tempo real por frame; o zoom interpola no espaço logarítmico. Isso altera apenas a projeção, não a física. Ativar Focar e acompanhar não teleporta a câmera.
+- Teste sugerido: com foco no dropdown, usar teclas 1–5 e Espaço; iniciar acompanhamento de uma lua, trocar pelo dropdown e observar transição; repetir nas quatro velocidades e recarregar para conferir persistência.
