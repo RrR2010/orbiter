@@ -6,7 +6,7 @@ export type Layers = {orbits:boolean;labels:boolean;belt:boolean};
 export const DEFAULT_LAYERS:Layers={orbits:true,labels:true,belt:true};
 export type ObservatoryState={selectedId:string|null;follow:boolean;layers:Layers;ambient:boolean;cameraSpeed:number};
 export const DEFAULT_OBSERVATORY:ObservatoryState={selectedId:null,follow:false,layers:{...DEFAULT_LAYERS},ambient:false,cameraSpeed:3};
-export const OBSERVATORY_KEY='orbiter.observatory.v1';
+export const OBSERVATORY_KEY='orbiter.observatory.v2';
 /** Transient screen-navigation animation, deliberately excluded from persistent state. */
 type CameraTransition={offsetX:number;offsetY:number;zoomTarget:number|null};
 const transitions=new WeakMap<ObservatoryState,CameraTransition>();
