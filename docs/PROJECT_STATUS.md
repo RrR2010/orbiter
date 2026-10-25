@@ -1,3 +1,9 @@
+> **ESTADO VIGENTE — 2026-10-25 / PR #7: AUDITORIA FINAL CONDICIONAL, NÃO INTEGRADO.**
+>
+> A Fase 3 V2 foi implementada e o humano confirmou `npm run validate` **4/4** e smoke visual de AP/PE, órbita selecionada e pan com acompanhamento de nave. A documentação e autoinspeção de código foram atualizadas nesta auditoria. **PENDÊNCIAS PARA MERGE:** `npm audit`, revisão final do diff/política do workflow, benchmark de escala em warp x1.000.000 (ou exceção explícita), e decisão sobre remoção do código V1 obsoleto. O CI do GitHub **não foi disparado**; executá-lo apenas depois dos gates anteriores no HEAD final, uma vez antes do squash merge. `main` permanece intacta; Fase 4 não autorizada.
+>
+> **Fonte de verdade:** [auditoria final](phases/PHASE_03_FINAL_AUDIT.md) e [contrato de voo V2](phases/PHASE_03_V2_AUTONOMOUS_FLIGHT.md). As seções cronológicas abaixo preservam observações antigas e não substituem o estado vigente.
+
 # Estado operacional — Orbiter
 
 **Atualização:** 2026-10-25
