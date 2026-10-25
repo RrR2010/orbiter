@@ -48,6 +48,18 @@ describe('autonomous space age',()=>{
   expect(c.missions.some(m=>m.status==='success')).toBe(true);
   expect(c.missions.some(m=>m.status==='failure')).toBe(true);
  });
+ it('does not skip events under a limited processing budget',()=>{
+  const limited=createCivilization(world),reference=createCivilization(world);
+  const target=3e6;
+  advanceCivilization(reference,world,target,10000);
+  let passes=0;
+  while(limited.time<target&&passes++<10000)advanceCivilization(limited,world,target,2);
+  expect(passes).toBeLessThan(10000);
+  expect(limited).toEqual(reference);
+  const snapshot=serializeCivilization(limited);
+  expect(advanceCivilization(limited,world,target,2)).toBe(0);
+  expect(serializeCivilization(limited)).toBe(snapshot);
+ });
  it('migrates missing strategic saves at current time without inventing past events',()=>{
   const c=parseCivilization(null,world,1234567);
   expect(c.time).toBe(1234567);expect(c.events).toEqual([]);expect(c.missions).toEqual([]);
