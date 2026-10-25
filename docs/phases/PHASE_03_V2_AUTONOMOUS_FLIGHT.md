@@ -1,6 +1,6 @@
 # Phase 3 — V2 Autonomous Flight & Simulation Fidelity Contract
 
-Status: approved design direction (2026-10-25). Implementation pending. Supersedes the compatibility and fixed-duration guidance provisions of PHASE_03_VISUAL_FLIGHT_PLAN.md. No Phase 4 work authorized.
+Status: V2 implemented and locally validated (4/4 reported by the product owner on 2026-10-25); pre-merge audit and outstanding gates pending. Supersedes the compatibility and fixed-duration guidance provisions of PHASE_03_VISUAL_FLIGHT_PLAN.md. No Phase 4 work authorized.
 
 ## Intent
 
@@ -57,3 +57,19 @@ No full aerodynamic/thermal simulation in Phase 3 (vacuum model). No close range
 - Physical events and finite burn visualization share the same checkpoints and never teleport satellite results.
 - Resources and tech advancement influence vehicle capability, mission choices, failure likelihood and launch cadence.
 - No frame-time integration of sleeping satellites; max time per frame is bounded at 1e6 and large simulation populations.
+
+## As built — Phase 3 checkpoint (2026-10-25)
+
+**Implemented and witnessed:** deterministic single-home-world civilization, research and resources, technology-dependent rocket capability, seed-scoped V2 mission plans, physical ascent, analytic coasts, finite apoapsis burns with intermediate telemetry, stable and partial orbits, suborbital scientific successes, failure/impact checkpoints, persistent mission history, and zoom-based planet/rocket/satellite rendering. Flight plans have v2 results and checkpoints. The UI supports watching preparation (warp-to-1× at event), independent one-shot focus and continuous follow, drag offset while following bodies **or missions**, selected-mission orbital conic highlight with AP/PE markers, and DevTools `orbiterDebug()`.
+
+**Validation evidence:** last user-reported `npm run validate`: lint PASS, typecheck PASS, tests PASS, build PASS. User visually confirmed pan offset and selected-orbit AP/PE. Earlier user evidence included target-reaching orbit, stable partial orbits, suborbital survey, vehicle impact and failure. Those are qualitative scenario witnesses, not a quantified cross-seed benchmark.
+
+**Limits / exceptions requiring future work:**
+
+- The simulated flight is still a **2D two-body vacuum** approximation, not full MechJeb, atmospheric physics or N-body orbital guidance.
+- Guidance and vehicle balancing can fail to achieve high periapsis targets; mixed success/failure is intentional, but systematic distribution across seeds has not been performance-benchmarked.
+- Visual burn state interpolates immutable checkpoints; it is not integrated at render-frame rate.
+- The codebase still contains `src/simulation/spaceflight/flight.ts` legacy V1 and its legacy-focused tests for reference. Those should be assessed for removal; do not claim complete V1 dead-code removal. Runtime V2 saves do not read the former V1 namespace.
+- Orbital rendering and histories cap visible/recent objects; benchmark at 1/100/1000/10000 objects is not yet evidenced. No assertion that million-fold warp is performant with thousands of vehicles.
+
+**Gate status:** local 4/4 and browser UX smoke reported by human; independent dependency/security audit (`npm audit`), quantified long-run performance, merge readiness / repository policy and final Actions workflow success are **not yet evidenced**. Keep PR #7 in draft and no Actions until remaining preflight checks have passed. Phase 4 not authorized.
