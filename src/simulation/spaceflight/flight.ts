@@ -34,12 +34,18 @@ export function planFlight(seed:string,missionId:string,planet:Body,ignitionS:nu
  const missionDv=(Math.max(circularSpeed*.8,targetSpeed)+g*ascentDuration)*profileFactor;
  const ispS=Math.max(150,missionDv/(9.80665*Math.log((dryKg+fuelKg)/dryKg)));
  const thrustN=(fuelKg/totalDuration)*ispS*9.80665;
+ const profileRoll=rng();
+ const guidanceProfile=objective.objective==='suborbitalSurvey'?'vertical':profileRoll<.32?'vertical':profileRoll<.7?'gradual':'tangential';
+ const ascentStart=guidanceProfile==='tangential'?.22:guidanceProfile==='gradual'?.05:0;
+ const ascentEnd=guidanceProfile==='tangential'?.72:guidanceProfile==='gradual'?.38:.04;
+ const insertionStart=guidanceProfile==='vertical'?.08:guidanceProfile==='gradual'?.38:.72;
+ const insertionEnd=guidanceProfile==='vertical'?.55:1;
  const site=homeLaunchSite(seed,planet.id);
  const initial:FlightState={position:sitePosition(site,planet.radius),velocity:{x:0,y:0},massKg:dryKg+fuelKg,fuelKg,timeS:ignitionS};
  const ascentEndS=ignitionS+ascentDuration,insertionEndS=ignitionS+totalDuration;
  return {version:1,planetId:planet.id,ignitionS,initial,ascentEndS,insertionEndS,
-  ascent:{startS:ignitionS,endS:ascentEndS,thrustN,ispS,progradeFraction:0},
-  insertion:{startS:ascentEndS,endS:insertionEndS,thrustN,ispS,progradeFraction:1},
+  ascent:{startS:ignitionS,endS:ascentEndS,thrustN,ispS,progradeFraction:ascentStart,endProgradeFraction:ascentEnd},
+  insertion:{startS:ascentEndS,endS:insertionEndS,thrustN,ispS,progradeFraction:insertionStart,endProgradeFraction:insertionEnd},
   reliabilityFailure:rng()<Math.max(.04,.22-tier*.035),objective,useApoapsisBurn:objective.objective!=='suborbitalSurvey'};
 }
 
