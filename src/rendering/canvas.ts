@@ -20,6 +20,6 @@ if(selected){
   ctx.beginPath();ctx.arc(p.x,p.y,4,0,2*Math.PI);ctx.fillStyle='#ffdf8a';ctx.fill();
   ctx.font='bold 12px system-ui';ctx.fillStyle='#fff1ba';ctx.fillText(label+' '+Math.round((value-homeBody.radius)/1000)+' km',p.x+9,p.y-9);
  };
- drawApsis(forecast.apoapsisPoint,'AP',forecast.apoapsisM);
+ if(forecast.apoapsisM!==null)drawApsis(forecast.apoapsisPoint,'AP',forecast.apoapsisM);
  if(forecast.periapsisPoint)drawApsis(forecast.periapsisPoint,'PE',forecast.periapsisM);
 }}}}if(civilization)for(const symbol of missionSymbols(world,civilization,time)){const p=project(symbol.position),active=symbol.state==='ascent'||symbol.state==='circularization',x=p.x,y=p.y;ctx.strokeStyle=symbol.state==='circularization'?'#ffdc83':active?'#ffbd77':'#74d7ec';ctx.fillStyle=ctx.strokeStyle;if(!drawSprite(ctx,active?'rocket':'satellite',x,y,active?16:14)){ctx.beginPath();ctx.arc(x,y,active?3:2,0,Math.PI*2);ctx.fill();}if(active){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-9,y+5);ctx.stroke();}}ctx.restore();}}
