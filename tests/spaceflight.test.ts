@@ -1,5 +1,6 @@
 import {describe,expect,it} from 'vitest';
 import {gravityForRadius,gravityAcceleration} from '../src/simulation/spaceflight/gravity';
+import {propagateCoast,propagateUntilImpact} from '../src/simulation/spaceflight/coast';
 import {analyzeTrajectory} from '../src/simulation/spaceflight/conics';
 import {coastStep,poweredStep,advancePowered} from '../src/simulation/spaceflight/integrator';
 import type {FlightState} from '../src/simulation/spaceflight/types';
@@ -42,6 +43,21 @@ describe('planet-centered flight mechanics',()=>{
   expect(launched.velocity.y).toBeGreaterThan(circular.velocity.y);
   const exhausted=poweredStep({...circular,fuelKg:0},earth,1,burn);
   expect(exhausted.massKg).toBe(1000);
+ });
+ it('propagates a coast analytically regardless of partitioning',()=>{
+  const a=propagateCoast(circular,earth,900);
+  const b=propagateCoast(propagateCoast(circular,earth,300),earth,600);
+  expect(Math.hypot(a.position.x-b.position.x,a.position.y-b.position.y)).toBeLessThan(.02);
+  expect(Math.hypot(a.velocity.x-b.velocity.x,a.velocity.y-b.velocity.y)).toBeLessThan(1e-4);
+  expect(analyzeTrajectory(a,earth).eccentricity).toBeLessThan(1e-8);
+ });
+ it('detects suborbital impact without mutating mission state',()=>{
+  const sub={...circular,velocity:{x:0,y:v*.7}};
+  const result=propagateUntilImpact(sub,earth,20000);
+  expect(result.impacted).toBe(true);
+  expect(result.state.timeS).toBeGreaterThan(0);
+  expect(Math.abs(Math.hypot(result.state.position.x,result.state.position.y)-earth.radiusM)).toBeLessThan(1);
+  expect(sub.timeS).toBe(0);
  });
  it('uses a fixed time grid across partition boundaries',()=>{
   const single=advancePowered(circular,earth,80,burn);
