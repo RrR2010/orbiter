@@ -2,7 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {generateWorld,positionsAt} from '../src/simulation/world';
 import {cameraScale,projectPoint,unprojectPoint} from '../src/rendering/camera';
 import {pickBody} from '../src/rendering/pick';
-import {DEFAULT_OBSERVATORY,parseObservatory,selectBody,focusBody,updateFollow,cancelCameraZoom,resetView,bodyTelemetry,distanceLabel,orbitalSpeed} from '../src/ui/observatory';
+import {DEFAULT_OBSERVATORY,parseObservatory,selectBody,focusBody,trackBody,panFollow,updateFollow,cancelCameraZoom,resetView,bodyTelemetry,distanceLabel,orbitalSpeed} from '../src/ui/observatory';
 
 describe('observatory commands',()=>{
   const world=generateWorld('phase2-regression');
@@ -13,34 +13,38 @@ describe('observatory commands',()=>{
     selectBody(state,world,moon.id);expect(state.selectedId).toBe(moon.id);
     state.follow=true;selectBody(state,world,'missing');expect(state.selectedId).toBeNull();expect(state.follow).toBe(false);
   });
-  it('focuses on moons and follows the current Keplerian position at high warp',()=>{
+  it('focuses once and independently follows the current Keplerian position at high warp',()=>{
     const state=structuredClone(DEFAULT_OBSERVATORY),camera={x:0,y:0,zoom:1};
     expect(focusBody(camera,state,world,0,moon.id)).toBe(true);
-    expect(camera.zoom).toBe(1);expect(state.follow).toBe(true);
+    const initial=positionsAt(world,0).get(moon.id)!;
+    expect(camera.x).toBe(initial.x);expect(camera.y).toBe(initial.y);
+    expect(camera.zoom).toBeGreaterThan(1);expect(state.follow).toBe(false);
+    const fixedZoom=camera.zoom;
+    expect(trackBody(state,world,moon.id)).toBe(true);
     const target=positionsAt(world,1e7).get(moon.id)!;
-    const before=Math.hypot(camera.x-target.x,camera.y-target.y);
     updateFollow(camera,state,world,1e7,.1);
-    expect(Math.hypot(camera.x-target.x,camera.y-target.y)).toBeLessThan(before);
-    expect(camera.zoom).toBeGreaterThan(1);
-    for(let i=0;i<100;i++)updateFollow(camera,state,world,1e7,.1);
-    expect(camera.x).toBeCloseTo(target.x,0);expect(camera.y).toBeCloseTo(target.y,0);
+    expect(camera.x).toBe(target.x);expect(camera.y).toBe(target.y);
+    expect(camera.zoom).toBe(fixedZoom);
     const later=positionsAt(world,1e7+1e6).get(moon.id)!;
     updateFollow(camera,state,world,1e7+1e6,.016);
-    expect(camera.x).toBeCloseTo(later.x,0);expect(camera.y).toBeCloseTo(later.y,0);
+    expect(camera.x).toBe(later.x);expect(camera.y).toBe(later.y);
     camera.zoom=12;cancelCameraZoom(state);updateFollow(camera,state,world,1e7+2e6,.016);
     expect(camera.zoom).toBe(12);expect(state.follow).toBe(true);
     resetView(camera,state);expect(camera).toEqual({x:0,y:0,zoom:1});expect(state.follow).toBe(false);
   });
-  it('keeps the same target centered under extreme warp even during a camera transition',()=>{
+  it('keeps tracking at extreme warp while preserving deliberate pan offsets',()=>{
     const state=structuredClone(DEFAULT_OBSERVATORY),camera={x:0,y:0,zoom:1};
     focusBody(camera,state,world,0,moon.id);
-    const initial=positionsAt(world,0).get(moon.id)!;
-    const offset={x:camera.x-initial.x,y:camera.y-initial.y};
+    expect(trackBody(state,world,moon.id)).toBe(true);
+    panFollow(state,1e7,-2e7);
     updateFollow(camera,state,world,1e7,.1);
     const target=positionsAt(world,1e7).get(moon.id)!;
-    const expected=Math.exp(-state.cameraSpeed*.1);
-    expect(camera.x-target.x).toBeCloseTo(offset.x*expected,0);
-    expect(camera.y-target.y).toBeCloseTo(offset.y*expected,0);
+    expect(camera.x-target.x).toBeCloseTo(1e7,0);
+    expect(camera.y-target.y).toBeCloseTo(-2e7,0);
+    updateFollow(camera,state,world,1e7+1e6,.016);
+    const later=positionsAt(world,1e7+1e6).get(moon.id)!;
+    expect(camera.x-later.x).toBeCloseTo(1e7,0);
+    expect(camera.y-later.y).toBeCloseTo(-2e7,0);
   });
   it('uses consistent focus zoom for inner and outer planets',()=>{
     const planets=world.bodies.filter(body=>body.kind==='planet');
