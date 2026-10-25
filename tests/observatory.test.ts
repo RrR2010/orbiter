@@ -16,9 +16,14 @@ describe('observatory commands',()=>{
   it('focuses on moons and follows the current Keplerian position at high warp',()=>{
     const state=structuredClone(DEFAULT_OBSERVATORY),camera={x:0,y:0,zoom:1};
     expect(focusBody(camera,state,world,0,moon.id)).toBe(true);
-    expect(camera.zoom).toBeGreaterThan(400);expect(state.follow).toBe(true);
-    updateFollow(camera,state,world,1e7);
-    expect(camera).toMatchObject(positionsAt(world,1e7).get(moon.id)!);
+    expect(camera.zoom).toBe(1);expect(state.follow).toBe(true);
+    const target=positionsAt(world,1e7).get(moon.id)!;
+    const before=Math.hypot(camera.x-target.x,camera.y-target.y);
+    updateFollow(camera,state,world,1e7,.1);
+    expect(Math.hypot(camera.x-target.x,camera.y-target.y)).toBeLessThan(before);
+    expect(camera.zoom).toBeGreaterThan(1);
+    for(let i=0;i<100;i++)updateFollow(camera,state,world,1e7,.1);
+    expect(camera.x).toBeCloseTo(target.x,0);expect(camera.y).toBeCloseTo(target.y,0);
     resetView(camera,state);expect(camera).toEqual({x:0,y:0,zoom:1});expect(state.follow).toBe(false);
   });
   it('roundtrips camera projection and picks visible planets',()=>{
@@ -42,5 +47,8 @@ describe('observatory commands',()=>{
     const parsed=parseObservatory(JSON.stringify(current));
     expect(parsed.layers.belt).toBe(false);expect(parsed.layers.orbits).toBe(true);
     expect(parseObservatory('{')).toEqual(DEFAULT_OBSERVATORY);
+    const legacy=JSON.parse(JSON.stringify(current)) as Record<string,unknown>;delete legacy.cameraSpeed;
+    expect(parseObservatory(JSON.stringify(legacy)).cameraSpeed).toBe(3);
+    expect(parseObservatory(JSON.stringify({...current,cameraSpeed:7})).cameraSpeed).toBe(7);
   });
 });
