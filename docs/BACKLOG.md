@@ -14,11 +14,12 @@ Não é uma lista de promessas. Ideias entram aqui primeiro, recebem triagem no 
 | IDEA-008 | Ajuste automático de aceleração próximo de eventos importantes | later | 5 | capturada |
 | IDEA-009 | Revisitar intervalo simulado ao retornar de outra sessão | parking-lot | 7+ | capturada |
 | IDEA-010 | Intervenções opcionais em asteroides e condições iniciais | later | 6+ | capturada |
+| IDEA-011 | Observar órbitas de luas com zoom/foco automático | next | 2 | capturada |
 
 ## Template de captura
 
 ```markdown
-### IDEA-011 — Nome breve
+### IDEA-012 — Nome breve
 - **Origem:** fase / feedback do humano / observação do agente
 - **Experiência desejada:** o que o observador verá/fará
 - **Motivação:** por que melhora o universo
