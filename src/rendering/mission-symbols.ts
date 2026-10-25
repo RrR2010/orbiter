@@ -1,12 +1,13 @@
 import {positionsAt,type World} from '../simulation/world';
 import {flightAt} from '../simulation/spaceflight/flight';
 import {propagateCoast} from '../simulation/spaceflight/coast';
+import type {FlightState} from '../simulation/spaceflight/types';
 import {gravityForRadius} from '../simulation/spaceflight/gravity';
 import type {Civilization,Mission} from '../simulation/civilization';
 import type {Vec2} from '../simulation/orbits';
 
 const insertionCache=new WeakMap<object,ReturnType<typeof flightAt>>();
-export type MissionSymbol={mission:Mission;position:Vec2;physical:boolean;state:'ascent'|'orbiting'|'legacy'};
+export type MissionSymbol={mission:Mission;position:Vec2;physical:boolean;flightState?:FlightState;state:'ascent'|'orbiting'|'legacy'};
 /** Read-only mission locations in SI. Legacy records retain their old illustrative positions. */
 export function missionSymbols(world:World,c:Civilization,time:number):MissionSymbol[]{
  const home=positionsAt(world,time).get(c.homeId),planet=world.bodies.find(b=>b.id===c.homeId);
@@ -22,7 +23,7 @@ export function missionSymbols(world:World,c:Civilization,time:number):MissionSy
     if(!checkpoint){checkpoint=flightAt(m.flight,gravity,lastBurn);insertionCache.set(m.flight,checkpoint);}
     sampled={...checkpoint,state:propagateCoast(checkpoint.state,gravity,time-lastBurn)};
    }else sampled=flightAt(m.flight,gravity,Math.max(m.flight.ignitionS,Math.min(time,m.resolvedAt||time)));
-   return {mission:m,position:{x:home.x+sampled.state.position.x,y:home.y+sampled.state.position.y},physical:true,state:m.status==='success'?'orbiting':'ascent'};
+   return {mission:m,position:{x:home.x+sampled.state.position.x,y:home.y+sampled.state.position.y},physical:true,flightState:sampled.state,state:m.status==='success'?'orbiting':'ascent'};
   }
   const angle=(m.startedAt/1000+time/5400+Number(m.id.split('-')[1]))*2*Math.PI;
   const offset=planet.radius*1.25;
