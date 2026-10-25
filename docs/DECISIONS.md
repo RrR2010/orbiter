@@ -70,3 +70,7 @@ Registrar decisões não triviais com motivo, alternativas e consequências. Nã
 ## ADR-0014 — CI final econômico e evidência de merge (2026-10-25)
 
 **Estado:** aceita. **Decisão:** o relatório humano de lint, typecheck, tests, build 4/4 e smoke não substitui `npm audit`, benchmarks requeridos, revisão da branch final e um workflow manual `Orbiter Final CI` executado no último HEAD antes do merge. Nenhuma execução Actions por commit. **Motivo:** evitar gasto do limite do GitHub mantendo rastreabilidade de segurança e critérios. **Consequências:** resultado de auditoria pode ser `PENDENTE` sem afirmar integração; squash merge apenas após comprovação dos gates, observando branch protection. **Complementa:** ADR-0012 e `docs/WORKFLOW.md`.
+
+## ADR-0015 — Fase de experiência visual antes da exploração (2026-10-25)
+
+**Estado:** aceita. **Decisão:** antecipar uma fase dedicada a linguagem visual, HUD, iconografia, telemetria observável e lifecycle de rastros como Fase 4. Reindexar a exploração interplanetária para Fase 5, narrativa para 6, economia para 7 e estabilidade longa para 8. **Motivo:** a simulação de voo V2 já existe, mas sua leitura pelo observador é insuficiente para sustentar a complexidade de exploração. **Condições:** discovery funcional antes de mudanças UX, sem telemetria fabricada e sem reescrita gratuita da física; documentação de design vira contrato obrigatório das features futuras. **Referência:** `docs/phases/PHASE_04.md` e Issue #8.
