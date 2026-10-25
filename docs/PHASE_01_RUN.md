@@ -1,6 +1,6 @@
 # Fase 1 — execução e validação humana
 
-Requisitos: Node.js 22+ e npm. Na raiz do repositório, use `npm ci` para instalar exatamente as versões fixadas no `package-lock.json`:
+Requisitos: Node.js 22.12+ e npm. Na raiz do repositório, use `npm ci` para instalar exatamente as versões fixadas no `package-lock.json`:
 
 ```bash
 npm ci
@@ -30,3 +30,8 @@ O `localStorage` usa formato validado `orbiter.phase1.v1` e persiste seed, tempo
 ## Evidências, aceite e limitações
 
 O humano reportou `npm run validate` com **4/4 PASS** (lint, typecheck, testes e build) no Windows, verificou interação, seed e recarregamento e observou 15 minutos de estabilidade sem travamentos ou jitter aparentes até aproximadamente o dia simulado 1400. A orquestradora aceitou a exceção expressa do product owner ao requisito original de 30 minutos. Não foram medidas taxas de FPS, uso de memória ou estabilidade por várias horas; esses pontos continuam riscos residuais, não impedimentos declarados para esta fase. Consulte `docs/PHASE_01_HANDOFF.md` e o comentário da revisão no PR #2.
+
+
+## Dependências de desenvolvimento e segurança
+
+O Vitest foi atualizado para a série 5 corrigida após o audit apontar falhas em versões anteriores do Vitest, `@vitest/mocker` e `tinypool`. Atualizações de major exigem executar `npm ci`, `npm run validate` e `npm audit` com lockfile sincronizado antes do merge. Evitar `npm audit fix --force` sem avaliação.
