@@ -23,7 +23,7 @@ export function flightViewAt(mission:Mission,radiusM:number,time:number):FlightS
  let cache=samples.get(plan);
  if(!cache){cache=new Map();samples.set(plan,cache);}
  let full=cache.get(tick);
- if(!full){full=flightAt(plan,planet,plan.ignitionS+tick);cache.set(tick,full);if(cache.size>4)cache.delete(cache.keys().next().value!);}
+ if(!full){full=flightAt(plan,planet,plan.ignitionS+tick);cache.set(tick,full);if(cache.size>4){const oldest=cache.keys().next().value;if(oldest!==undefined)cache.delete(oldest);}}
  if(t-plan.ignitionS===tick)return full;
  // Fractional time is recomputed from immutable ignition checkpoint for precision.
  return flightAt(plan,planet,t);
