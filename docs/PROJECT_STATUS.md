@@ -37,3 +37,9 @@ O humano retorna à orquestradora com PR #4 integrado e feedback. A próxima fas
 ## Fase 3 autorizada (2026-10-25)
 
 **Próxima execução:** Fase 3 — Primeira Era Espacial, conforme `docs/phases/PHASE_03.md` e [Issue #6](https://github.com/RrR2010/orbiter/issues/6). Um novo agente pode implementar até merge autônomo dentro dos gates. A Fase 4 não está autorizada. **Política CI v3:** não executar Actions por commit; apenas `workflow_dispatch` final após testes e smoke tests locais. Riscos principais: scheduler determinístico sob warp alto, evolução persistente sem quebrar saves, controle de número de eventos.
+
+## Fase 3 — Trabalho em progresso (2026-10-25)
+
+**Branch:** `phase/03-first-space-age`. **PR:** [#7](https://github.com/RrR2010/orbiter/pull/7) (draft). **Issue:** #6 (aberta). **Main:** permanece com a Fase 2 integrada.
+
+O módulo da civilização, o scheduler orientado a eventos, o feed, os símbolos de missões e seus seletores já foram implementados na branch. **Os gates A1–A9 ainda não foram aprovados.** A integração está bloqueada por indisponibilidade de clone do repositório no terminal do executor; não há evidência de `npm ci`, `npm run validate`, `npm audit` ou smoke test visual. GitHub Actions não foi disparado, conforme política CI v3. Não iniciar Fase 4.
