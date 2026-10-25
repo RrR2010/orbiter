@@ -51,3 +51,7 @@ Na branch do PR #7 foram adicionados os módulos `simulation/spaceflight/{types,
 ## Continuação Bloco A — coast analítico (2026-10-25)
 
 Adicionado `src/simulation/spaceflight/coast.ts` com propagador universal de dois corpos e estimativa de primeiro cruzamento da superfície por amostragem limitada + bisseção, bem como testes correspondentes. **Limitação importante:** a busca por impacto ainda não deve ser usada em janelas arbitrariamente extensas sem subdivisão ou evento analítico; a discretização pode ignorar interseções entre amostras. O integrador de queima também demanda estado de passo/remainder para garantir equivalência sob partições temporais arbitrárias. Ambos são pendências do gate A1 antes da integração de missões. Testes escritos, mas não executados no ambiente atual; nenhum CI disparado.
+
+## Bloco A — Correções complementares (2026-10-25)
+
+`sampleBurnAt` consulta queimas desde checkpoint de ignição imutável, evitando dependência de partição do render, ao custo de reintegração por consulta. `coast.ts` reduz o tempo de propagação de trajetórias ligadas módulo período e ajusta a busca de impacto à duração orbital, com limite de 32.768 amostras. **Pendente:** garantir discretização exata para targets fracionários sem recomputação, e detecção rigorosa de impactos rasantes por raiz analítica. Testes escritos e commitados, ainda não executados; sem Actions e sem merge.
