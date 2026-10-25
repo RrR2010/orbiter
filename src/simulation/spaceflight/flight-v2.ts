@@ -1,3 +1,4 @@
+import {designVehicle,type VehicleCapability} from './vehicle-capability';
 import {executeAscentV2} from './ascent-v2';
 import {planMissionObjective,type MissionTarget} from './objectives';
 import {gravityForRadius} from './gravity';
@@ -13,7 +14,7 @@ import type {FlightState,PlanetGravity} from './types';
 export type AutonomousFlightPlanV2=Readonly<{
  version:2;id:string;planetId:string;ignitionS:number;initial:FlightState;
  target:MissionTarget;goal:OrbitalGoal;thrustN:number;ispS:number;
- ascentProfile:'vertical'|'gradual'|'tangential';navigationError:number;
+ ascentProfile:'vertical'|'gradual'|'tangential';navigationError:number;vehicle?:VehicleCapability;
 }>;
 export type AutonomousFlightResultV2=Readonly<{
  version:2;plan:AutonomousFlightPlanV2;checkpoints:readonly FlightCheckpointV2[];
@@ -22,27 +23,20 @@ export type AutonomousFlightResultV2=Readonly<{
 }>;
 
 /** Seed-scoped mission identity: render/camera/warp cannot affect planning. */
-export function createAutonomousFlightV2(seed:string,id:string,planet:Body,ignitionS:number,tier:number):AutonomousFlightPlanV2{
+export function createAutonomousFlightV2(seed:string,id:string,planet:Body,ignitionS:number,tier:number,knowledge=0):AutonomousFlightPlanV2{
  if(planet.kind!=='planet')throw new Error('V2 launch requires planet');
  const rng=seededRandom('orbiter:autonomous-v2:'+seed+':'+id);
  const target=planMissionObjective(seed,id,planet.radius,ignitionS,tier);
  const radius=planet.radius,gravity=gravityForRadius(radius);
- const g=gravity.muM3S2/(radius*radius);
- const ispBase=360+Math.max(0,tier)*20;
- const fuelKg=1450,dryKg=550;
- const thrustN=(dryKg+fuelKg)*g*(1.65+rng()*.3);
- const desiredSpeed=Math.sqrt(gravity.muM3S2/(radius+Math.max(100000,target.periapsisAltitudeM)));
- // The procedural vehicle must have enough total delta-v for the generated world's orbital speed.
- // Scale engine efficiency, not liftoff thrust; cap nothing silently via camera/warp.
- const ispS=Math.max(ispBase,(desiredSpeed*1.65+g*120)/(9.80665*Math.log((fuelKg+dryKg)/dryKg)));
- const scale=1;
- const deviation=(rng()-.5)*2*(.13/(tier+1));
+ const vehicle=designVehicle(gravity,tier,knowledge,rng());
+ const {fuelKg,dryKg,ispS,thrustN}=vehicle;
+ const deviation=(rng()-.5)*2*vehicle.guidanceError;
  const profiles=['vertical','gradual','tangential'] as const;
  const profile=target.objective==='suborbitalSurvey'?'vertical':profiles[Math.floor(rng()*profiles.length)];
  return {version:2,id,planetId:planet.id,ignitionS,
   initial:{position:sitePosition(homeLaunchSite(seed,planet.id),radius),velocity:{x:0,y:0},massKg:dryKg+fuelKg,fuelKg,timeS:ignitionS},
   target,goal:{periapsisAltitudeM:target.periapsisAltitudeM,apoapsisAltitudeM:target.apoapsisAltitudeM,toleranceM:Math.max(20000,radius*.003)},
-  thrustN:Math.max(thrustN*scale,(dryKg+fuelKg)*g*1.65),ispS,ascentProfile:profile,navigationError:deviation};
+  thrustN,ispS,ascentProfile:profile,navigationError:deviation,vehicle};
 }
 
 /** Bounded authoritative trajectory run, once per launch event, never once per render frame.
@@ -55,7 +49,7 @@ export function resolveAutonomousFlightV2(plan:AutonomousFlightPlanV2,planet:Pla
  const ascent=executeAscentV2(state,planet,{
   targetApoapsisAltitudeM:plan.goal.apoapsisAltitudeM,
   thrustN:plan.thrustN,ispS:plan.ispS,profile:plan.ascentProfile,
-  navigationError:plan.navigationError,stepS:1,reservedFuelKg:Math.min(state.fuelKg*.23,350)
+  navigationError:plan.navigationError,stepS:1,reservedFuelKg:state.fuelKg*(plan.vehicle?.reserveFraction??.23)
  });
  checkpoints.push(...ascent.checkpoints);
  state=ascent.state;
