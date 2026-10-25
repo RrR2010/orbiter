@@ -8,10 +8,11 @@ A sequência abaixo é a **ordem desejada**, não autorização para iniciar tod
 | 1 | Planetário vivo | Sistema procedural em Canvas, órbitas, câmera, warp e save/load básico | Screensaver agradável e estável por 30 min |
 | 2 | Observatório e telemetria | Seleção, foco, detalhes orbitais, camadas e eventos astronômicos | Usuário consegue explorar e entender o sistema |
 | 3 | Primeira era espacial | Civilização inicial, tecnologias básicas, lançamentos/satélites e falhas | Progressão autônoma testável e consequência visível |
-| 4 | Missões interplanetárias | Planejamento, transferências, sondas, encontros e pousos simplificados | Missões têm causa, risco e resultados reproduzíveis |
-| 5 | História e direção narrativa | Timeline, resumos, follow de protagonistas, câmera de eventos | Evento de destaque está ancorado em evento real |
-| 6 | Infraestrutura e economia | Estações, mineração, logística, recursos e decisões estratégicas | Cadeia causal entre recursos e expansão |
-| 7 | Ecossistema de longa duração | Otimização, estabilidade, persistência robusta, crises e legado | Testes de simulação longa e retomada entre sessões |
+| 4 | Linguagem visual, HUD e UX de missões | Discovery com PO, instrumentação, iconografia vetorial, trilhas corretas e design system | Voos legíveis, sem telemetria inventada; padrões documentados |
+| 5 | Missões interplanetárias | Transferências, sondas, encontros e pousos simplificados | Missões têm causa, risco e resultados reproduzíveis |
+| 6 | História e direção narrativa | Timeline, resumos, protagonistas e câmera de eventos | Destaques ancorados em eventos reais |
+| 7 | Infraestrutura e economia | Estações, mineração, logística e recursos | Infraestrutura surge por necessidades reais |
+| 8 | Ecossistema de longa duração | Otimização, estabilidade, crises e legado | Simulação longa e retomada confiáveis |
 
 ## Regras de fase
 
@@ -32,4 +33,4 @@ A sequência abaixo é a **ordem desejada**, não autorização para iniciar tod
 
 ## Planejamento progressivo
 
-Apenas a fase ativa recebe especificação operacional detalhada. Fases 2–7 são intenções de produto, refinadas uma de cada vez com evidências da fase anterior. Nunca estimar prazo como requisito de aceite.
+Apenas a fase ativa recebe especificação operacional detalhada. Fases futuras são intenções de produto, refinadas uma de cada vez com evidências da fase anterior. Nunca estimar prazo como requisito de aceite.
