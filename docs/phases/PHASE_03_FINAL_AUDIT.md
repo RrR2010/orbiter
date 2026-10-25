@@ -47,3 +47,13 @@
 6. Não iniciar a Fase 4 sem nova autorização.
 
 **Auditoria efetuada pela IA sobre código e documentação conectados; validação local, navegador e `npm audit` nesta etapa não foram executados pela IA.**
+
+## Atualização — limpeza V1 e benchmark isolado (2026-10-25)
+
+O product owner executou `npm ci`, `npm run validate` (4/4 PASS) e `npm audit` (0 vulnerabilidades) antes destes novos commits. `npm ci` informou aviso de versão de ESLint depreciada e postinstall de esbuild não coberto por `allowScripts`; não foi relatada falha, mas avaliar aviso em manutenção de dependências.
+
+Com aprovação explícita, removido `src/simulation/spaceflight/flight.ts` (planejador V1 obsoleto); tipo de snapshot necessário à renderização V2 foi definido em `flight-view.ts`. Os módulos reutilizados de mecânica orbital e respectivos testes são **compartilhados**, não devem ser eliminados como legados automaticamente.
+
+Criado `npm run benchmark:orbits` (`scripts/benchmark-orbits.mjs`): empacota código-fonte real da física via esbuild **apenas em memória**, cria vetores sintéticos de 100, 1000 e 10000 naves com órbitas circulares e mede propagação analítica de 1.000.000 segundos por nave, geometria de previsão para no máximo 8 selecionáveis, heap consumido e checksum reprodutível. `npm run benchmark:orbits -- 100 1000 10000` permite tamanhos explícitos. **O comando não abre o navegador, não escreve arquivos e nunca acessa localStorage/saves.** Ele não representa FPS Canvas, scheduler, nem milhões de misses/eventos; é um microbenchmark que deve acompanhar smoke manual de warp 1.000.000×.
+
+**Status atualizado:** Security audit 0 vulnerabilidades e 4/4 previamente comprovados pelo humano; **limpeza V1 e script de benchmark requerem nova validação 4/4** no HEAD atual. Benchmark ainda **não foi executado nem medido** nesta auditoria; capturar resultados e hardware antes de aprovar escala. CI e merge continuam pendentes.
