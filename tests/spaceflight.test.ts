@@ -2,7 +2,7 @@ import {describe,expect,it} from 'vitest';
 import {gravityForRadius,gravityAcceleration} from '../src/simulation/spaceflight/gravity';
 import {propagateCoast,propagateUntilImpact} from '../src/simulation/spaceflight/coast';
 import {analyzeTrajectory} from '../src/simulation/spaceflight/conics';
-import {coastStep,poweredStep,advancePowered} from '../src/simulation/spaceflight/integrator';
+import {coastStep,poweredStep,advancePowered,sampleBurnAt} from '../src/simulation/spaceflight/integrator';
 import type {FlightState} from '../src/simulation/spaceflight/types';
 
 const earth=gravityForRadius(6371000),mu=earth.muM3S2,r=earth.radiusM+400000,v=Math.sqrt(mu/r);
@@ -58,6 +58,24 @@ describe('planet-centered flight mechanics',()=>{
   expect(result.state.timeS).toBeGreaterThan(0);
   expect(Math.abs(Math.hypot(result.state.position.x,result.state.position.y)-earth.radiusM)).toBeLessThan(1);
   expect(sub.timeS).toBe(0);
+ });
+ it('samples a partial burn from a fixed checkpoint regardless of requested frames',()=>{
+  const a=sampleBurnAt(circular,earth,67.37,burn);
+  sampleBurnAt(circular,earth,9.23,burn);
+  sampleBurnAt(circular,earth,30.91,burn);
+  const b=sampleBurnAt(circular,earth,67.37,burn);
+  expect(b).toEqual(a);
+  expect(sampleBurnAt(circular,earth,67,burn).timeS).toBe(67);
+ });
+ it('keeps bound orbit stable over many complete revolutions',()=>{
+  const period=analyzeTrajectory(circular,earth).periodS!;
+  const after=propagateCoast(circular,earth,period*50+90);
+  const first=propagateCoast(circular,earth,90);
+  expect(Math.hypot(after.position.x-first.position.x,after.position.y-first.position.y)).toBeLessThan(.01);
+ });
+ it('does not invent an impact on stable circular orbits',()=>{
+  const period=analyzeTrajectory(circular,earth).periodS!;
+  expect(propagateUntilImpact(circular,earth,period*100).impacted).toBe(false);
  });
  it('uses a fixed time grid across partition boundaries',()=>{
   const single=advancePowered(circular,earth,80,burn);
