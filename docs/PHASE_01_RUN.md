@@ -1,9 +1,9 @@
 # Fase 1 — execução e validação humana
 
-Requisitos: Node.js 22+ e npm. Na raiz do repositório:
+Requisitos: Node.js 22+ e npm. Na raiz do repositório (temporariamente `npm install` até o lockfile estar versionado; depois, em ambiente limpo, usar `npm ci`):
 
 ```bash
-npm ci
+npm install
 npm run dev
 ```
 
