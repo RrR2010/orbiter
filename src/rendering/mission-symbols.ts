@@ -1,9 +1,11 @@
 import {positionsAt,type World} from '../simulation/world';
 import {flightAt} from '../simulation/spaceflight/flight';
+import {propagateCoast} from '../simulation/spaceflight/coast';
 import {gravityForRadius} from '../simulation/spaceflight/gravity';
 import type {Civilization,Mission} from '../simulation/civilization';
 import type {Vec2} from '../simulation/orbits';
 
+const insertionCache=new WeakMap<object,ReturnType<typeof flightAt>>();
 export type MissionSymbol={mission:Mission;position:Vec2;physical:boolean;state:'ascent'|'orbiting'|'legacy'};
 /** Read-only mission locations in SI. Legacy records retain their old illustrative positions. */
 export function missionSymbols(world:World,c:Civilization,time:number):MissionSymbol[]{
@@ -13,7 +15,13 @@ export function missionSymbols(world:World,c:Civilization,time:number):MissionSy
  return c.missions.slice(-12).filter(m=>m.status==='ascending'||m.status==='success').map(m=>{
   if(m.flight){
    // Never re-integrate huge coast intervals per frame for non-orbital failures.
-   const sampled=flightAt(m.flight,gravity,Math.max(m.flight.ignitionS,Math.min(time,m.resolvedAt||time)));
+   const lastBurn=m.flight.insertionEndS;
+   let sampled:ReturnType<typeof flightAt>;
+   if(m.status==='success'&&time>lastBurn){
+    let checkpoint=insertionCache.get(m.flight);
+    if(!checkpoint){checkpoint=flightAt(m.flight,gravity,lastBurn);insertionCache.set(m.flight,checkpoint);}
+    sampled={...checkpoint,state:propagateCoast(checkpoint.state,gravity,time-lastBurn)};
+   }else sampled=flightAt(m.flight,gravity,Math.max(m.flight.ignitionS,Math.min(time,m.resolvedAt||time)));
    return {mission:m,position:{x:home.x+sampled.state.position.x,y:home.y+sampled.state.position.y},physical:true,state:m.status==='success'?'orbiting':'ascent'};
   }
   const angle=(m.startedAt/1000+time/5400+Number(m.id.split('-')[1]))*2*Math.PI;
