@@ -42,6 +42,16 @@ describe('observatory commands',()=>{
     expect(camera.x-target.x).toBeCloseTo(offset.x*expected,0);
     expect(camera.y-target.y).toBeCloseTo(offset.y*expected,0);
   });
+  it('uses consistent focus zoom for inner and outer planets',()=>{
+    const planets=world.bodies.filter(body=>body.kind==='planet');
+    const state=structuredClone(DEFAULT_OBSERVATORY),camera={x:0,y:0,zoom:1};
+    for(const body of [planets[0],planets[planets.length-1]]){
+      camera.zoom=1;
+      expect(focusBody(camera,state,world,0,body.id)).toBe(true);
+      for(let i=0;i<100;i++)updateFollow(camera,state,world,0,.1);
+      expect(camera.zoom).toBeCloseTo(5,2);
+    }
+  });
   it('roundtrips camera projection and picks visible planets',()=>{
     const camera={x:0,y:0,zoom:1},point=positionsAt(world,0).get(planet.id)!;
     expect(cameraScale(1200,800,camera)).toBeGreaterThan(0);
