@@ -171,3 +171,9 @@ User mission ended planned circularization at t756, alt84km, Pe -106km with 565k
 ## Selected-orbit AP/PE overlay (2026-10-25)
 
 Added apsidal positions to existing predicted Kepler conic geometry and highlighted only `trackedMissionId` in the Canvas: solid gold 2.4px conic, AP and valid above-surface PE dots with compact altitude labels. Other orbits retain low-contrast dashed styling. Negative periapsis markers and invalid/open conics are not drawn. Selection uses the existing mission button/canvas click; no markers are drawn without a selected mission. Added predicted orbit extrema regressions. Needs human local validate and browser smoke before CI/merge; PR remains draft.
+
+## Decisão de produto após consolidação As-Built — 2026-10-25
+
+**Fase 3:** PR #7 integrado e documentação As-Built consolidada no catálogo `docs/systems/README.md`. Textos anteriores de progresso abaixo são históricos e não representam pendências atuais.
+**Fase 4 AUTORIZADA:** Linguagem Visual, HUD e UX de Missões; ver `docs/phases/PHASE_04.md` e [Issue #8](https://github.com/RrR2010/orbiter/issues/8). Começar por Discovery funcional com o humano, depois executar autonomamente até merge sob os gates. **Fase 5:** exploração interplanetária, NÃO autorizada.
+**CI:** apenas `workflow_dispatch` final, depois de testes e smoke tests locais. Não acionar Actions por commit.
