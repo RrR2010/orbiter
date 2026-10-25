@@ -74,3 +74,11 @@ A cada retorno **pós-merge**, a orquestradora avalia feedback funcional, riscos
 - **Falha:** corrigir localmente, repetir testes e fazer no máximo nova rodada de CI final quando o trabalho estiver realmente pronto; não há proibição de reexecutar quando necessário, mas não executar por commit.
 - **Infraestrutura:** o workflow não deve ter triggers `push`/`pull_request`. Caso as regras do repositório exijam checks gerados por eventos automáticos ou a API não possa disparar manualmente, escalar o bloqueio ao humano/orquestradora antes do merge. Nunca ignorar branch protection.
 - **Rastro de validação:** handoff informa os comandos locais, resultados de smoke test, URL da execução final, conclusão e SHA.
+
+## Continuidade técnica entre agentes — As-Built
+
+1. No início de toda fase, ler `docs/systems/README.md` e apenas as especificações dos subsistemas que serão afetados, além do brief/ADRs pertinentes.
+2. Os documentos As-Built devem refletir a **implementação na main**, descrevendo propósito, regras, algoritmo/unidades, estado, APIs/eventos, integração, referências do código e testes, limitações e pontos de extensão.
+3. Uma feature que altera um subsistema existente só está pronta quando a documentação desse subsistema também estiver atualizada. Criar documento novo apenas para um limite de responsabilidade real.
+4. Handoffs são históricos, `docs/phases/` são requisitos planejados, `docs/systems/` é contrato atual; evitar usar um handoff antigo como descrição vigente.
+5. Manutenção retrospectiva excepcional: somente documentação, diretamente na main, com responsabilidade dividida por subsistema e sem disparar GitHub Actions. Não editar os mesmos arquivos em paralelo; sincronizar antes de commitar. Se uma descoberta exigir correção de código/contrato ou controversa, registrar a divergência e escalar, sem corrigir o produto nessa tarefa.
