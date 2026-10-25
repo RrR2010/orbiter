@@ -1,10 +1,21 @@
 import type {Vec2} from '../simulation/orbits';
 import type {Mission} from '../simulation/civilization';
 
-/** Immutable ascent path from the authoritative V2 event checkpoints. */
-const cache=new WeakMap<object,readonly Vec2[]>();
-export function poweredTrack(mission:Mission):readonly Vec2[]{
+/** Only ascent telemetry points form a physical polyline. Do not connect
+ * independent coast, maneuver, or outcome checkpoints with straight lines. */
+const cache=new WeakMap<object,readonly {timeS:number;point:Vec2}[]>();
+export function poweredTrack(mission:Mission,timeS=Infinity):readonly Vec2[]{
  const flight=mission.flight;if(!flight)return [];
- let points=cache.get(flight);if(!points){points=flight.checkpoints.map(c=>c.state.position);cache.set(flight,points);}
- return points;
+ let samples=cache.get(flight);
+ if(!samples){
+  samples=[];
+  for(const c of flight.checkpoints){
+   if(c.kind==='coast'||c.reason==='Analytic coast to apoapsis')break;
+   if(c.reason==='Physical liftoff'||c.reason==='Ascent telemetry checkpoint'||c.reason.startsWith('Ascent ')){
+    samples=[...samples,{timeS:c.timeS,point:c.state.position}];
+   }else break;
+  }
+  cache.set(flight,samples);
+ }
+ return samples.filter(c=>c.timeS<=timeS).map(c=>c.point);
 }
