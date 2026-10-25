@@ -12,9 +12,9 @@ export function missionSymbols(world:World,c:Civilization,time:number):MissionSy
  return c.missions.slice(-12).filter(m=>m.status==='ascending'||m.status==='success').map(m=>{
   if(m.flight){
    const sampled=flightViewAt(m,planet.radius,Math.max(m.flight.plan.ignitionS,time));
-   if(!sampled)return {mission:m,position:home,physical:false,state:'legacy' as const};
+   if(!sampled)return null;
    return {mission:m,position:{x:home.x+sampled.state.position.x,y:home.y+sampled.state.position.y},physical:true,flightState:sampled.state,state:m.status==='success'?'orbiting':sampled.phase==='circularization'?'circularization':sampled.phase==='ascent'||sampled.phase==='insertion'?'ascent':'coast'};
   }
   return {mission:m,position:home,physical:false,state:'legacy' as const};
- });
+ }).filter((symbol):symbol is NonNullable<typeof symbol>=>symbol!==null);
 }
