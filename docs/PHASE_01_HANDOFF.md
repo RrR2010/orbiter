@@ -14,7 +14,7 @@
 - **A4 — PASSOU (manual):** pan, zoom, fullscreen e controles observados funcionais; medição de DPR não reportada separadamente.
 - **A5 — PASSOU (manual + automatizado):** refresh persistiu seed e progresso até o dia ~1400.
 - **A6 — PASSOU (Windows):** saída reportada pelo usuário: PASS Lint (1,5 s), PASS Typecheck (1,2 s), PASS Tests (2,7 s), PASS Build (5,2 s); RESULT 4/4 passed. Testes unitários: 15 após incremento de warp intermediário (contagem final não informada pelo relatório compacto).
-- **A7 — PARCIAL:** ensaio humano contínuo por 15 minutos, sem travamentos, gargalos ou jitter percebidos; órbitas aparentaram estáveis, controles e refresh continuaram funcionais. O brief exige 30 minutos ou equivalente instrumentado justificável mais verificação visual. Não houve medição instrumental de FPS/memória ou execução de 30 minutos. **Gate A7 ainda pendente.**
+- **A7 — ACEITO PELO PRODUCT OWNER COM RESSALVAS:** ensaio humano contínuo por 15 minutos, sem travamentos, gargalos ou jitter percebidos; órbitas aparentaram estáveis, controles e refresh continuaram funcionais. O brief exige 30 minutos ou equivalente instrumentado justificável mais verificação visual. Não houve medição instrumental de FPS/memória ou execução de 30 minutos. **O product owner aceitou formalmente 15 minutos como critério suficiente para esta fase em 2026-10-24; exceção ao limiar original de 30 minutos, sem afirmar equivalência instrumental. Revisão final do gate permanece com a orquestradora.**
 - **A8 — PASSOU (escopo):** sem civilização, missões, economia ou funcionalidades da Fase 2.
 
 ## Testes e limitações
@@ -26,8 +26,8 @@ O ambiente de execução do agente não realizou medição instrumental nem abri
 - Persistência regenerativa via `localStorage`, formato v1, ADR-0005.
 - API de comandos para clock permite futuras políticas de warp, mas desaceleração pré-evento não implementada.
 - IDEA-011 (foco em luas) e IDEA-012 (desaceleração antecipada por eventos) permanecem para triagem posterior.
-- Risco remanescente: estabilidade por 30 minutos ainda não evidenciada e telemetria FPS/memória indisponível.
+- Risco remanescente aceito pelo product owner: não há evidência de estabilidade por 30 minutos nem telemetria FPS/memória; testes mais longos devem ser reconsiderados quando o número de entidades e sistemas crescer.
 
 ## Recomendação ao gate
 
-Não fazer merge automático nem liberar Fase 2. Submeter ao julgamento da orquestradora, com A7 explicitamente **PARCIAL**; se o gate exigir estritamente 30 minutos, completar mais 15 minutos contínuos em novo ensaio ou realizar ensaio instrumentado equivalente antes da aprovação.
+Não fazer merge automático nem liberar Fase 2. Submeter ao julgamento da orquestradora com A7 **aceito pelo product owner mediante exceção documentada de 15 minutos**. A orquestradora decide se aceita a exceção no gate; não declarar ensaio de 30 minutos nem liberar a próxima fase sem decisão.
