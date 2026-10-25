@@ -1,3 +1,4 @@
+import {planMissionObjective,type MissionTarget} from './objectives';
 import {homeLaunchSite,sitePosition} from './surface-site';
 import {seededRandom} from '../../core/random';
 import type {Body} from '../world';
@@ -10,7 +11,7 @@ import type {Burn,FlightState,PlanetGravity,Trajectory} from './types';
 export type FlightPlan=Readonly<{
  version:1;planetId:string;ignitionS:number;initial:FlightState;
  ascent:Burn;insertion:Burn;ascentEndS:number;insertionEndS:number;
- reliabilityFailure:boolean;
+ reliabilityFailure:boolean;objective?:MissionTarget;
 }>;
 export type FlightSnapshot=Readonly<{state:FlightState;orbit:Trajectory;phase:'ascent'|'insertion'|'coast'|'impact'|'failure';impacted:boolean}>;
 
@@ -25,8 +26,11 @@ export function planFlight(seed:string,missionId:string,planet:Body,ignitionS:nu
  // off planets that range across nearly two orders of magnitude in radius.
  const fuelKg=720,dryKg=280;
  const ascentDuration=90,totalDuration=300;
- const profileFactor=1.08+rng()*.40;
- const missionDv=(circularSpeed+g*ascentDuration)*profileFactor;
+ const objective=planMissionObjective(seed,missionId,planet.radius,ignitionS,tier);
+ const targetRadius=planet.radius+Math.max(10000,objective.apoapsisAltitudeM);
+ const targetSpeed=Math.sqrt(gravity.muM3S2/targetRadius);
+ const profileFactor=(objective.objective==='suborbitalSurvey'?.5:objective.objective==='highApoapsis'?1.48:1.08)+rng()*.26;
+ const missionDv=(Math.max(circularSpeed*.8,targetSpeed)+g*ascentDuration)*profileFactor;
  const ispS=Math.max(150,missionDv/(9.80665*Math.log((dryKg+fuelKg)/dryKg)));
  const thrustN=(fuelKg/totalDuration)*ispS*9.80665;
  const site=homeLaunchSite(seed,planet.id);
@@ -35,7 +39,7 @@ export function planFlight(seed:string,missionId:string,planet:Body,ignitionS:nu
  return {version:1,planetId:planet.id,ignitionS,initial,ascentEndS,insertionEndS,
   ascent:{startS:ignitionS,endS:ascentEndS,thrustN,ispS,progradeFraction:0},
   insertion:{startS:ascentEndS,endS:insertionEndS,thrustN,ispS,progradeFraction:1},
-  reliabilityFailure:rng()<Math.max(.04,.22-tier*.035)};
+  reliabilityFailure:rng()<Math.max(.04,.22-tier*.035),objective};
 }
 
 /** Flight is sampled from its immutable ignition state, never incremented by a render frame. */
