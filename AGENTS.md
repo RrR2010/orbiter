@@ -63,3 +63,12 @@ Escolha a menor solução reversível coerente com visão e critérios; document
 ## CI econômico (obrigatório)
 
 GitHub Actions é um recurso de validação **final**, não de desenvolvimento. Não executar automaticamente por push/commit/abertura ou atualização de PR. Trabalhar com testes locais (`npm run validate`, `npm audit`), smoke tests e revisão completos primeiro. Apenas quando a branch estiver pronta para merge, executar manualmente `Orbiter Final CI` via `workflow_dispatch` no HEAD final; confirmar check verde desse commit e então integrar. Se houver alteração posterior de código, repetir validação local e disparar novo CI final somente quando pronto; nunca tratar check de SHA antigo como suficiente. Se branch protection exigir checks automáticos ou não reconhecer checks manuais, escalar a configuração em vez de burlar. Não iniciar Actions desnecessários nem usar jobs de CI como substituto para testes locais.
+
+## Documentação As-Built obrigatória
+
+- `docs/systems/README.md` é o índice de contratos técnicos **implementados atualmente**. Consultá-lo junto de `docs/ARCHITECTURE.md` antes de alterar sistemas existentes.
+- Cada subsistema relevante possui uma especificação viva em `docs/systems/<system>.md`, baseada no código e testes reais, não nas intenções do roadmap.
+- Ao criar ou alterar comportamento, API, estado persistido, dependências ou invariantes, atualizar **no mesmo trabalho** a respectiva As-Built e o índice. Documentar simplificações, limitações e referências a arquivos/testes.
+- Separação: `docs/phases/` registra **o solicitado**; `docs/systems/` registra **o que existe**; handoff registra **como foi validado e entregue**; ADR explica **por que se decidiu**. Em conflito com As-Built, verificar código/testes e corrigir a documentação.
+- Não duplicar descrições integrais em múltiplos arquivos nem afirmar funcionalidades não verificadas. Qualquer divergência encontrada deve ser explicitada.
+- **Exceção transitória de documentação retroativa:** agentes das Fases 1–2 e 3 podem editar exclusivamente os arquivos As-Built de sua responsabilidade, diretamente na `main`, com commits pequenos e sem alterar código, saves ou demais arquivos. Devem executar sequencialmente ou fazer pull/rebase antes de cada push; nunca usar force push. As regras normais de PR continuam valendo para desenvolvimento de produto.
