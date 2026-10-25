@@ -10,7 +10,7 @@ describe('space program evolution contracts',()=>{
   advanceCivilization(c,world,2000000,10000);
   const plans=c.missions.flatMap(m=>m.flight?[m.flight]:[]);
   expect(plans.length).toBeGreaterThan(1);
-  for(const flight of plans)expect(flight.initial.position).toEqual(expected);
+  for(const flight of plans)expect(flight.plan.initial.position).toEqual(expected);
  });
  it('plans differentiated targets deterministically',()=>{
   const a=planMissionObjective('orbiter-001','mission-1',6371000,1000,4);
