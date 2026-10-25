@@ -66,3 +66,11 @@ Capturar ideias como `IDEA-###` no `docs/BACKLOG.md`. Classificar `now` (bloquei
 ## Revisão de orquestração
 
 A cada retorno **pós-merge**, a orquestradora avalia feedback funcional, riscos, backlog e decide CONTINUAR / HOTFIX / REPLANEJAR. Essa avaliação define o próximo brief; não é pré-requisito para concluir a fase já autorizada.
+
+## Política de economia do GitHub Actions (v3)
+
+- **Durante a implementação:** commits e pushes livres; todo o feedback de desenvolvimento é obtido localmente (`npm ci`, `npm run validate`, `npm audit`, smoke tests de navegador). PR pode ficar aberto sem disparar CI.
+- **Gate final:** depois de implementação completa, documentação, revisão, testes automatizados e smoke tests aprovados, disparar manualmente o workflow `Orbiter Final CI` via `workflow_dispatch` apontando à branch e ao HEAD do PR. Conferir conclusão `success` e SHA correspondente antes do squash merge.
+- **Falha:** corrigir localmente, repetir testes e fazer no máximo nova rodada de CI final quando o trabalho estiver realmente pronto; não há proibição de reexecutar quando necessário, mas não executar por commit.
+- **Infraestrutura:** o workflow não deve ter triggers `push`/`pull_request`. Caso as regras do repositório exijam checks gerados por eventos automáticos ou a API não possa disparar manualmente, escalar o bloqueio ao humano/orquestradora antes do merge. Nunca ignorar branch protection.
+- **Rastro de validação:** handoff informa os comandos locais, resultados de smoke test, URL da execução final, conclusão e SHA.
