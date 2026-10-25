@@ -32,3 +32,7 @@ Canvas depende de navegador e GPU local para desempenho; FPS/memória necessitam
 ## Ajuste de follow em warp elevado
 
 O acompanhamento não suaviza continuamente a posição absoluta do corpo (isso introduzia atraso e fazia planetas/luas saírem da tela em 100.000×/1.000.000×). Durante a transição, suaviza apenas o **deslocamento relativo câmera–alvo**, somando-o à posição kepleriana atual a cada frame; após convergir, usa a posição atual sem atraso. O zoom automático só é aplicado no início de um novo foco e termina quando converge; scroll/teclas de zoom cancelam a animação do zoom, sem desligar o follow. Pan manual continua encerrando o acompanhamento. Exercitar warp 3, 4 e 5 e zoom out manual durante o follow.
+
+## Enquadramento padrão dos planetas
+
+O foco de planetas usa zoom local constante de **5×**, sem depender do semieixo maior orbital. Anteriormente usava `2 AU / a`, deixando planetas externos demasiado distantes. O foco das luas ainda utiliza sua escala orbital própria para revelar órbitas pequenas. A transição permanece suave e o zoom manual pode substituir o automático. Esta escolha é visual, não altera raios físicos nem dinâmica orbital.
