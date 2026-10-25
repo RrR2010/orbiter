@@ -7,6 +7,9 @@ import type {FlightSnapshot} from '../simulation/spaceflight/flight';
 /** V2 read-only trajectory: completed flights continue in analytical coast. */
 export function flightViewAt(mission:Mission,radiusM:number,time:number):FlightSnapshot|null{
  const flight=mission.flight;if(!flight)return null;
+ const impact=flight.checkpoints.find(c=>c.kind==='impact');
+ if(impact&&time>=impact.timeS)return null;
+ if(!flight.orbital&&mission.status==='success'&&time>flight.terminal.timeS)return null;
  const gravity=gravityForRadius(radiusM);
  const s=sampleAutonomousFlightWithPlanet(flight,gravity,Math.max(flight.plan.ignitionS,time));
  const impacted=flight.checkpoints.some(c=>c.kind==='impact'&&c.timeS<=time);
