@@ -59,3 +59,7 @@ O executor é responsável por conduzir a fase até o fim, não só entregar có
 ## Decisão sob ambiguidade
 
 Escolha a menor solução reversível coerente com visão e critérios; documente e siga. Peça intervenção somente para os limites de escalonamento acima.
+
+## CI econômico (obrigatório)
+
+GitHub Actions é um recurso de validação **final**, não de desenvolvimento. Não executar automaticamente por push/commit/abertura ou atualização de PR. Trabalhar com testes locais (`npm run validate`, `npm audit`), smoke tests e revisão completos primeiro. Apenas quando a branch estiver pronta para merge, executar manualmente `Orbiter Final CI` via `workflow_dispatch` no HEAD final; confirmar check verde desse commit e então integrar. Se houver alteração posterior de código, repetir validação local e disparar novo CI final somente quando pronto; nunca tratar check de SHA antigo como suficiente. Se branch protection exigir checks automáticos ou não reconhecer checks manuais, escalar a configuração em vez de burlar. Não iniciar Actions desnecessários nem usar jobs de CI como substituto para testes locais.
