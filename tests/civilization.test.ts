@@ -3,7 +3,7 @@ import {flightAt} from '../src/simulation/spaceflight/flight';
 import {gravityForRadius} from '../src/simulation/spaceflight/gravity';
 import {flightSucceeded} from '../src/simulation/spaceflight/flight';
 import {generateWorld} from '../src/simulation/world';
-import {createCivilization,advanceCivilization,parseCivilization,serializeCivilization,technology} from '../src/simulation/civilization';
+import {createCivilization,advanceCivilization,parseCivilization,serializeCivilization,technology,RESOURCE_CAP,RESOURCE_INCOME_PER_DAY,LAUNCH_RESOURCE_COST} from '../src/simulation/civilization';
 describe('autonomous space age',()=>{
  const world=generateWorld('space-age-regression');
  it('assigns one deterministic homeworld without modifying generated orbits',()=>{
@@ -77,6 +77,20 @@ describe('autonomous space age',()=>{
   const original=structuredClone(c);
   const restored=parseCivilization(serializeCivilization(c),world,c.time);
   expect(restored).toEqual(original);
+ });
+ it('spends resources and replenishes them slowly enough to observe launch costs',()=>{
+  const c=createCivilization(world);
+  advanceCivilization(c,world,100000,10000);
+  expect(c.resources).toBeLessThanOrEqual(RESOURCE_CAP);
+  expect(RESOURCE_INCOME_PER_DAY*2).toBeLessThan(LAUNCH_RESOURCE_COST);
+  const before=c.resources;
+  const next=c.nextAt;
+  advanceCivilization(c,world,next,10000);
+  expect(c.resources).toBeLessThanOrEqual(RESOURCE_CAP);
+  expect(Number.isFinite(c.resources)).toBe(true);
+  expect(before).toBeGreaterThanOrEqual(0);
+  const restored=parseCivilization(serializeCivilization(c),world,c.time);
+  expect(restored.resources).toBe(c.resources);
  });
  it('migrates missing strategic saves at current time without inventing past events',()=>{
   const c=parseCivilization(null,world,1234567);
