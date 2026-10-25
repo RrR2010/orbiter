@@ -13,7 +13,7 @@ export function nextApoapsis(state:FlightState,planet:PlanetGravity):number|null
  const h=r.x*v.y-r.y*v.x,e=orbit.eccentricity,rmag=Math.hypot(r.x,r.y);
  const cosE=Math.max(-1,Math.min(1,(1-rmag/a)/e));
  const sinE=(r.x*v.x+r.y*v.y)/(e*Math.sqrt(mu*a));
- let E=Math.atan2(sinE,cosE);
+ const E=Math.atan2(sinE,cosE);
  const M=E-e*Math.sin(E),n=Math.sqrt(mu/(a*a*a));
  let delta=(Math.PI-M)/n;
  const period=orbit.periodS;
@@ -38,9 +38,10 @@ export function planApoapsisCircularization(state:FlightState,planet:PlanetGravi
  const desired=Math.sqrt(mu*(2/ra-2/(ra+rp)));
  const needed=Math.max(0,desired-velocity);
  const dry=state.massKg-state.fuelKg;
- if(!(dry>0)||needed<=0)return null;
+ if(!(dry>0)||!(state.fuelKg>0)||needed<=0||!(velocity>0))return null;
  const dvAvailable=ispS*9.80665*Math.log(state.massKg/dry);
  const dv=Math.min(needed,dvAvailable);
+ if(!(dv>0))return null;
  const fuel=state.massKg*(1-Math.exp(-dv/(ispS*9.80665)));
  const factor=1+dv/velocity;
  const after:FlightState={...before,velocity:{x:before.velocity.x*factor,y:before.velocity.y*factor},massKg:before.massKg-fuel,fuelKg:Math.max(0,before.fuelKg-fuel)};
