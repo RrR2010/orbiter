@@ -20,8 +20,9 @@ describe('launch watch event gate',()=>{
  it('does not stop for research while watching preparation',()=>{
   const world=generateWorld('watch-research');
   const watched=createCivilization(world);
-  advanceCivilization(watched,world,900,10000,true);
+  advanceCivilization(watched,world,5000,10000,true);
   expect(watched.events.at(-1)?.kind).toBe('research');
-  expect(watched.time).toBe(900);
+  expect(watched.stage).toBe(1);
+  expect(watched.time).toBe(5000);
  });
 });
