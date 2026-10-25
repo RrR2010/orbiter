@@ -7,7 +7,7 @@ npm install
 npm run dev
 ```
 
-Abrir o endereço informado pelo Vite (normalmente http://localhost:5173). Validação completa: `npm run validate` (executa lint, typecheck, tests e build, sem parar na primeira falha; mostra PASS/FAIL por etapa e encerra com erro se qualquer uma falhar). Comandos individuais: `npm run typecheck`, `npm run lint`, `npm test` e `npm run build`.
+Abrir o endereço informado pelo Vite (normalmente http://localhost:5173). Validação completa: `npm run validate` (executa lint, typecheck, tests e build, sem parar na primeira falha; mostra PASS/FAIL por etapa e encerra com erro se qualquer uma falhar. A saída de `npm run validate` é um relatório compacto delimitado por `ORBITER VALIDATION REPORT` e `END ORBITER REPORT`, pronto para copiar ao agente. O relatório extrai no máximo 12 linhas relevantes por falha, trunca linhas individuais em 220 caracteres e limita a captura por comando em 2 MiB; informações de depuração extensas devem ser obtidas executando o comando individual). Comandos individuais: `npm run typecheck`, `npm run lint`, `npm test` e `npm run build`.
 
 ## Demonstração guiada
 
