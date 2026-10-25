@@ -18,7 +18,11 @@ export function poweredStep(s:FlightState,planet:PlanetGravity,dt:number,burn:Bu
  const active=s.timeS>=burn.startS&&s.timeS<burn.endS;
  const used=active?Math.min(s.fuelKg,burn.thrustN*dt/(burn.ispS*G0)):0;
  const radial={x:s.position.x/Math.hypot(s.position.x,s.position.y),y:s.position.y/Math.hypot(s.position.x,s.position.y)};
- const tangential={x:-radial.y,y:radial.x},fraction=Math.min(1,Math.max(0,burn.progradeFraction));
+ const tangential={x:-radial.y,y:radial.x};
+ const progress=Math.max(0,Math.min(1,(s.timeS-burn.startS)/Math.max(1e-9,burn.endS-burn.startS)));
+ const start=Math.max(0,Math.min(1,burn.progradeFraction));
+ const end=Math.max(0,Math.min(1,burn.endProgradeFraction??start));
+ const fraction=start+(end-start)*progress;
  const direction={x:radial.x*(1-fraction)+tangential.x*fraction,y:radial.y*(1-fraction)+tangential.y*fraction};
  const norm=Math.hypot(direction.x,direction.y),m=s.massKg-used/2;
  const g=gravityAcceleration(s.position,planet.muM3S2);
