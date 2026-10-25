@@ -21,6 +21,9 @@ describe('launch guidance diversity',()=>{
    const plan=planFlight(world.seed,'flight-'+i,planet,1000,4);
    const initial=flightAt(plan,gravity,plan.ignitionS);
    expect(Math.hypot(initial.state.position.x,initial.state.position.y)).toBeCloseTo(planet.radius+10,4);
+   expect(plan.orbitalReserveKg).toBeGreaterThan(0);
+   const end=flightAt(plan,gravity,plan.insertionEndS);
+   if(!end.impacted)expect(end.state.fuelKg).toBeGreaterThan(0);
    const mid=flightAt(plan,gravity,plan.ignitionS+25);
    expect(Number.isFinite(mid.state.position.x+mid.state.velocity.y)).toBe(true);
   }
