@@ -1,5 +1,4 @@
 import {planApoapsisCircularization} from './maneuvers';
-import {propagateCoast} from './coast';
 import {planMissionObjective,type MissionTarget} from './objectives';
 import {homeLaunchSite,sitePosition} from './surface-site';
 import {seededRandom} from '../../core/random';
