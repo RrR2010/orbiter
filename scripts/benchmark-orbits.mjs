@@ -1,5 +1,6 @@
 import {build} from 'esbuild';
 import {performance} from 'node:perf_hooks';
+import {Buffer} from 'node:buffer';
 
 // Intentionally isolated from the browser and persistence. Bundled from the real
 // production source, then run as a disposable in-memory Node module.
