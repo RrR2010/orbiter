@@ -1,52 +1,61 @@
-# Orbiter — Agent Operating Contract
+# Orbiter — Agent Operating Contract (autonomous phase delivery)
 
-## Ordem de leitura (obrigatória)
+## Leitura obrigatória
 
-1. `docs/PROJECT_STATUS.md` — estado atual, fase liberada e bloqueios.
-2. `docs/PRODUCT_VISION.md` — o que o produto precisa proporcionar.
-3. `docs/ARCHITECTURE.md` — limites técnicos e contratos.
-4. `docs/ROADMAP.md` e `docs/phases/PHASE_XX.md` — escopo e critérios da fase.
+1. `docs/PROJECT_STATUS.md` — fase autorizada, estado e bloqueios.
+2. `docs/PRODUCT_VISION.md` — experiência e prioridades.
+3. `docs/ARCHITECTURE.md` — limites e contratos.
+4. `docs/ROADMAP.md` e brief `docs/phases/PHASE_XX.md` — critérios de aceite.
 5. `docs/WORKFLOW.md`, `docs/BACKLOG.md`, `docs/DECISIONS.md`.
 
-## Missão
+## Contrato de autonomia
 
-Implemente **somente a fase ativa**. O humano toma decisões funcionais; você decide e explica detalhes técnicos sem impor escolhas desnecessárias. Preserve simplicidade, determinismo e execução local simples.
+**A autorização de execução de uma fase inclui implementar, testar, corrigir, revisar o próprio PR e fazer merge na main**, sem retorno à orquestradora a cada iteração, quando TODOS os critérios do brief e os gates técnicos estiverem satisfeitos. Nenhuma autorização adicional é necessária para refatorações reversíveis, correção de bugs, ajustes de testes, dependências justificadas e melhorias de UX dentro do escopo.
+
+O executor é responsável por conduzir a fase até o fim, não só entregar código. O humano avalia a experiência em testes funcionais pontuais quando a validação automatizada/navegador não for suficiente. Não inventar evidências ou declarar testes não realizados.
 
 ## Regras não negociáveis
 
-- Nunca iniciar fase seguinte automaticamente, nem misturar features futuras por conveniência.
-- Separar simulação pura, renderização, persistência, narrativa e UI; renderização jamais decide resultado da simulação.
-- Física híbrida transparente: indicar explicitamente simplificações, unidades e limites de validade.
-- Seed determinística; não usar `Math.random()` dentro da simulação; relógio de simulação independente do FPS.
-- Registrar alterações de arquitetura em `docs/DECISIONS.md`, antes de substituir padrões existentes.
-- Sempre fornecer testes de comportamento, casos limite e instruções para rodar localmente.
-- Funcionalidades incompletas devem ser identificadas, não mascaradas com animação que simula sucesso.
-- Nada de credenciais em código ou logs. Não remover trabalho existente nem forçar push.
-- Código, identificadores, comentários e docstrings em inglês; documentação de produto/handoff em português.
-- Cada feature deve ter causa, efeito no estado, observação possível e teste correspondente.
-- Se surgir uma ideia fora do escopo, registrar no backlog/issue, sem implementá-la na fase atual.
-- Alterações em escopo/arquitetura com impacto transversal exigem aprovação do humano e revisão da orquestradora.
+- Implementar **apenas** a fase autorizada. Não iniciar a seguinte automaticamente.
+- Separar simulação, visualização, UI e persistência; render não produz consequências físicas.
+- Física híbrida transparente, unidades SI no motor, aproximações documentadas.
+- Seed e clock determinísticos; não utilizar `Math.random()` na simulação; estado independente de FPS.
+- Testes correspondentes às regras, incluindo limites, regressões e persistência.
+- Não ocultar bugs, falhas CI ou funções incompletas; nunca simular sucesso.
+- Nunca forçar push, sobrescrever mudanças de terceiros ou incluir segredos.
+- Código, comentários, identificadores e docstrings em inglês; documentação/handoff em português.
+- Atualizar o backlog ao descobrir ideias fora do escopo, sem implementá-las implicitamente.
+- Registrar decisões técnicas transversais em `docs/DECISIONS.md` com justificativa.
+- Proteger compatibilidade de saves; migração/teste obrigatório se o formato mudar.
 
-## Ciclo de execução da fase
+## Limites que exigem escalonamento
 
-1. Ler estado e especificação; inspecionar repositório; verificar se há trabalho em progresso.
-2. Abrir branch `phase/NN-short-name` a partir de `main` atualizada. Se trabalhar via agente integrado, usar branch/PR equivalente.
-3. Implementar em incrementos pequenos; adicionar testes antes ou junto às regras.
-4. Executar lint, typecheck, tests e build; se algum comando não existir, explicar por quê.
-5. Validar visualmente em navegador quando disponível, incluindo fullscreen, resize, zoom e desempenho; registrar evidências e limitações.
-6. Abrir PR para `main`, com checklist dos critérios de aceite e evidências. Não fazer merge automático.
-7. Entregar relatório conforme `docs/WORKFLOW.md`. Sugerir mudança de status somente após integração validada.
+**PARE e escale** quando houver: mudança funcional relevante fora do brief; necessidade de novo PR/dependência de fase prévia; risco de apagar/corromper universos existentes sem migração segura; remoção de segurança/testes; mudança de arquitetura estrutural incompatível; dependência de segredo, credencial ou aprovação externa; bloqueio CI/repo não resolvível com manutenção de escopo; desacordo material com o product owner.
 
-## Critérios universais de pronto
+**Não escale** escolha de nomes, bibliotecas compatíveis, organização interna, melhoria de performance, fix de bugs, revisão de teste ou detalhes reversíveis. Documente e prossiga.
 
-- Escopo da fase implementado sem regressões conhecidas.
-- Projeto inicia com passos documentados.
-- Testes automatizados pertinentes passando; avisos e falhas reportados sem omissão.
-- Sem `TODO` silencioso em funcionalidade anunciada como pronta.
-- Uso de CPU/memória observado quando relevante.
-- Documentação e backlog atualizados no mesmo PR.
-- Handoff sucinto, com links de branch, PR, commits e pendências.
+## Loop completo de execução
 
-## Instrução ao agente
+1. Ler documentos; conferir `main` e estado real; abrir branch da fase.
+2. Implementar em incrementos, com testes e documentação; fazer decisões técnicas autonomamente.
+3. Rodar `npm ci`, lint, typecheck, tests, build e audit; reparar falhas até gates verdes; atualizar lockfile se dependências mudarem.
+4. Abrir PR com checklist, evidências e handoff. Review pode ser feito pelo próprio executor; abrir feedback de code review adicional quando possível, sem inventar aprovação de revisor independente.
+5. Validar no navegador (diretamente, ou guiando o humano quando indisponível), registrando limitações e exceções de critérios aprovadas pelo humano.
+6. Se escopo e qualidade forem atendidos, CI obrigatório estiver verde, PR mergeável e alterações documentadas, **fazer merge por squash na main**. Não depender de novo chamado da orquestradora.
+7. Fechar issue, atualizar `docs/PROJECT_STATUS.md` como fase integrada, com commit/PR, riscos e próximas ações; caso a atualização precise ser feita após merge, usar um PR pequeno de follow-up e integrá-lo sob as mesmas regras.
+8. Entregar relatório ao humano, incluindo link do commit integrado e feedback funcional desejado.
+9. **Parar:** a próxima fase só é autorizada pela orquestradora. Nenhuma execução adicional por inferência do roadmap.
 
-Se houver ambiguidade: escolha a menor implementação reversível coerente com a visão, registre a decisão e siga. Pergunte apenas em caso de decisão funcional irreversível, mudança grande de escopo ou risco de perda de dados.
+## Gates de merge autônomo
+
+- Critérios de aceite PASSOU, ou exceção **expressamente aceita pelo humano** e documentada (não autoaprovar a própria exceção).
+- CI verde no HEAD relevante; nenhum conflito de merge ou review bloqueante.
+- `npm audit` sem vulnerabilidades conhecidas relevantes ou risco formalmente escalado/aceito; nenhum bypass silencioso.
+- Testes necessários executados de verdade e resultados registrados.
+- Documentação, backlog, ADR e release/handoff coerentes com implementação.
+- Sem perda irreversível de dados, segredos ou mudanças inesperadas no escopo.
+- PR integrado via método suportado pela configuração do repositório; se regras do GitHub exigirem revisão externa, respeitá-las.
+
+## Decisão sob ambiguidade
+
+Escolha a menor solução reversível coerente com visão e critérios; documente e siga. Peça intervenção somente para os limites de escalonamento acima.
