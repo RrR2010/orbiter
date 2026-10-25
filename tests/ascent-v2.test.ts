@@ -17,4 +17,17 @@ describe('feedback ascent v2',()=>{
   const b=executeAscentV2(initial,planet,{...options,profile:'tangential'});
   expect(a.state.position).not.toEqual(b.state.position);
  });
+ it('keeps large-world tangential launches physically bounded and deterministic',()=>{
+  const massive=gravityForRadius(56691000);
+  const surface={position:{x:massive.radiusM+10,y:0},velocity:{x:0,y:0},massKg:2600,fuelKg:1950,timeS:0};
+  const gravity=massive.muM3S2/(massive.radiusM*massive.radiusM);
+  const config={targetApoapsisAltitudeM:1329000,thrustN:2600*gravity*1.8,ispS:7900,profile:'tangential' as const,navigationError:0,stepS:1,reservedFuelKg:540,maxDurationS:900};
+  const flight=executeAscentV2(surface,massive,config);
+  expect(flight).toEqual(executeAscentV2(surface,massive,config));
+  expect(flight.state.fuelKg).toBeGreaterThanOrEqual(539.99);
+  expect(flight.checkpoints.at(-1)?.state).toEqual(flight.state);
+  expect(flight.checkpoints.every(c=>Number.isFinite(c.state.position.x+c.state.position.y+c.state.velocity.x+c.state.velocity.y))).toBe(true);
+  expect(flight.state.timeS).toBeGreaterThan(0);
+ });
+
 });
