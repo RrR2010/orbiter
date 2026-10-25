@@ -3,7 +3,7 @@ import type {Body} from '../world';
 import {gravityForRadius} from './gravity';
 import {analyzeTrajectory} from './conics';
 import {poweredStep} from './integrator';
-import {propagateCoast} from './coast';
+import {propagateUntilImpact} from './coast';
 import type {Burn,FlightState,PlanetGravity,Trajectory} from './types';
 
 export type FlightPlan=Readonly<{
@@ -55,8 +55,9 @@ export function flightAt(plan:FlightPlan,planet:PlanetGravity,targetS:number):Fl
  }
  if(!impacted&&targetS>plan.insertionEndS){
   const dt=targetS-plan.insertionEndS;
-  s=propagateCoast(s,planet,dt);
-  phase='coast';
+  const coast=propagateUntilImpact(s,planet,dt);
+  s=coast.state;impacted=coast.impacted;
+  phase=impacted?'impact':'coast';
  }
  const orbit=analyzeTrajectory(s,planet);
  if(impacted)phase='impact';
