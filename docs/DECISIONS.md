@@ -30,6 +30,10 @@ Registrar decisões não triviais com motivo, alternativas e consequências. Nã
 
 **Estado:** aceita. **Decisão:** seleção, follow, visibilidade de camadas e modo ambiente usam `orbiter.observatory.v1`, separado do save físico da Fase 1. **Motivo:** preservar seed, tempo e identidade orbital mesmo com configurações de observação malformadas. **Consequências:** preferências podem ser descartadas com defaults seguros sem afetar universo; telemetria permanece função pura do estado físico.
 
+## ADR-0008 — Transições de câmera com velocidade persistida (2026-10-25)
+
+**Estado:** aceita. **Decisão:** suavizar pan/focus/follow e zoom por interpolação exponencial independente do FPS; zoom interpolado em espaço logarítmico. **Motivo:** reduzir saltos visuais durante mudanças de escala, inclusive lua → planeta, sem afetar a simulação. **Consequências:** quatro opções de rapidez persistidas com default retrocompatível no estado do observatório; a posição renderizada da câmera pode atrasar em relação ao corpo selecionado durante aproximação. Drag interrompe follow; selecionar outro corpo durante follow muda o alvo suavemente. Atalhos de tempo têm precedência sobre controles não editáveis.
+
 ## Novo ADR (template)
 
 ```markdown
