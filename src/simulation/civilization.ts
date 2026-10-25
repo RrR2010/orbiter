@@ -1,9 +1,11 @@
+import {planFlight,flightAt,flightSucceeded,type FlightPlan} from './spaceflight/flight';
+import {gravityForRadius} from './spaceflight/gravity';
 import {seededRandom} from '../core/random';
 import type {World} from './world';
 
 export type Technology='astronomy'|'rocketry'|'orbitalFlight'|'satellites';
 export type MissionStatus='preparing'|'ascending'|'success'|'failure';
-export type Mission={id:string;originId:string;targetId:string;startedAt:number;launchAt:number;resolvedAt:number;status:MissionStatus;success:boolean|null;vehicleId:string};
+export type Mission={id:string;originId:string;targetId:string;startedAt:number;launchAt:number;resolvedAt:number;status:MissionStatus;success:boolean|null;vehicleId:string;flight?:FlightPlan};
 export type SpaceEvent={id:string;time:number;kind:'research'|'preparation'|'launch'|'success'|'failure';missionId:string|null;detail:string};
 export type Civilization={version:1;id:string;homeId:string;seed:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number};
 const TECH:readonly Technology[]=['astronomy','rocketry','orbitalFlight','satellites'];
@@ -38,13 +40,16 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
   c.time=time;
   const mission=c.missions.find(m=>m.status==='preparing'||m.status==='ascending');
   if(mission?.status==='preparing'){
+   const home=world.bodies.find(b=>b.id===mission.originId);
+   if(!mission.flight&&home)mission.flight=planFlight(world.seed,mission.id,home,time,c.stage);
    mission.status='ascending';record(c,time,'launch','Launch ignition',mission.id);c.nextAt=time+FLIGHT_SECONDS;
   }else if(mission?.status==='ascending'){
-   const chance=Math.min(.94,.35+c.stage*.12+Math.min(.2,c.successes*.035));
-   mission.success=probability(world.seed,mission.id)<chance;
+   const home=world.bodies.find(b=>b.id===mission.originId);
+   const planet=home?gravityForRadius(home.radius):null;
+   mission.success=mission.flight&&planet?flightSucceeded(flightAt(mission.flight,planet,time),planet):probability(world.seed,mission.id)<Math.min(.94,.35+c.stage*.12+Math.min(.2,c.successes*.035));
    mission.status=mission.success?'success':'failure';mission.resolvedAt=time;
    if(mission.success)c.successes++;else c.failures++;
-   record(c,time,mission.success?'success':'failure',mission.success?'Satellite reached operational orbit':'Vehicle lost during ascent',mission.id);
+   record(c,time,mission.success?'success':'failure',mission.success?'Satellite reached operational orbit':'Launch ended without a stable orbit',mission.id);
    c.nextAt=time+RECOVERY_SECONDS;
   }else if(c.stage<TECH.length){
    const cost=RESEARCH_COST[c.stage];
