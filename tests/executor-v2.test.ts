@@ -22,6 +22,17 @@ describe('event-based flight executor v2',()=>{
   expect(analyzeTrajectory(progress.state,planet).periapsisM).toBeGreaterThan(analyzeTrajectory(beginning.state,planet).periapsisM);
   expect(analyzeTrajectory(a.end,planet).periapsisM).toBeGreaterThan(0);
  });
+ it('starts a long apoapsis correction before the theoretical node',()=>{
+  const initial={...state,velocity:{x:0,y:Math.sqrt(mu/r)*.75}};
+  const result=executeGuidanceV2(initial,planet,goal,{...engine,thrustN:12000});
+  const coast=result.checkpoints.find(c=>c.kind==='coast');
+  const burnStart=result.checkpoints.find(c=>c.kind==='burn-start');
+  if(coast&&burnStart){
+   expect(burnStart.timeS).toBe(coast.timeS);
+   expect(result.checkpoints.some(c=>c.kind==='burn-progress')).toBe(true);
+   expect(burnStart.state.fuelKg).toBe(initial.fuelKg);
+  }
+ });
  it('honors fuel exhaustion and does not invent impulse',()=>{
   const empty={...state,fuelKg:0};
   const result=executeGuidanceV2(empty,planet,goal,engine);
