@@ -159,3 +159,7 @@ User reproduced apoapsis-started 326s burn: started Ap 790km at t503 with Pe -17
 ## Failed insertion ballistic lifecycle — 2026-10-25
 
 User mission ended planned circularization at t756, alt84km, Pe -106km with 565kg remaining, then spacecraft disappeared. This was not a fuel-out or impact: V2 marked failure and closed mission immediately when guidance finished. Now non-orbital flights with surface-intersecting conics coast deterministically to their first physical surface crossing, store an impact checkpoint, and resolve only then. During the interval after orbital insertion abort the ship remains visible in coast, with 'Em queda' UI status; it is removed only on actual impact. Scientific suborbital success is still independent of vehicle survival. Added `tests/failed-insertion-descent.test.ts`. Local validate and browser smoke pending; no Actions.
+
+## Selected-orbit AP/PE overlay (2026-10-25)
+
+Added apsidal positions to existing predicted Kepler conic geometry and highlighted only `trackedMissionId` in the Canvas: solid gold 2.4px conic, AP and valid above-surface PE dots with compact altitude labels. Other orbits retain low-contrast dashed styling. Negative periapsis markers and invalid/open conics are not drawn. Selection uses the existing mission button/canvas click; no markers are drawn without a selected mission. Added predicted orbit extrema regressions. Needs human local validate and browser smoke before CI/merge; PR remains draft.
