@@ -28,3 +28,7 @@ Canvas depende de navegador e GPU local para desempenho; FPS/memória necessitam
 - Ao selecionar outro corpo enquanto o acompanhamento está ativo, a câmera redireciona o follow ao novo corpo. Se o follow estava desligado, a seleção apenas altera o inspector.
 - **Configurações da câmera** oferece quatro velocidades (suave, normal, rápida e quase instantânea), gravadas em `orbiter.observatory.v1`, com default compatível para preferências antigas. O follow usa interpolação exponencial de posição e zoom baseada no tempo real por frame; o zoom interpola no espaço logarítmico. Isso altera apenas a projeção, não a física. Ativar Focar e acompanhar não teleporta a câmera.
 - Teste sugerido: com foco no dropdown, usar teclas 1–5 e Espaço; iniciar acompanhamento de uma lua, trocar pelo dropdown e observar transição; repetir nas quatro velocidades e recarregar para conferir persistência.
+
+## Ajuste de follow em warp elevado
+
+O acompanhamento não suaviza continuamente a posição absoluta do corpo (isso introduzia atraso e fazia planetas/luas saírem da tela em 100.000×/1.000.000×). Durante a transição, suaviza apenas o **deslocamento relativo câmera–alvo**, somando-o à posição kepleriana atual a cada frame; após convergir, usa a posição atual sem atraso. O zoom automático só é aplicado no início de um novo foco e termina quando converge; scroll/teclas de zoom cancelam a animação do zoom, sem desligar o follow. Pan manual continua encerrando o acompanhamento. Exercitar warp 3, 4 e 5 e zoom out manual durante o follow.
