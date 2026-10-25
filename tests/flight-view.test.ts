@@ -10,8 +10,8 @@ describe('flight projection view',()=>{
   expect(mission?.flight).toBeDefined();if(!mission?.flight)return;
   const radius=world.bodies.find(b=>b.id===mission.originId)!.radius;
   const before=JSON.stringify(mission);
-  const first=flightViewAt(mission,radius,mission.flight.ignitionS+22.5);
-  const second=flightViewAt(mission,radius,mission.flight.ignitionS+22.5);
+  const first=flightViewAt(mission,radius,mission.flight.plan.ignitionS+22.5);
+  const second=flightViewAt(mission,radius,mission.flight.plan.ignitionS+22.5);
   expect(first).toEqual(second);
   expect(JSON.stringify(mission)).toBe(before);
  });
