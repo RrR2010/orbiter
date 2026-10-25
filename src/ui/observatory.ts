@@ -28,7 +28,7 @@ export function focusBody(camera:Camera,state:ObservatoryState,world:World,time:
   if(!position)return false;
   state.selectedId=id;state.follow=true;camera.x=position.x;camera.y=position.y;
   const reference=body.kind==='moon'?body.orbit?.semiMajorAxis:body.kind==='planet'?body.orbit?.semiMajorAxis:undefined;
-  if(reference)camera.zoom=Math.max(.035,Math.min(400,body.kind==='moon'?8*AU/reference:2*AU/reference));
+  if(reference)camera.zoom=Math.max(.035,Math.min(20000,body.kind==='moon'?8*AU/reference:2*AU/reference));
   return true;
 }
 export function updateFollow(camera:Camera,state:ObservatoryState,world:World,time:number):void{
