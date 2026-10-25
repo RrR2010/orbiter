@@ -56,7 +56,7 @@ export function resolveAutonomousFlightV2(plan:AutonomousFlightPlanV2,planet:Pla
  if(ascent.outcome==='impact'){
   return {version:2,plan,checkpoints,terminal:state,outcome:'failed',reason:'Surface collision during ascent',orbital:false,goalAchieved:false};
  }
- if(plan.target.objective==='suborbitalSurvey'){const orbit=analyzeTrajectory(state,planet);const achieved=ascent.outcome!=='impact'&&orbit.apoapsisM!==null&&orbit.apoapsisM-planet.radiusM>=plan.goal.apoapsisAltitudeM-plan.goal.toleranceM;const reason=achieved?'Suborbital survey altitude reached':'Suborbital survey altitude missed';checkpoints.push({timeS:state.timeS,state,kind:achieved?'goal':'partial',reason});return {version:2,plan,checkpoints,terminal:state,outcome:achieved?'achieved':'failed',reason,orbital:false,goalAchieved:achieved};}
+ if(plan.target.objective==='suborbitalSurvey'){const orbit=analyzeTrajectory(state,planet);const achieved=orbit.apoapsisM!==null&&orbit.apoapsisM-planet.radiusM>=plan.goal.apoapsisAltitudeM-plan.goal.toleranceM;const reason=achieved?'Suborbital survey altitude reached':'Suborbital survey altitude missed';checkpoints.push({timeS:state.timeS,state,kind:achieved?'goal':'partial',reason});return {version:2,plan,checkpoints,terminal:state,outcome:achieved?'achieved':'failed',reason,orbital:false,goalAchieved:achieved};}
  const engine={thrustN:plan.thrustN*.35,ispS:plan.ispS,stepS:2};
  const correction=executeGuidanceV2(state,planet,plan.goal,engine);
  checkpoints.push(...correction.checkpoints);
