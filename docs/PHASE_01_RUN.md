@@ -12,9 +12,9 @@ Abrir o endereço informado pelo Vite (normalmente http://localhost:5173). Valid
 ## Demonstração guiada
 
 1. Observar o sistema e suas órbitas; arrastar para pan, usar scroll ou teclas +/− para zoom.
-2. Alternar 1×, 100× e 10.000×, pausar e retomar; verificar que não existe salto abrupto de tempo.
+2. Alternar 1×, 100×, 10.000× e 1.000.000×, pausar e retomar; verificar que não existe salto abrupto de tempo.
 3. Ativar Tela cheia, redimensionar a janela e verificar controles e proporções.
-4. Anotar seed e tempo, recarregar e confirmar retomada no mesmo universo.
+4. Observar o relógio em horas:minutos:segundos (e dias após 24h). Anotar seed e tempo, recarregar e confirmar retomada no mesmo universo.
 5. Alterar a seed, confirmar no diálogo e comparar o novo sistema; observar por 30 minutos.
 
 ## Simplificações e limites
