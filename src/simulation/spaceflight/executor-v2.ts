@@ -19,9 +19,15 @@ export function executeGuidanceV2(initial:FlightState,planet:PlanetGravity,goal:
   return {checkpoints:[{timeS:state.timeS,state,kind:decision.action==='abort'?'abort':'partial',reason:decision.reason}],end:state,decision,outcome:decision.action==='abort'?'aborted':'partial'};
  }
  if(decision.action==='coast-to-apoapsis'&&decision.targetTimeS!==null){
-  const dt=decision.targetTimeS-state.timeS;
-  if(dt>0){state=propagateCoast(state,planet,dt);checkpoints.push({timeS:state.timeS,state,kind:'coast',reason:'Analytic coast to apoapsis'});}
-  decision=decideGuidance(state,planet,goal,engine.ispS);
+  const nodeTime=decision.targetTimeS;
+  const durationAtNode=burnDurationForDeltaV(state,engine.ispS,engine.thrustN,decision.desiredDeltaVMs);
+  // Center finite impulse around its Keplerian maneuver node, constrained by current time.
+  const burnStart=Math.max(state.timeS,nodeTime-durationAtNode/2);
+  if(burnStart>state.timeS){
+   const coast=propagateCoast(state,planet,burnStart-state.timeS);
+   state=coast;checkpoints.push({timeS:state.timeS,state,kind:'coast',reason:'Coast to centered apoapsis burn start'});
+  }
+  decision={...decision,action:'raise-periapsis',reason:'Centered finite burn to raise periapsis'};
  }
  if(decision.action!=='raise-periapsis'&&decision.action!=='raise-apoapsis'){
   const kind=decision.action==='goal-achieved'?'goal':'partial';
@@ -33,7 +39,7 @@ export function executeGuidanceV2(initial:FlightState,planet:PlanetGravity,goal:
  if(duration<=0)return {checkpoints:[...checkpoints,{timeS:state.timeS,state,kind:'partial',reason:'No executable delta-v'}],end:state,decision,outcome:'partial'};
  const start=state.timeS,end=start+duration;
  let nextTelemetry=start+10;
- const burn:Burn={startS:start,endS:end,thrustN:engine.thrustN,ispS:engine.ispS,progradeFraction:1};
+ const burn:Burn={startS:start,endS:end,thrustN:engine.thrustN,ispS:engine.ispS,progradeFraction:decision.action==='raise-periapsis'?.94:1};
  checkpoints.push({timeS:start,state,kind:'burn-start',reason:decision.reason});
  // The solver performs deterministic work once per event, never once per render frame.
  while(state.timeS<end-1e-9){
