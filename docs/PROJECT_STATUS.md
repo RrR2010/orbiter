@@ -1,39 +1,35 @@
 # Estado operacional — Orbiter
 
-**Última atualização:** 2026-10-24
-**Fase atual para implementação:** 1 — Planetário vivo
-**Situação:** pronta para atribuição a agente; código ainda não implementado
-**Última decisão de gate:** Fase 0 documentada; Fase 1 autorizada
-**Próxima ação do humano:** iniciar um agente com a issue da Fase 1 e `docs/phases/PHASE_01.md`.
+**Atualização:** 2026-10-25
+**Fase atual:** 1 — Planetário vivo, revisão final APROVADA.
+**PR de integração:** https://github.com/RrR2010/orbiter/pull/2 (head conferido `1fd2f63`; CI #61 verde).
+**Situação no momento deste registro:** merge **autorizado**, ainda não realizado. Próxima fase NÃO autorizada.
+**Próxima ação:** integrar PR #2 à main; fechar issue #1 e registrar merge SHA. Após integração, a orquestradora prepara o brief da Fase 2.
 
-## Resumo imutável de produto
+## Baseline funcional
 
-Física híbrida; observação + intervenção opcional; um sistema planetário; uma civilização inicial (a partir da fase 3); persistência entre sessões; 2D top-down.
+Física híbrida; observador com intervenções opcionais; um sistema planetário e uma civilização inicial futura; persistência entre sessões; visual 2D top-down.
 
-## Atividade corrente
+## Histórico de gates
 
-| Item | Situação | Referência |
+| Fase | Gate | Evidências / limitações |
 |---|---|---|
-| Fase 0: fundação | Documentação preparada | Este commit |
-| Fase 1: planetário vivo | Não iniciada | `docs/phases/PHASE_01.md` |
-| Fase 2+ | Não autorizadas | `docs/ROADMAP.md` |
+| 0 — Fundação | Aprovada | documentação inicial |
+| 1 — Planetário vivo | **Aprovado para merge** | check GitHub Actions #61 verde, lockfile, npm ci, revisão técnica, ensaio visual 15 min com exceção aceita |
+| 2 — Observatório | Não autorizada | depende de Fase 1 integrada e brief específico |
 
-## Riscos a observar
+## Riscos residuais aceitos da Fase 1
 
-- Física visual falsa disfarçada de orbital.
-- Escopo excessivo antes de existir um screensaver observável.
-- Determinismo quebrado por FPS ou fontes aleatórias globais.
-- Arquivos salvos incompatíveis após refatorações.
-- Agentes esquecendo decisões tomadas fora do repositório.
+- Ensaio de 15 minutos em lugar dos 30 inicialmente sugeridos, aceito expressamente pelo humano.
+- Não foram obtidas métricas instrumentais de FPS/memória para uso de muitas horas.
+- Frame clamp limita avanço em FPS baixo/inatividade e precisa de nova política antes de simulação por eventos.
+- Física analítica bidimensional com aproximações e cinturão visual agregado.
+- Persistência v1 regenerativa; futuras mudanças no gerador precisam de cuidado com saves.
 
-## Em cada retorno à orquestradora
+## Regra de execução a partir das próximas fases
 
-O humano envia URL do PR, resumo da demonstração e eventuais desejos de mudança. A orquestradora:
-1. Verifica artefatos e evidências.
-2. Classifica gate: **APROVADO**, **AJUSTES NECESSÁRIOS** ou **REPLANEJAR**.
-3. Atualiza este arquivo, próximo brief, backlog e decisões via PR/commit.
-4. Autoriza a próxima fase *somente quando apropriado*.
+AGENTS.md e docs/WORKFLOW.md v2 permitem ao executor, com autorização de início de fase, fazer implementar → testar → PR → CI → **merge autônomo** caso todos os gates passem. Orquestradora não precisa aprovar cada PR, mas autoriza cada **nova fase**. Escalonamento só para mudanças relevantes de escopo, blockers, risco irreversível ou exceções não preaprovadas.
 
-## Handoff mais recente
+## Feedback e retorno
 
-Fundação documental criada; ainda não existe implementação, CI nem evidência de navegador. Nenhum teste de código foi executado. O primeiro agente deve criar setup, scripts e validações na Fase 1.
+O humano volta após integração com link do merge e impressões funcionais. Orquestradora avalia e prepara a Fase 2; os próximos executores não precisam retornar durante o ciclo normal. Não marcar Fase 1 como integrada antes de merge verificado.
