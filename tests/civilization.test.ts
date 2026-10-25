@@ -65,7 +65,7 @@ describe('autonomous space age',()=>{
   advanceCivilization(c,world,3e6,10000);
   const flown=c.missions.filter(m=>m.flight);
   expect(flown.length).toBeGreaterThan(0);
-  for(const mission of flown){if(mission.status==='success'||mission.status==='failure')expect(mission.success).toBe(mission.flight?.orbital);}
+  for(const mission of flown){if(mission.status==='success'||mission.status==='failure')expect(mission.success).toBe(Boolean(mission.flight?.orbital||mission.flight?.goalAchieved));}
   const original=structuredClone(c);
   const restored=parseCivilization(serializeCivilization(c),world,c.time);
   expect(restored).toEqual(original);
