@@ -22,8 +22,9 @@ export function designVehicle(planet:PlanetGravity,stage:number,knowledge:number
  const ratio=Math.log((dryKg+fuelKg)/dryKg);
  // The generator's gravity scale varies enormously; normalize to a minimum
  // capability envelope, but early technologies receive substantially less margin.
- const theoreticalMin=(circularSpeed*(1.1+advancement*.4)+g*85)/(9.80665*ratio);
- const ispS=Math.max(280+advancement*300,theoreticalMin);
+ const baselineRatio=Math.log((650+1250)/650);
+ const baselineIsp=Math.max(280,(circularSpeed*1.1+g*85)/(9.80665*baselineRatio));
+ const ispS=baselineIsp*(1+advancement*.35);
  const initialTwr=1.5+advancement*.35+(variation-.5)*.16;
  const thrustN=(dryKg+fuelKg)*g*initialTwr;
  const deltaVMs=ispS*9.80665*ratio;
