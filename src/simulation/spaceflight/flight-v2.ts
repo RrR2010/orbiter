@@ -26,8 +26,6 @@ export function createAutonomousFlightV2(seed:string,id:string,planet:Body,ignit
  const rng=seededRandom('orbiter:autonomous-v2:'+seed+':'+id);
  const target=planMissionObjective(seed,id,planet.radius,ignitionS,tier);
  const radius=planet.radius,gravity=gravityForRadius(radius);
- const missionRadius=radius+Math.max(50000,target.apoapsisAltitudeM);
- const circularSpeed=Math.sqrt(gravity.muM3S2/missionRadius);
  const g=gravity.muM3S2/(radius*radius);
  const ispS=360+Math.max(0,tier)*20;
  const fuelKg=1450,dryKg=550,availableDv=ispS*9.80665*Math.log((fuelKg+dryKg)/dryKg);
