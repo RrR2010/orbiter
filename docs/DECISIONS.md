@@ -22,6 +22,14 @@ Registrar decisões não triviais com motivo, alternativas e consequências. Nã
 
 **Estado:** aceita para Fase 1. **Contexto:** salvar snapshots completos adicionaria acoplamento e migrações desnecessárias. **Opções:** IndexedDB/snapshot integral ou localStorage com metadados determinísticos. **Decisão:** armazenar seed, versão, tempo e câmera no localStorage; regenerar corpos por seed. **Motivo:** simplicidade e teste de identidade. **Consequências:** alterações no algoritmo gerador exigirão versionamento/migração; não há evolução offline.
 
+## ADR-0006 — Câmera local de alta ampliação (2026-10-25)
+
+**Estado:** aceita para Fase 2. **Contexto:** luas pequenas exigem mais de 400× de zoom para que órbitas reais ocupem pixels suficientes. **Opções:** ampliar apenas o desenho (geometria enganosa), criar coordenadas relativas artificiais ou ampliar o domínio de zoom da câmera. **Decisão:** aumentar limite de zoom para 20.000× e ampliar apenas a faixa válida do campo `camera.zoom` no save v1, mantendo mesma chave, formato, unidades e gerador. **Motivo:** zoom altera apenas projeção, sem alterar elementos orbitais. **Consequências:** saves anteriores são compatíveis e não migram destrutivamente; versões antigas do cliente (Fase 1) podem rejeitar uma câmera salva com zoom acima de 400×, embora dados de seed/tempo continuem presentes. O controle de câmera será versionado separadamente numa futura evolução se necessário.
+
+## ADR-0007 — Configurações visuais independentes (2026-10-25)
+
+**Estado:** aceita. **Decisão:** seleção, follow, visibilidade de camadas e modo ambiente usam `orbiter.observatory.v1`, separado do save físico da Fase 1. **Motivo:** preservar seed, tempo e identidade orbital mesmo com configurações de observação malformadas. **Consequências:** preferências podem ser descartadas com defaults seguros sem afetar universo; telemetria permanece função pura do estado físico.
+
 ## Novo ADR (template)
 
 ```markdown
