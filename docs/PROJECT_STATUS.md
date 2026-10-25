@@ -47,3 +47,7 @@ O módulo da civilização, o scheduler orientado a eventos, o feed, os símbolo
 ## Fase 3 — Bloco A iniciado (2026-10-25)
 
 Na branch do PR #7 foram adicionados os módulos `simulation/spaceflight/{types,gravity,conics,integrator}.ts` e `tests/spaceflight.test.ts`. Modelo de gravidade local por densidade constante versionável, análise de trajetórias cônicas, propulsão simplificada e testes de referência. **Ainda não conectado às missões**, não substitui resultados estratégicos persistidos. Não há testes locais executados nesta sessão; gates permanecem pendentes. Próximos passos: garantir consistência sob partições arbitrárias, eventos de impacto, coast analítico, modelagem de queimas e migração dos saves Fase 3 antes de alterar o fluxo de missão. Sem GitHub Actions nesta etapa.
+
+## Continuação Bloco A — coast analítico (2026-10-25)
+
+Adicionado `src/simulation/spaceflight/coast.ts` com propagador universal de dois corpos e estimativa de primeiro cruzamento da superfície por amostragem limitada + bisseção, bem como testes correspondentes. **Limitação importante:** a busca por impacto ainda não deve ser usada em janelas arbitrariamente extensas sem subdivisão ou evento analítico; a discretização pode ignorar interseções entre amostras. O integrador de queima também demanda estado de passo/remainder para garantir equivalência sob partições temporais arbitrárias. Ambos são pendências do gate A1 antes da integração de missões. Testes escritos, mas não executados no ambiente atual; nenhum CI disparado.
