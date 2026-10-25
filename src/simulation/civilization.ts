@@ -51,7 +51,7 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
    record(c,time,'launch','V2 autonomous launch ignition',mission.id);
    c.nextAt=Math.max(time+1,mission.flight.terminal.timeS);
   }else if(mission?.status==='ascending'){
-   mission.success=mission.flight?.orbital??false;
+   mission.success=mission.flight?.goalAchieved||mission.flight?.orbital||false;
    mission.status=mission.success?'success':'failure';mission.resolvedAt=time;
    if(mission.success)c.successes++;else c.failures++;
    const detail=mission.flight?.reason??'Missing flight result';
