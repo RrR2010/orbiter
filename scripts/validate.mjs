@@ -8,7 +8,7 @@ const results = [];
 
 function compactErrors(output) {
   const lines = output
-    .replace(/\x1b\[[0-9;]*m/g, '')
+    .replace(new RegExp(String.fromCharCode(27) + '\\[[0-9;]*m', 'g'), '')
     .split(/\r?\n/)
     .map(line => line.trim())
     .filter(Boolean);
