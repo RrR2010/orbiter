@@ -12,9 +12,9 @@ import type {Burn,FlightState,PlanetGravity,Trajectory} from './types';
 export type FlightPlan=Readonly<{
  version:1;planetId:string;ignitionS:number;initial:FlightState;
  ascent:Burn;insertion:Burn;ascentEndS:number;insertionEndS:number;
- reliabilityFailure:boolean;objective?:MissionTarget;useApoapsisBurn?:boolean;orbitalReserveKg?:number;
+ reliabilityFailure:boolean;objective?:MissionTarget;useApoapsisBurn?:boolean;orbitalReserveKg?:number;apoapsisBurnDurationS?:number;
 }>;
-export type FlightSnapshot=Readonly<{state:FlightState;orbit:Trajectory;phase:'ascent'|'insertion'|'coast'|'impact'|'failure';impacted:boolean}>;
+export type FlightSnapshot=Readonly<{state:FlightState;orbit:Trajectory;phase:'ascent'|'insertion'|'coast'|'circularization'|'impact'|'failure';impacted:boolean}>;
 
 function objectiveReserveForTier(tier:number):number{return Math.max(90,Math.min(200,125+tier*9));}
 
@@ -51,7 +51,7 @@ export function planFlight(seed:string,missionId:string,planet:Body,ignitionS:nu
  return {version:1,planetId:planet.id,ignitionS,initial,ascentEndS,insertionEndS,
   ascent:{startS:ignitionS,endS:ascentEndS,thrustN,ispS,progradeFraction:ascentStart,endProgradeFraction:ascentEnd},
   insertion:{startS:ascentEndS,endS:insertionEndS,thrustN,ispS,progradeFraction:insertionStart,endProgradeFraction:insertionEnd},
-  reliabilityFailure:rng()<Math.max(.04,.22-tier*.035),objective,useApoapsisBurn:objective.objective!=='suborbitalSurvey',orbitalReserveKg};
+  reliabilityFailure:rng()<Math.max(.04,.22-tier*.035),objective,useApoapsisBurn:objective.objective!=='suborbitalSurvey',orbitalReserveKg,apoapsisBurnDurationS:60};
 }
 
 /** Flight is sampled from its immutable ignition state, never incremented by a render frame. */
@@ -80,7 +80,25 @@ export function flightAt(plan:FlightPlan,planet:PlanetGravity,targetS:number):Fl
   if(maneuver&&targetS>=maneuver.atS){
    const before=propagateUntilImpact(s,planet,maneuver.atS-plan.insertionEndS);
    if(before.impacted){s=before.state;impacted=true;}
-   else{
+   else if(plan.apoapsisBurnDurationS){
+    // Finite prograde burn: the visible orbit evolves during the maneuver.
+    // Old saved plans without this field retain their original impulsive result.
+    const duration=plan.apoapsisBurnDurationS;
+    const burnEnd=maneuver.atS+duration;
+    const maneuverBurn:Burn={startS:maneuver.atS,endS:burnEnd,thrustN:maneuver.fuelKg/duration*plan.insertion.ispS*9.80665,ispS:plan.insertion.ispS,progradeFraction:1};
+    s=maneuver.before;
+    const stop=Math.min(targetS,burnEnd);
+    while(s.timeS+1<=stop+1e-9){
+     s=poweredStep(s,planet,1,maneuverBurn);
+     if(Math.hypot(s.position.x,s.position.y)<=planet.radiusM){impacted=true;break;}
+    }
+    if(!impacted&&stop>s.timeS+1e-8)s=poweredStep(s,planet,stop-s.timeS,maneuverBurn);
+    if(!impacted&&targetS>burnEnd){
+     const coast=propagateUntilImpact(s,planet,targetS-burnEnd);
+     s=coast.state;impacted=coast.impacted;
+    }
+    if(!impacted&&targetS<=burnEnd)phase='circularization';
+   }else{
     const coast=propagateUntilImpact(maneuver.after,planet,targetS-maneuver.atS);
     s=coast.state;impacted=coast.impacted;
    }
@@ -88,7 +106,7 @@ export function flightAt(plan:FlightPlan,planet:PlanetGravity,targetS:number):Fl
    const coast=propagateUntilImpact(s,planet,dt);
    s=coast.state;impacted=coast.impacted;
   }
-  phase=impacted?'impact':'coast';
+  if(phase!=='circularization')phase=impacted?'impact':'coast';
  }
  const orbit=analyzeTrajectory(s,planet);
  if(impacted)phase='impact';
@@ -108,5 +126,5 @@ export function flightResolutionTime(plan:FlightPlan,planet:PlanetGravity):numbe
  const atBurnEnd=flightAt(plan,planet,plan.insertionEndS);
  if(atBurnEnd.impacted)return plan.insertionEndS;
  const maneuver=planApoapsisCircularization(atBurnEnd.state,planet,plan.objective.periapsisAltitudeM,plan.insertion.ispS);
- return maneuver&&maneuver.atS-plan.insertionEndS<=86400?maneuver.atS+1:plan.insertionEndS;
+ return maneuver&&maneuver.atS-plan.insertionEndS<=86400?maneuver.atS+(plan.apoapsisBurnDurationS??0)+1:plan.insertionEndS;
 }
