@@ -1,4 +1,4 @@
-import {planFlight,flightAt,flightSucceeded,type FlightPlan} from './spaceflight/flight';
+import {planFlight,flightAt,flightSucceeded,flightResolutionTime,type FlightPlan} from './spaceflight/flight';
 import {gravityForRadius} from './spaceflight/gravity';
 import {seededRandom} from '../core/random';
 import type {World} from './world';
@@ -42,7 +42,7 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
   if(mission?.status==='preparing'){
    const home=world.bodies.find(b=>b.id===mission.originId);
    if(!mission.flight&&home)mission.flight=planFlight(world.seed,mission.id,home,time,c.stage);
-   mission.status='ascending';record(c,time,'launch','Launch ignition',mission.id);c.nextAt=time+FLIGHT_SECONDS;
+   mission.status='ascending';record(c,time,'launch','Launch ignition',mission.id);const gravity=home?gravityForRadius(home.radius):null;c.nextAt=mission.flight&&gravity?flightResolutionTime(mission.flight,gravity):time+FLIGHT_SECONDS;
   }else if(mission?.status==='ascending'){
    const home=world.bodies.find(b=>b.id===mission.originId);
    const planet=home?gravityForRadius(home.radius):null;
