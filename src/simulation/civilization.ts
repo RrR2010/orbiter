@@ -44,7 +44,7 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
    const home=world.bodies.find(b=>b.id===mission.originId);
    if(!home||home.kind!=='planet')throw new Error('Missing V2 launch planet');
    if(!mission.flight){
-    const plan=createAutonomousFlightV2(world.seed,mission.id,home,time,c.stage);
+    const plan=createAutonomousFlightV2(world.seed,mission.id,home,time,c.stage,c.knowledge);
     mission.flight=resolveAutonomousFlightV2(plan,gravityForRadius(home.radius));
    }
    mission.status='ascending';
