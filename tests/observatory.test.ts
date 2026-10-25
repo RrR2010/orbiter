@@ -2,7 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {generateWorld,positionsAt} from '../src/simulation/world';
 import {cameraScale,projectPoint,unprojectPoint} from '../src/rendering/camera';
 import {pickBody} from '../src/rendering/pick';
-import {DEFAULT_OBSERVATORY,parseObservatory,selectBody,focusBody,updateFollow,resetView,bodyTelemetry,distanceLabel,orbitalSpeed} from '../src/ui/observatory';
+import {DEFAULT_OBSERVATORY,parseObservatory,selectBody,focusBody,updateFollow,cancelCameraZoom,resetView,bodyTelemetry,distanceLabel,orbitalSpeed} from '../src/ui/observatory';
 
 describe('observatory commands',()=>{
   const world=generateWorld('phase2-regression');
@@ -24,7 +24,23 @@ describe('observatory commands',()=>{
     expect(camera.zoom).toBeGreaterThan(1);
     for(let i=0;i<100;i++)updateFollow(camera,state,world,1e7,.1);
     expect(camera.x).toBeCloseTo(target.x,0);expect(camera.y).toBeCloseTo(target.y,0);
+    const later=positionsAt(world,1e7+1e6).get(moon.id)!;
+    updateFollow(camera,state,world,1e7+1e6,.016);
+    expect(camera.x).toBeCloseTo(later.x,0);expect(camera.y).toBeCloseTo(later.y,0);
+    camera.zoom=12;cancelCameraZoom(state);updateFollow(camera,state,world,1e7+2e6,.016);
+    expect(camera.zoom).toBe(12);expect(state.follow).toBe(true);
     resetView(camera,state);expect(camera).toEqual({x:0,y:0,zoom:1});expect(state.follow).toBe(false);
+  });
+  it('keeps the same target centered under extreme warp even during a camera transition',()=>{
+    const state=structuredClone(DEFAULT_OBSERVATORY),camera={x:0,y:0,zoom:1};
+    focusBody(camera,state,world,0,moon.id);
+    const initial=positionsAt(world,0).get(moon.id)!;
+    const offset={x:camera.x-initial.x,y:camera.y-initial.y};
+    updateFollow(camera,state,world,1e7,.1);
+    const target=positionsAt(world,1e7).get(moon.id)!;
+    const expected=Math.exp(-state.cameraSpeed*.1);
+    expect(camera.x-target.x).toBeCloseTo(offset.x*expected,0);
+    expect(camera.y-target.y).toBeCloseTo(offset.y*expected,0);
   });
   it('roundtrips camera projection and picks visible planets',()=>{
     const camera={x:0,y:0,zoom:1},point=positionsAt(world,0).get(planet.id)!;
