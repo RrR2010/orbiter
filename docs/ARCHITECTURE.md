@@ -78,3 +78,7 @@ Simulação não importa Canvas, DOM, `Date.now()`, timers ou componentes UI. UI
 - Teste de persistência: salvar/recarregar não muda identidade nem tempo.
 - Benchmarks reproduzíveis e sem promessas não medidas.
 - Desenvolver fallback para WebGL não é requisito nesta etapa.
+
+## Fonte de verdade da implementação (As-Built)
+
+Este documento contém princípios e arquitetura de referência; não substitui descrições operacionais atualizadas. Consulte [o catálogo de subsistemas](systems/README.md) para os contratos As-Built verificados contra código e testes reais. Os documentos de fases são requisitos históricos/planejados; decisões estão no ADR; relatórios de handoff guardam evidências. Quando a implementação divergir da arquitetura de referência, documentar a divergência e propor revisão de ADR em vez de declarar comportamento inexistente.
