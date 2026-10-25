@@ -38,6 +38,11 @@ export function executeGuidanceV2(initial:FlightState,planet:PlanetGravity,goal:
  while(state.timeS<end-1e-9){
   const dt=Math.min(engine.stepS,end-state.timeS);
   state=poweredStep(state,planet,dt,burn);
+  const orbitNow=analyzeTrajectory(state,planet);
+  if(decision.action==='raise-periapsis'&&orbitNow.kind==='elliptic'&&orbitNow.periapsisM>=planet.radiusM+goal.periapsisAltitudeM-goal.toleranceM){
+   checkpoints.push({timeS:state.timeS,state,kind:'burn-end',reason:'Periapsis target reached: feedback cutoff'});
+   return {checkpoints,end:state,decision,outcome:'burned'};
+  }
   if(Math.hypot(state.position.x,state.position.y)<=planet.radiusM){
    checkpoints.push({timeS:state.timeS,state,kind:'impact',reason:'Surface collision during burn'});
    return {checkpoints,end:state,decision,outcome:'aborted'};
