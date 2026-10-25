@@ -30,8 +30,17 @@ export function executeAscentV2(initial:FlightState,planet:PlanetGravity,options
   const turnElapsed=Math.max(0,elapsed-12);
   const turnAltitude=Math.max(0,altitude-Math.max(500,planet.radiusM*.00002));
   const progress=Math.min(1,turnElapsed/(profile==='vertical'?180:profile==='gradual'?130:95),turnAltitude/Math.max(7000,planet.radiusM*.002));
-  const tangent=progress*(profile==='vertical'?.78:profile==='gradual'?.99:1);
-  const fraction=Math.min(.98,tangent);
+  // Pitch is constrained by actual orbital energy and vertical motion, not elapsed time alone.
+  // On high-gravity worlds a fast tangential turn can hold Ap at ~200 km while the rocket falls.
+  const apoapsisAltitude=orbit.apoapsisM===null?Infinity:Math.max(0,orbit.apoapsisM-planet.radiusM);
+  const apoapsisProgress=Math.min(1,apoapsisAltitude/Math.max(1,options.targetApoapsisAltitudeM));
+  const radialSpeed=(state.position.x*state.velocity.x+state.position.y*state.velocity.y)/radius;
+  const desiredTangent=progress*(profile==='vertical'?.78:profile==='gradual'?.99:1);
+  const altitudeGate=Math.min(1,Math.max(0,(altitude-Math.max(1000,planet.radiusM*.00005))/Math.max(25000,planet.radiusM*.002)));
+  const apoapsisGate=Math.min(1,.2+apoapsisProgress*1.15);
+  let fraction=Math.min(.98,desiredTangent*altitudeGate,apoapsisGate);
+  if(radialSpeed<0&&apoapsisProgress<.95)fraction=0;
+  else if(radialSpeed<Math.max(5,Math.sqrt(planet.muM3S2/planet.radiusM)*.002)&&apoapsisProgress<.75)fraction=Math.min(fraction,.14);
   const dt=Math.min(step,maxDuration-elapsed,(state.fuelKg-reserve)*ispS*9.80665/thrustN);
   if(dt<=1e-9){reason='fuel-exhausted';break;}
   const burn:Burn={startS:state.timeS,endS:state.timeS+dt,thrustN,ispS,progradeFraction:fraction};
