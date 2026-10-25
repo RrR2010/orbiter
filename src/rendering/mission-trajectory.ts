@@ -19,3 +19,12 @@ export function poweredTrack(mission:Mission,timeS=Infinity):readonly Vec2[]{
  }
  return samples.filter(c=>c.timeS<=timeS).map(c=>c.point);
 }
+
+/** A trail survives mission resolution only when a spacecraft remains in a stable orbit. */
+export function shouldDrawMissionTrail(mission:Mission,timeS:number):boolean{
+ const flight=mission.flight;
+ if(!flight)return false;
+ if(flight.checkpoints.some(c=>c.kind==='impact'&&c.timeS<=timeS))return false;
+ if(mission.status==='ascending')return true;
+ return mission.status==='success'&&flight.orbital;
+}
