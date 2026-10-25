@@ -16,3 +16,9 @@ Configurações são serializadas na chave `orbiter.observatory.v2`; `parseObser
 `tests/observatory.test.ts` cobre seleção, foco, follow em warp extremo, offsets de pan, zoom manual, projeção roundtrip e picking, métricas e defaults de preferências. Diferenças relevantes frente à Fase 2 histórica: **Focar** e **Acompanhar** são botões/ações distintos na main, e a chave do observatório é v2. Não extrapolar o comportamento de handoff antigo.
 
 Referências: `src/rendering/camera.ts`, `src/rendering/canvas.ts`, `src/rendering/pick.ts`, `src/ui/observatory.ts`, `src/main.ts`; ADR-0006 a ADR-0009; PR #4, e alterações posteriores da Fase 3.
+
+## Extensões de interface — Fase 4 (branch de desenvolvimento)
+
+`src/main.ts` monta uma agenda contextual de missões em preparação e HUD para missão selecionada; `src/style.css` contém os estilos responsivos `.mission-hud` e `.launch-agenda`. O mapa e câmera continuam em Canvas e comandos existentes; missão selecionada usa `trackedMissionId`. O modo ambiente recolhe ambos os painéis. A preferência de marcações da agenda usa `orbiter.mission-watch.v1`, lista de IDs persistida separadamente (não faz parte do save físico nem do observatório V2). O código trata eventos de lançamento recém-processados em lote e não troca câmera se já houver acompanhamento de missão. Há somente uma civilização no modelo atual; concorrência entre múltiplas civilizações permanece futuro, não implementado.
+
+**Limitações:** o painel usa seleção/acompanhamento unificados, sem modo independente de inspeção passiva de missão; não há cronograma global multi-civilização; nem alerta programado com confirmação. A agenda exibe apenas missões que já possuem `launchAt` real, nunca inventa eventos. Testes de navegador/reload pendentes antes do aceite.
