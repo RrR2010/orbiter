@@ -39,3 +39,21 @@ export function advancePowered(s:FlightState,planet:PlanetGravity,targetS:number
  }
  return current;
 }
+
+/** Recompute from a persistent ignition checkpoint, never from a fractional render-frame state.
+ * The event scheduler stores the ignition state and requests arbitrary timestamps from it.
+ * This intentionally trades CPU for exact partition invariance until step checkpoints exist.
+ */
+export function sampleBurnAt(ignition:FlightState,planet:PlanetGravity,targetS:number,burn:Burn,stepS=1):FlightState{
+ if(targetS<ignition.timeS||!Number.isFinite(targetS)||!(stepS>0)||!Number.isFinite(stepS))throw new Error('Invalid sampling target');
+ let s=ignition;
+ while(s.timeS+stepS<=targetS+1e-10){
+  const next=Math.min(s.timeS+stepS,targetS);
+  s=poweredStep(s,planet,next-s.timeS,burn);
+  if(Math.hypot(s.position.x,s.position.y)<planet.radiusM)return s;
+ }
+ if(targetS>s.timeS+1e-10){
+  s=poweredStep(s,planet,targetS-s.timeS,burn);
+ }
+ return s;
+}
