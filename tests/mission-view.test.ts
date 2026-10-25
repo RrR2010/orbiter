@@ -3,7 +3,7 @@ import {generateWorld} from '../src/simulation/world';
 import {createCivilization,advanceCivilization} from '../src/simulation/civilization';
 import {missionSymbols} from '../src/rendering/mission-symbols';
 import {gravityForRadius} from '../src/simulation/spaceflight/gravity';
-import {flightAt} from '../src/simulation/spaceflight/flight';
+import {sampleAutonomousFlightWithPlanet} from '../src/simulation/spaceflight/flight-v2';
 import {positionsAt} from '../src/simulation/world';
 
 describe('physical mission view',()=>{
@@ -13,7 +13,7 @@ describe('physical mission view',()=>{
   const mission=civilization.missions.find(m=>m.flight);
   expect(mission).toBeDefined();
   if(!mission?.flight)return;
-  const snapshot=JSON.stringify(civilization),time=mission.flight.ignitionS+30;
+  const snapshot=JSON.stringify(civilization),time=mission.flight.plan.ignitionS+30;
   const symbols=missionSymbols(world,civilization,time),symbol=symbols.find(s=>s.mission.id===mission.id);
   // Historical failures are not drawn as still-active vehicles.
   if(mission.status==='success'){
@@ -23,7 +23,7 @@ describe('physical mission view',()=>{
   }
   expect(JSON.stringify(civilization)).toBe(snapshot);
   const planet=world.bodies.find(b=>b.id===civilization.homeId)!;
-  const physics=flightAt(mission.flight,gravityForRadius(planet.radius),mission.flight.ignitionS+30);
-  expect(Number.isFinite(physics.state.position.x)).toBe(true);
+  const physics=sampleAutonomousFlightWithPlanet(mission.flight,gravityForRadius(planet.radius),mission.flight.plan.ignitionS+30);
+  expect(Number.isFinite(physics.position.x)).toBe(true);
  });
 });
