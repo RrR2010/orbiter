@@ -12,12 +12,12 @@ Abrir o endereço informado pelo Vite (normalmente http://localhost:5173). Valid
 ## Demonstração guiada
 
 1. Observar o sistema e suas órbitas; arrastar para pan, usar scroll ou teclas +/− para zoom.
-2. Alternar 1×, 100×, 10.000× e 1.000.000×, pausar e retomar; verificar que não existe salto abrupto de tempo.
+2. Usar Espaço para pausar/retomar e teclas 1–4 para alterar velocidade (1×, 100×, 10.000×, 1.000.000×); os campos de texto continuam recebendo digitação normalmente. Alternar 1×, 100×, 10.000× e 1.000.000×, pausar e retomar; verificar que não existe salto abrupto de tempo.
 3. Ativar Tela cheia, redimensionar a janela e verificar controles e proporções.
 4. Observar o relógio em horas:minutos:segundos (e dias após 24h). Anotar seed e tempo, recarregar e confirmar retomada no mesmo universo.
 5. Alterar a seed, confirmar no diálogo e comparar o novo sistema; observar por 30 minutos.
 
-## Simplificações e limites
+## Contrato de controle temporal\n\nO clock expõe `dispatch({type: 'set-warp', warp})` e `dispatch({type: 'toggle-pause'})`, independentemente de DOM. Controles humanos chamam essa API; sistemas futuros poderão enviar comandos após detectar eventos reais. A redução automática pré-evento não está implementada na Fase 1 (IDEA-012). Os atalhos não voltam no tempo, apenas param ou alteram o avanço futuro.\n\n## Simplificações e limites
 
 Órbitas keplerianas elípticas de dois corpos em plano 2D; distâncias em metros, tempo em segundos, período derivado de parâmetro gravitacional. Não há perturbação N-body, colisões, inclinação 3D ou movimentos seculares. Estrela central fixa; luas seguem pais, sem propagação perturbada. Raio visual dos astros é aumentado artificialmente; trilhas usam 96 segmentos. Pontos do cinturão são ilustração agregada fixa, sem corpo físico individual ou falsas colisões. O zoom só transforma coordenadas. A simulação fica parada enquanto a aba está inativa e o tempo não avança offline. Deltas de animação são limitados a 0,1 s para evitar saltos após suspensão.
 
