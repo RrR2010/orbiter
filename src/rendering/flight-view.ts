@@ -1,33 +1,16 @@
 import type {Mission} from '../simulation/civilization';
-import {flightAt} from '../simulation/spaceflight/flight';
 import {gravityForRadius} from '../simulation/spaceflight/gravity';
-import {propagateCoast} from '../simulation/spaceflight/coast';
-import {flightResolutionTime} from '../simulation/spaceflight/flight';
+import {analyzeTrajectory} from '../simulation/spaceflight/conics';
+import {sampleAutonomousFlightWithPlanet} from '../simulation/spaceflight/flight-v2';
 import type {FlightSnapshot} from '../simulation/spaceflight/flight';
 
-/** Physics-derived read model: burn checkpoints are cached by plan identity, never by frame time. */
-const checkpoints=new WeakMap<object,FlightSnapshot>();
-const resolutionCache=new WeakMap<object,number>();
-const samples=new WeakMap<object,Map<number,FlightSnapshot>>();
+/** V2 read-only trajectory: completed flights continue in analytical coast. */
 export function flightViewAt(mission:Mission,radiusM:number,time:number):FlightSnapshot|null{
- const plan=mission.flight;if(!plan)return null;
- const planet=gravityForRadius(radiusM),end=plan.insertionEndS;
- if(time>end){
-  if(plan.useApoapsisBurn&&plan.objective){let resolution=resolutionCache.get(plan);if(resolution===undefined){resolution=flightResolutionTime(plan,planet);resolutionCache.set(plan,resolution);}if(time<=resolution)return flightAt(plan,planet,time);const terminal=flightAt(plan,planet,resolution);if(terminal.impacted||terminal.phase==='failure')return terminal;return {...terminal,state:propagateCoast(terminal.state,planet,time-resolution),phase:'coast'};}
-  let checkpoint=checkpoints.get(plan);
-  if(!checkpoint){checkpoint=flightAt(plan,planet,end);checkpoints.set(plan,checkpoint);}
-  if(checkpoint.impacted||checkpoint.phase==='failure')return checkpoint;
-  const state=propagateCoast(checkpoint.state,planet,time-end);
-  return {...checkpoint,state,phase:'coast'};
- }
- const t=Math.max(plan.ignitionS,time);
- // Cache integer snapshots to avoid reintegrating all preceding burn steps each frame.
- const tick=Math.floor(t-plan.ignitionS);
- let cache=samples.get(plan);
- if(!cache){cache=new Map();samples.set(plan,cache);}
- let full=cache.get(tick);
- if(!full){full=flightAt(plan,planet,plan.ignitionS+tick);cache.set(tick,full);if(cache.size>4){const oldest=cache.keys().next().value;if(oldest!==undefined)cache.delete(oldest);}}
- if(t-plan.ignitionS===tick)return full;
- // Fractional time is recomputed from immutable ignition checkpoint for precision.
- return flightAt(plan,planet,t);
+ const flight=mission.flight;if(!flight)return null;
+ const gravity=gravityForRadius(radiusM);
+ const s=sampleAutonomousFlightWithPlanet(flight,gravity,Math.max(flight.plan.ignitionS,time));
+ const impacted=flight.checkpoints.some(c=>c.kind==='impact'&&c.timeS<=time);
+ const burning=flight.checkpoints.some((c,i)=>c.kind==='burn-start'&&time>=c.timeS&&time<(flight.checkpoints.slice(i+1).find(next=>next.kind==='burn-end'||next.kind==='impact')?.timeS??c.timeS));
+ const phase:FlightSnapshot['phase']=impacted?'impact':burning?'ascent':time>=flight.terminal.timeS&&!flight.orbital?'failure':'coast';
+ return {state:s,orbit:analyzeTrajectory(s,gravity),phase,impacted};
 }
