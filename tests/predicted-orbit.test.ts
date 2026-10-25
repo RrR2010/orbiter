@@ -10,12 +10,17 @@ describe('predicted orbital overlay',()=>{
   const forecast=predictLocalOrbit(state,planet)!;
   expect(forecast.closed).toBe(true);expect(forecast.impactRisk).toBe(false);
   expect(forecast.points.length).toBe(97);
+  expect(Math.hypot(forecast.apoapsisPoint.x,forecast.apoapsisPoint.y)).toBeCloseTo(radius,3);
+  expect(forecast.periapsisPoint).not.toBeNull();
+  expect(Math.hypot(forecast.periapsisPoint!.x,forecast.periapsisPoint!.y)).toBeCloseTo(radius,3);
   for(const p of forecast.points)expect(Math.abs(Math.hypot(p.x,p.y)-radius)).toBeLessThan(.01);
  });
  it('clips predicted sections beneath the surface without changing state',()=>{
   const sub={...state,velocity:{x:0,y:state.velocity.y*.7}};
   const before=JSON.stringify(sub),forecast=predictLocalOrbit(sub,planet)!;
   expect(forecast.impactRisk).toBe(true);
+  expect(forecast.periapsisPoint).toBeNull();
+  expect(Math.hypot(forecast.apoapsisPoint.x,forecast.apoapsisPoint.y)).toBeGreaterThan(planet.radiusM);
   expect(forecast.points.some(p=>Number.isNaN(p.x))).toBe(true);
   expect(forecast.points.some(p=>Number.isFinite(p.x))).toBe(true);
   expect(JSON.stringify(sub)).toBe(before);
