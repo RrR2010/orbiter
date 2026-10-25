@@ -30,7 +30,7 @@ function record(c:Civilization,time:number,kind:SpaceEvent['kind'],detail:string
 }
 export function technology(c:Readonly<Civilization>):readonly Technology[]{return TECH.slice(0,c.stage);}
 /** Event-driven integration. The exact same event order is processed for any time partition. */
-export function advanceCivilization(c:Civilization,world:World,target:number,budget=256):number{
+export function advanceCivilization(c:Civilization,world:World,target:number,budget=256,stopOnPreparation=false):number{
  if(!Number.isFinite(target)||target<c.time)throw new Error('Invalid target time');
  if(!Number.isSafeInteger(budget)||budget<1)throw new Error('Invalid event budget');
  let processed=0;
@@ -69,7 +69,7 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
    const id='mission-'+(++c.missionSerial);
    c.missions.push({id,originId:c.homeId,targetId:c.homeId,startedAt:time,launchAt:time+PREP_SECONDS,resolvedAt:0,status:'preparing',success:null,vehicleId:'vehicle-'+c.missionSerial});
    if(c.missions.length>MAX_MISSIONS)c.missions.shift();
-   record(c,time,'preparation','Mission preparation initiated (resource cost '+LAUNCH_RESOURCE_COST+')',id);c.nextAt=time+PREP_SECONDS;
+   record(c,time,'preparation','Mission preparation initiated (resource cost '+LAUNCH_RESOURCE_COST+')',id);c.nextAt=time+PREP_SECONDS;if(stopOnPreparation)break;
   }else c.nextAt=time+RECOVERY_SECONDS;
  }
  // Work cap never discards simulation debt; caller must resume before drawing an advanced timeline.
