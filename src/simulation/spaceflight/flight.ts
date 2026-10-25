@@ -1,3 +1,4 @@
+import {homeLaunchSite,sitePosition} from './surface-site';
 import {seededRandom} from '../../core/random';
 import type {Body} from '../world';
 import {gravityForRadius} from './gravity';
@@ -28,8 +29,8 @@ export function planFlight(seed:string,missionId:string,planet:Body,ignitionS:nu
  const missionDv=(circularSpeed+g*ascentDuration)*profileFactor;
  const ispS=Math.max(150,missionDv/(9.80665*Math.log((dryKg+fuelKg)/dryKg)));
  const thrustN=(fuelKg/totalDuration)*ispS*9.80665;
- const launchAngle=rng()*2*Math.PI,r=planet.radius+10;
- const initial:FlightState={position:{x:r*Math.cos(launchAngle),y:r*Math.sin(launchAngle)},velocity:{x:0,y:0},massKg:dryKg+fuelKg,fuelKg,timeS:ignitionS};
+ const site=homeLaunchSite(seed,planet.id);
+ const initial:FlightState={position:sitePosition(site,planet.radius),velocity:{x:0,y:0},massKg:dryKg+fuelKg,fuelKg,timeS:ignitionS};
  const ascentEndS=ignitionS+ascentDuration,insertionEndS=ignitionS+totalDuration;
  return {version:1,planetId:planet.id,ignitionS,initial,ascentEndS,insertionEndS,
   ascent:{startS:ignitionS,endS:ascentEndS,thrustN,ispS,progradeFraction:0},
