@@ -43,3 +43,7 @@ O humano retorna à orquestradora com PR #4 integrado e feedback. A próxima fas
 **Branch:** `phase/03-first-space-age`. **PR:** [#7](https://github.com/RrR2010/orbiter/pull/7) (draft). **Issue:** #6 (aberta). **Main:** permanece com a Fase 2 integrada.
 
 O módulo da civilização, o scheduler orientado a eventos, o feed, os símbolos de missões e seus seletores já foram implementados na branch. **Os gates A1–A9 ainda não foram aprovados.** A integração está bloqueada por indisponibilidade de clone do repositório no terminal do executor; não há evidência de `npm ci`, `npm run validate`, `npm audit` ou smoke test visual. GitHub Actions não foi disparado, conforme política CI v3. Não iniciar Fase 4.
+
+## Fase 3 — Bloco A iniciado (2026-10-25)
+
+Na branch do PR #7 foram adicionados os módulos `simulation/spaceflight/{types,gravity,conics,integrator}.ts` e `tests/spaceflight.test.ts`. Modelo de gravidade local por densidade constante versionável, análise de trajetórias cônicas, propulsão simplificada e testes de referência. **Ainda não conectado às missões**, não substitui resultados estratégicos persistidos. Não há testes locais executados nesta sessão; gates permanecem pendentes. Próximos passos: garantir consistência sob partições arbitrárias, eventos de impacto, coast analítico, modelagem de queimas e migração dos saves Fase 3 antes de alterar o fluxo de missão. Sem GitHub Actions nesta etapa.
