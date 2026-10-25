@@ -46,3 +46,7 @@ Registrar decisões não triviais com motivo, alternativas e consequências. Nã
 **Consequências:** vantagens, custos, migração, compatibilidade.
 **Substitui:** ADR anterior, se aplicável.
 ```
+
+## ADR-0009 — Follow sem atraso e zoom manual independente (2026-10-25)
+
+**Estado:** aceita, complementa ADR-0008. **Decisão:** acompanhar o alvo em sua posição analítica atual mais um deslocamento transitório suavizado; não usar interpolação permanente entre posição absoluta antiga e nova. Aplicar zoom automático apenas na transição inicial de foco, cancelando-o no primeiro comando manual de zoom, sem cancelar follow. **Motivo:** em alto warp o alvo percorre grandes distâncias por frame e a interpolação absoluta causava atraso visível; zoom contínuo impedia zoom out. **Consequência:** câmera não cria fatos simulados e permanece centralizada no corpo após a transição.
