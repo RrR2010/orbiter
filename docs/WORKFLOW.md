@@ -1,68 +1,68 @@
-# Fluxo humano ↔ agente executor ↔ orquestradora
+# Workflow — fase autônoma com gates objetivos (v2)
 
 ## Papéis
 
-- **Humano / product owner:** descreve comportamentos, observa demonstração, decide prioridades funcionais; não precisa escolher bibliotecas ou desenhar API.
-- **Agente executor:** implementa, testa, documenta, roda localmente e entrega PR + evidências.
-- **Orquestradora:** mantém arquitetura/roadmap, avalia gates, protege escopo e prepara brief da fase seguinte.
+- **Humano / Product Owner:** define comportamento esperado, fornece feedback visual quando necessário, aceita explicitamente exceções de gate.
+- **Orquestradora:** prepara briefs e roadmap, define contratos e prioridades, intervém apenas em blockers/escalonamentos e avalia entregas integradas.
+- **Executor:** assume ciclo **end-to-end**, incluindo correções, validação, PR, merge e fechamento do handoff, dentro do escopo aprovado.
 
-## Procedimento de cada fase
+## Ciclo normal (sem ping-pong)
 
-1. Humano inicia novo agente e fornece o **prompt de kickoff** abaixo e o link da issue da fase.
-2. Agente lê documentação, executa fase em branch, registra novas ideias sem implementá-las automaticamente.
-3. Agente abre PR (não faz merge) com checklist e relatório.
-4. Humano testa execução guiado pelo agente e descreve o que gostou/não gostou.
-5. Humano volta à orquestradora com link do PR e feedback.
-6. Orquestradora julga gate, solicita correções se necessário, ou integra/autoriza próximo passo de maneira explícita.
-7. Após merge aprovado, status e backlog ficam sincronizados; próxima issue é preparada.
+1. Orquestradora prepara e autoriza uma fase, com issue/brief e gates verificáveis.
+2. Humano inicia agente com prompt abaixo.
+3. Executor implementa, testa, demonstra e corrige iterativamente sem consultar a orquestradora em decisões locais.
+4. Executor abre PR, verifica checklist, valida CI e auditoria, registra evidências e faz **merge autônomo** se todos os gates forem satisfeitos.
+5. Executor atualiza status e issue, e fornece relatório final ao humano.
+6. Humano retorna à orquestradora **uma vez ao final**, com o PR integrado e feedback. Orquestradora prioriza backlog e prepara nova fase.
 
-## Prompt de kickoff para copiar
+**Exceção:** bloqueios fora de escopo, mudança funcional relevante ou riscos irreversíveis exigem escalonamento antes da ação. GitHub branch protection e revisão obrigatória têm precedência.
 
-> Você é o agente executor do projeto Orbiter. Leia integralmente AGENTS.md, docs/PROJECT_STATUS.md, docs/PRODUCT_VISION.md, docs/ARCHITECTURE.md, docs/ROADMAP.md, docs/WORKFLOW.md e o brief da fase ativa. Implemente **somente** a fase ativa; evite perguntas técnicas ao humano salvo bloqueio real. Faça código e testes, rode build/lint/typecheck, valide a experiência no navegador, documente como executar, abra PR sem merge e entregue um handoff pelo modelo abaixo. Registre ideias fora do escopo em docs/BACKLOG.md. Não declare critérios aceitos sem evidência.
+## Prompt de kickoff
 
-## Modelo de handoff do executor
+> Você é o agente executor autônomo do Orbiter. Leia AGENTS.md, docs/PROJECT_STATUS.md, docs/PRODUCT_VISION.md, docs/ARCHITECTURE.md, docs/ROADMAP.md, docs/WORKFLOW.md e o brief da fase ativa. Execute a fase end-to-end: implemente, teste, corrija, valide no navegador ou com o humano, abra PR, garanta CI e auditoria e faça merge na main por squash **sem pedir nova autorização**, desde que todos os gates estejam cumpridos. Feche issue, atualize status e entregue handoff com commit integrado. Não inicie a próxima fase. Escale somente se precisar alterar escopo, houver bloqueio externo/PR pré-requisito, risco de perda de dados ou decisão estrutural irreversível. Registre ideias fora do escopo no backlog, sem implementá-las.
+
+## Handoff pós-merge
 
 ```markdown
 # Handoff — Fase N
-- Branch / PR / commit:
-- O que funciona para o usuário:
-- Como executar (comandos + URL local):
-- Demonstração guiada (3–5 ações simples):
-- Critérios de aceite (cada um: PASSOU / PARCIAL / FALHOU + evidência):
-- Testes executados (comandos e resultados):
-- Desempenho/limites medidos:
-- Decisões técnicas e simplificações:
-- Bugs, riscos e regressões:
-- Ideias novas registradas (links/IDs):
-- Recomendações para próxima fase (não implementadas):
+- Issue / PR / merge SHA / branch:
+- Experiência entregue ao usuário:
+- Como executar / demonstrar (3–5 ações):
+- Critérios de aceite e evidências (PASSOU / EXCEÇÃO APROVADA):
+- Testes, CI, audit e execução visual (reais; registrar limitações):
+- Simplificações, decisões/ADRs e riscos:
+- Ideias registradas (IDs do backlog):
+- Status main / persistência / compatibilidade:
+- Feedback funcional esperado do humano:
+- Próxima fase: NÃO INICIADA, aguarda orquestradora.
 ```
 
-## Modelo de parecer da orquestradora
+## Escalonamento obrigatório
 
-```markdown
-# Gate — Fase N
-Decisão: APROVADO | AJUSTES NECESSÁRIOS | REPLANEJAR
-Evidências conferidas:
-Pendências obrigatórias:
-Escopo alterado:
-Backlog triado:
-Próximo passo único:
-```
+Abrir comentário na issue e comunicar ao humano/orquestradora apenas para:
+- Expansão de escopo/alteração significativa de experiência.
+- Dependência que requeira PR separado fora da fase.
+- Quebra de API/arquitetura global ou save incompatível sem migração.
+- Perda potencial de dados, segredo, permissões ou segurança.
+- CI/regras GitHub irremediavelmente bloqueantes, ou aceitação de exceção a gate.
+- Incapacidade de validar critério obrigatório.
+
+Não escalar ajustes locais reversíveis, bugs, refatorações, escolha de dependência adequada ou documentação da fase.
 
 ## Backlog vivo
 
-Novas ideias **não** interrompem automaticamente uma fase:
-1. Capturar em `docs/BACKLOG.md` com ID incremental, motivação e benefício funcional.
-2. Classificar: `now` (bug/risco que bloqueia gate), `next` (candidato à fase seguinte), `later` (futuro) ou `parking-lot` (exploração).
-3. Vincular a issue GitHub quando a ideia virar trabalho executável.
-4. Orquestradora avalia na transição: aceitar, recortar, adiar ou rejeitar, anotando motivo.
-5. Uma ideia não vira requisito de fase ativa sem atualização explícita do brief e do gate.
-6. Se houver desvio crítico, registrar ADR e autorização do humano.
+Capturar ideias como `IDEA-###` no `docs/BACKLOG.md`. Classificar `now` (bloqueio do gate atual), `next`, `later`, `parking-lot`. Ideia não vira escopo sem atualização explícita do brief. A orquestradora faz a triagem **após** integração, não durante a execução normal.
 
-## Regras para Issues e PRs
+## Regras para revisão, PR e merge
 
-- Issue por fase com checklist e link ao brief; issues menores só quando reduzirem risco.
-- Uma branch/PR principal por fase; desdobramentos vinculados à issue.
-- PR inclui screenshot/gif quando cabível, comandos de validação e comportamento esperado/observado.
-- GitHub é fonte de verdade: evitar contexto escondido em conversas.
-- Atualizar links do PR/issue em `docs/PROJECT_STATUS.md` após revisão; não marcar concluído antes de merge aceito.
+- Issue por fase; branch da fase; PR para `main` com checklist e evidências.
+- CI deve passar no commit atual, inclusive lockfile consistente.
+- Revisão automatizada ou autoinspeção do executor é útil, mas não substitui aprovação humana quando exigida por branch protection.
+- Nenhum merge com testes falhos, conflitos, critérios omitidos ou exceções autoaprovadas.
+- Prefira squash merge para histórico legível.
+- PR descreve escopo entregue, riscos, limitações e testes; não promete o que não foi validado.
+- Atualize status/issue no mesmo PR se possível; após merge, faça follow-up mínimo caso precise registrar o SHA final.
+
+## Revisão de orquestração
+
+A cada retorno **pós-merge**, a orquestradora avalia feedback funcional, riscos, backlog e decide CONTINUAR / HOTFIX / REPLANEJAR. Essa avaliação define o próximo brief; não é pré-requisito para concluir a fase já autorizada.
