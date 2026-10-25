@@ -10,9 +10,8 @@ describe('local mission visualization',()=>{
   const mission=c.missions.find(m=>m.flight);
   expect(mission?.flight).toBeDefined();
   if(!mission?.flight)return;
-  const planet=world.bodies.find(b=>b.id===mission.originId)!;
   const before=JSON.stringify(c);
-  const a=poweredTrack(mission,planet.radius),b=poweredTrack(mission,planet.radius);
+  const a=poweredTrack(mission),b=poweredTrack(mission);
   expect(a.length).toBeGreaterThan(1);
   expect(a).toBe(b);
   expect(a.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y))).toBe(true);
