@@ -27,10 +27,10 @@ export function executeAscentV2(initial:FlightState,planet:PlanetGravity,options
   if(orbit.apoapsisM!==null&&orbit.apoapsisM>=targetAp&&altitude>Math.min(planet.radiusM*.01,50000)){
    reason='cutoff';break;
   }
-  const turnElapsed=Math.max(0,elapsed-25);
-  const turnAltitude=Math.max(0,altitude-Math.max(1000,planet.radiusM*.0001));
-  const progress=Math.min(1,turnElapsed/(profile==='vertical'?300:profile==='gradual'?190:105),turnAltitude/Math.max(10000,planet.radiusM*.01));
-  const tangent=progress*(profile==='vertical'?.48:profile==='gradual'?.99:1);
+  const turnElapsed=Math.max(0,elapsed-12);
+  const turnAltitude=Math.max(0,altitude-Math.max(500,planet.radiusM*.00002));
+  const progress=Math.min(1,turnElapsed/(profile==='vertical'?180:profile==='gradual'?130:95),turnAltitude/Math.max(7000,planet.radiusM*.002));
+  const tangent=progress*(profile==='vertical'?.78:profile==='gradual'?.99:1);
   const fraction=Math.min(.98,tangent);
   const dt=Math.min(step,maxDuration-elapsed,(state.fuelKg-reserve)*ispS*9.80665/thrustN);
   if(dt<=1e-9){reason='fuel-exhausted';break;}
