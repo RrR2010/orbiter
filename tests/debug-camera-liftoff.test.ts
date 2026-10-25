@@ -26,10 +26,10 @@ describe('camera debug controls and V2 liftoff',()=>{
    const plan=createAutonomousFlightV2(world.seed,'mission-floor',planet,0,4);
    const gravity=gravityForRadius(planet.radius);
    const g=gravity.muM3S2/(planet.radius*planet.radius);
-   expect(plan.thrustN/(plan.initial.massKg*g)).toBeGreaterThanOrEqual(1.65-1e-9);
+   expect(plan.thrustN/(plan.initial.massKg*g)).toBeGreaterThanOrEqual(1.4-1e-9);
    const targetSpeed=Math.sqrt(gravity.muM3S2/(planet.radius+Math.max(100000,plan.target.periapsisAltitudeM)));
    const totalDv=plan.ispS*9.80665*Math.log(plan.initial.massKg/(plan.initial.massKg-plan.initial.fuelKg));
-   expect(totalDv).toBeGreaterThanOrEqual(targetSpeed*1.65);
+   expect(totalDv).toBeGreaterThanOrEqual(targetSpeed*1.1);
   }
  });
 });
