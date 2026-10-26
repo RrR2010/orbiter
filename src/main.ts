@@ -1,3 +1,4 @@
+import {hudIcon,type HudIcon} from './ui/hud-icons';
 import {missionTelemetry,metricText} from './ui/mission-telemetry';
 import {analyzeTrajectory} from './simulation/spaceflight/conics';
 import {gravityForRadius} from './simulation/spaceflight/gravity';
@@ -17,16 +18,45 @@ function renderMissionPanel():void{
  if(mission&&!hud.hidden){
   const body=world.bodies.find(b=>b.id===mission.originId);
   const t=body?missionTelemetry(mission,body.radius,clock.time):null;
-  const cells:[string,string][]=[['Altitude',metricText(t?.altitudeM??null,'km')],['Velocidade',metricText(t?.speedMs??null,'km/s')],['Combustível',metricText(t?.fuelFraction??null,'%')],['Apoastro atual',metricText(t?.apoapsisM??null,'km')],['Periastro atual',metricText(t?.periapsisM??null,'km')],['Massa',metricText(t?.massKg??null,'kg')],['ΔV restante',metricText(t?.deltaVMs??null,'m/s')],['Isp',metricText(t?.ispS??null,'s')]];
   const heading=document.createElement('div');heading.className='mission-hud-heading';
-  const title=document.createElement('strong');title.textContent='◈ '+mission.id+' · '+(t?.phase??'N/D');
-  const subtitle=document.createElement('small');subtitle.textContent=(body?.name??mission.originId)+' · velocidade planetocêntrica · altitude sobre a superfície';
+  const title=document.createElement('strong');title.textContent=mission.id+' · '+(t?.phase??'N/D');
+  const subtitle=document.createElement('small');subtitle.textContent=(body?.name??mission.originId)+' · referencial planetocêntrico';
   heading.append(title,subtitle);
-  const metrics=document.createElement('div');metrics.className='mission-hud-grid';
-  for(const [label,value] of cells){const item=document.createElement('div');item.className='mission-hud-metric';const a=document.createElement('small'),b=document.createElement('strong');a.textContent=label;b.textContent=value;item.append(a,b);metrics.append(item);}
-  const target=document.createElement('div');target.className='mission-hud-target';target.textContent='Alvos · AP '+metricText(t?.targetApM??null,'km')+' · PE '+metricText(t?.targetPeM??null,'km')+' | valores atuais não representam previsão de manobra';
+  const instrument=(icon:HudIcon,label:string,value:string,style=''):HTMLElement=>{
+   const item=document.createElement('div');item.className='mission-hud-instrument '+style;
+   const labelRow=document.createElement('div');labelRow.className='mission-hud-label';
+   const text=document.createElement('small');text.textContent=label;labelRow.append(hudIcon(icon),text);
+   const number=document.createElement('strong');number.className='mission-hud-value';number.textContent=value;
+   item.append(labelRow,number);return item;
+  };
+  const primary=document.createElement('div');primary.className='mission-hud-primary';
+  primary.append(
+   instrument('altitude','ALTITUDE',metricText(t?.altitudeM??null,'km')),
+   instrument('velocity','VELOCIDADE',metricText(t?.speedMs??null,'km/s')),
+   instrument('fuel','PROPELENTE',metricText(t?.fuelFraction??null,'%'),'mission-hud-fuel')
+  );
+  const orbit=document.createElement('div');orbit.className='mission-hud-orbit';
+  const orbitTitle=document.createElement('small');orbitTitle.className='mission-hud-section-title';orbitTitle.textContent='ÓRBITA · ATUAL / ALVO';
+  const apsides=document.createElement('div');apsides.className='mission-hud-apsides';
+  for(const [name,icon,current,targetValue] of [
+   ['AP','apoapsis',t?.apoapsisM??null,t?.targetApM??null],
+   ['PE','periapsis',t?.periapsisM??null,t?.targetPeM??null]
+  ] as const){
+   const item=instrument(icon,name+' ATUAL',metricText(current,'km'));
+   const targetText=document.createElement('small');targetText.className='mission-hud-aim';targetText.textContent='Alvo '+metricText(targetValue,'km');
+   item.append(targetText);apsides.append(item);
+  }
+  orbit.append(orbitTitle,apsides);
+  const secondary=document.createElement('div');secondary.className='mission-hud-secondary';
+  secondary.append(
+   instrument('mass','MASSA',metricText(t?.massKg??null,'kg')),
+   instrument('deltaV','ΔV RESTANTE',metricText(t?.deltaVMs??null,'m/s')),
+   instrument('isp','ISP',metricText(t?.ispS??null,'s'))
+  );
+  const target=document.createElement('div');target.className='mission-hud-footnote';
+  target.textContent='Valores instantâneos · alvos não são previsão de manobra. Sem leitura confiável: N/D.';
   const toggle=document.createElement('button');toggle.type='button';toggle.textContent='Encerrar acompanhamento';toggle.addEventListener('click',()=>{trackedMissionId=null;});
-  hud.replaceChildren(heading,metrics,target,toggle);
+  hud.replaceChildren(heading,primary,orbit,secondary,target,toggle);
  }
  const upcoming=civilization.missions.filter(m=>m.status==='preparing'&&m.launchAt>=clock.time).sort((a,b)=>a.launchAt-b.launchAt||a.id.localeCompare(b.id)).slice(0,5);
  agenda.hidden=observatory.ambient||upcoming.length===0;
