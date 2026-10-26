@@ -19,3 +19,7 @@ Preparação/lançamento/inserção/resultado/falha: pequenos avisos contextuais
 ## Modo ambiente
 
 Inatividade reduz chrome visual; modo dedicado oculta painéis opcionais; ações de recuperação e avisos relevantes continuam disponíveis. Testar com teclado, fullscreen e pointer.
+
+## Configuração implementada na branch
+
+`orbiter.visual.v1` preserva `cinematic` (padrão falso) e `autoDim` (padrão verdadeiro) em chave isolada. Após 11 segundos sem interação, `.ui-idle` reduz o chrome visual, revertendo com mouse/teclado/foco. Feedback cinematográfico só modifica sombra e entrada do aviso de evento real. `prefers-reduced-motion: reduce` desativa animação/transição. O relógio simulado e eventos não são modificados por essas preferências.
