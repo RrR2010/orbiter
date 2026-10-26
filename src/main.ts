@@ -26,7 +26,7 @@ let currentTab:'explore'|'missions'|'settings'='explore';
 try{const stored=localStorage.getItem(TAB_KEY);if(stored==='explore'||stored==='missions'||stored==='settings')currentTab=stored;}catch{/* optional UI preference */}
 function showObservatoryTab(tab:typeof currentTab):void{
  currentTab=tab;for(const page of sections)page.hidden=page.dataset.page!==tab;
- for(const button of observatoryTabs.querySelectorAll<HTMLButtonElement>('button')){const active=button.dataset.tab===tab;button.setAttribute('aria-selected',String(active));button.tabIndex=0;}
+ observatoryTabs.querySelectorAll<HTMLButtonElement>('button').forEach(button=>{const active=button.dataset.tab===tab;button.setAttribute('aria-selected',String(active));button.tabIndex=0;});
  try{localStorage.setItem(TAB_KEY,tab);}catch{/* optional UI preference */}
 }
 for(const [id,label] of [['explore','Corpos'],['missions','Missões'],['settings','Camadas']] as const){
