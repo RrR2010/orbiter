@@ -9,3 +9,9 @@
 ## Pipeline de extensão
 
 Definir tipo real no modelo → mapear a glifo próximo/distante → revisar escala/contraste/seleção → validar 3 situações reais (subida, órbita, impacto ou estado ausente). SVG/Canvas são opções, não compromisso de engine nova.
+
+## Ícones instrumentais SVG — Fase 4
+
+`src/ui/hud-icons.ts` define glifos originais, fechados e reutilizáveis por chave semântica: `altitude`, `velocity`, `fuel`, `apoapsis`, `periapsis`, `mass`, `deltaV`, `isp`. São SVGs de geometria fixa, criados no namespace SVG, com `aria-hidden` e rótulos textuais adjacentes; não representam medidas físicas por si mesmos. O mesmo catálogo poderá sustentar instrumentos futuros sem biblioteca externa.
+
+**Direção futura sugerida pelo PO:** atlas/sprite sheet de naves com LOD, preservando glifo vetorial como fallback e hit test no Canvas. A arte definitiva e o tier de sprite ainda não foram entregues.
