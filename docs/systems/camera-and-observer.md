@@ -34,3 +34,7 @@ Interface inclui duas opções independentes no observatório (ênfase cinematog
 ### Correção de preparação e acompanhamento de lançamento
 
 `src/ui/mission-camera.ts` resolve a posição global da base de lançamento via `homeLaunchSite` + `sitePosition` + `positionsAt` (ou posição inicial imutável do plano V2). Selecionar a missão na agenda agora inicia acompanhamento da **base na superfície**, com enquadramento local inicial; no lançamento, o mesmo ID passa a seguir o símbolo físico da nave. `watch-launch` continua controlando apenas a redução do warp a 1×; não usa mais `trackBody` para centralizar o planeta na preparação. Se uma missão já está sendo acompanhada, a preparação de outra não sequestra a câmera. Testes puros em `tests/mission-camera.test.ts`; smoke humano pendente.
+
+### Organização global de UI na Fase 4
+
+`src/main.ts` reorganiza nós DOM existentes do Observatório em páginas **Corpos / Missões / Camadas**, com `aria-selected` e persistência independente de aba (`orbiter.observatory-tab.v1`). Não duplica AP/PE em histórico textual quando o HUD já fornece essa informação. Header agrupa controles de tempo e visualização sem mudar IDs ou eventos; rodapé mostra tempo, seed/corpos, missão acompanhada, status e ajuda de atalhos recolhível. A página Missões permanece disponível mesmo após seleção de outro corpo. Todos os botões originais continuam conectados aos seus handlers.
