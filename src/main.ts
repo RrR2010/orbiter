@@ -86,7 +86,7 @@ function renderMissionPanel():void{
   for(const item of upcoming){
    const row=document.createElement('div');row.className='launch-agenda-row';
    const label=document.createElement('span');label.textContent=item.id+' · T−'+timeLabel(item.launchAt-clock.time);
-   const button=document.createElement('button');const marked=followedLaunches.includes(item.id);button.textContent=marked?'✓ Marcada':'Acompanhar';button.setAttribute('aria-pressed',String(marked));button.addEventListener('click',()=>{followedLaunches=marked?followedLaunches.filter(id=>id!==item.id):[...followedLaunches,item.id];saveLaunchQueue();renderMissionPanel();});
+   const button=document.createElement('button');const marked=followedLaunches.includes(item.id);button.textContent=marked?'✓ Marcada':'Acompanhar';button.setAttribute('aria-pressed',String(marked));button.addEventListener('click',()=>{followedLaunches=marked?followedLaunches.filter(id=>id!==item.id):[...followedLaunches,item.id];if(!marked)setMissionTracking(item.id);saveLaunchQueue();renderMissionPanel();});
    row.append(label,button);list.append(row);
   }
   agenda.replaceChildren(heading,list);
