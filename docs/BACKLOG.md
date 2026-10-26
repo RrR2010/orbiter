@@ -57,3 +57,11 @@ Se for correção de bug que bloqueia critério da fase atual, registrar na issu
 - **Risco/dependências:** estados e referencial de câmera adicionais; mapa de manobra requer dados físicos reais.
 - **Triagem:** later
 - **Status:** capturada; não implementar a partir de arte ilustrativa.
+
+
+### IDEA-016 — Atlas de naves com LOD visual
+- **Origem:** feedback do PO durante refinamento da Fase 4.
+- **Experiência desejada:** glifo distante, silhueta intermediária e sprite em zoom próximo, preservando reconhecimento e orientação física 2D.
+- **Risco/dependências:** atlas original, política de escala e fallback vetorial, consistência de picking e performance.
+- **Triagem:** later
+- **Status:** capturada; sprites definitivos não implementados neste refinamento.
