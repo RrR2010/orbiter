@@ -41,3 +41,30 @@
 @media(max-width:1050px){.mission-hud{top:85px;width:280px}.mission-hud-metric strong{font-size:13px}.launch-agenda{width:280px}.observatory{width:280px}}
 @media(max-width:800px){.hud{padding:10px}.mission-hud{top:144px;left:10px;max-height:40vh}.launch-agenda{left:10px;top:144px}#app:has(.mission-hud:not([hidden])) .launch-agenda{bottom:62px}.observatory{top:144px;max-height:45vh}.info{bottom:6px}}
 @media(prefers-reduced-motion:reduce){.mission-hud,.launch-agenda{animation:none;transition:none}}
+
+
+/* Phase 4 HUD: instruments rather than equal-weight dashboard tiles. */
+.mission-hud{width:min(365px,calc(100vw - 36px));padding:16px 17px;background:#081728eb}
+.mission-hud-heading{padding-bottom:11px;margin-bottom:7px;border-color:#456078}
+.mission-hud-heading strong{font-size:15px;letter-spacing:.015em}
+.mission-hud-primary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:12px 0 13px;border-bottom:1px solid #38516b}
+.mission-hud-instrument{min-width:0;padding:7px 9px}
+.mission-hud-primary .mission-hud-instrument:not(:first-child),.mission-hud-secondary .mission-hud-instrument:not(:first-child){border-left:1px solid #314960}
+.mission-hud-label{display:flex;align-items:center;gap:6px;color:#91adc8}
+.mission-hud-label small{font-size:9px;letter-spacing:.06em}
+.mission-hud-icon{width:19px;height:19px;flex:0 0 19px;color:#74cde3}
+.mission-hud-value{display:block;padding:9px 0 1px;font-size:15px;font-variant-numeric:tabular-nums;line-height:1.2;color:#f2f7ff;overflow-wrap:anywhere}
+.mission-hud-fuel .mission-hud-value{color:#7be0c5}
+.mission-hud-orbit{padding:12px 0;border-bottom:1px solid #38516b}
+.mission-hud-section-title{display:block;font-size:10px;color:#8da6bf;letter-spacing:.1em;margin:0 0 5px}
+.mission-hud-apsides{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.mission-hud-apsides .mission-hud-instrument{padding:9px 10px;border:1px solid #2d4a64;border-radius:7px;background:#10223a88}
+.mission-hud-apsides .mission-hud-value{font-size:18px}
+.mission-hud-aim{display:block;margin-top:6px;color:#dcb474;font-size:10px;font-variant-numeric:tabular-nums}
+.mission-hud-secondary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:11px 0}
+.mission-hud-secondary .mission-hud-value{font-size:13px}
+.mission-hud-secondary .mission-hud-icon{width:16px;height:16px;flex-basis:16px;color:#99bbcf}
+.mission-hud-footnote{font-size:10px;line-height:1.45;color:#9eafc2;padding:10px 0;border-top:1px solid #38516b}
+.mission-hud>button{margin-top:2px;background:transparent;border-color:#31506a}
+@media(max-width:1050px){.mission-hud{width:310px}.mission-hud-primary .mission-hud-value{font-size:13px}.mission-hud-label{gap:3px}.mission-hud-icon{width:16px;height:16px;flex-basis:16px}}
+@media(max-width:500px){.mission-hud{width:min(350px,calc(100vw - 20px))}.mission-hud-primary .mission-hud-value{font-size:12px}}
