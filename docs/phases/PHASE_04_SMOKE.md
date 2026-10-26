@@ -43,3 +43,9 @@ Somente depois de correções e todos os gates A1–A7 aprovados: executar `Orbi
 
 9. Ativar/desativar **Eventos cinematográficos** no observatório, induzir evento real de lançamento, verificar destaque opcional sem mudança de ocorrência física.
 10. Ativar **Reduzir interface após inatividade**; não tocar teclado/mouse por 11+ segundos, conferir opacidade reduzida e retorno após interação. Desativar e repetir. Recarregar para verificar persistência. Testar também com `prefers-reduced-motion`.
+
+## Regressão de câmera — relatório do PO
+
+11. Com opção `Reduzir para 1×` marcada e **nenhuma missão selecionada**, avançar ao próximo início de preparação: observar redução para 1× e centro da câmera na base de superfície (não no centro do planeta). No instante de ignição, observar câmera seguindo o veículo sem intervenção.
+12. Repetir usando o botão `Acompanhar` de uma missão na agenda, inicialmente com o checkbox de redução desmarcado: enquadramento na base durante preparação, nave após ignição. Manter follow de outra missão e verificar que novos avisos não sequestram a câmera.
+13. Fazer pan e zoom manual durante preparação e após lançamento, verificando a permanência do offset e do zoom escolhidos.
