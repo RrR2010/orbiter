@@ -38,3 +38,8 @@ Anotar saída completa do validador e auditoria, incluindo SHA testado (`git rev
 ## Gate de integração
 
 Somente depois de correções e todos os gates A1–A7 aprovados: executar `Orbiter Final CI` manualmente via `workflow_dispatch` no **HEAD definitivo do PR** e confirmar sucesso com SHA correspondente. Então squash merge e fechamento de Issue #8.
+
+## Verificações adicionais da iteração de acabamento
+
+9. Ativar/desativar **Eventos cinematográficos** no observatório, induzir evento real de lançamento, verificar destaque opcional sem mudança de ocorrência física.
+10. Ativar **Reduzir interface após inatividade**; não tocar teclado/mouse por 11+ segundos, conferir opacidade reduzida e retorno após interação. Desativar e repetir. Recarregar para verificar persistência. Testar também com `prefers-reduced-motion`.
