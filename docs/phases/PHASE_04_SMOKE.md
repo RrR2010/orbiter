@@ -49,3 +49,10 @@ Somente depois de correções e todos os gates A1–A7 aprovados: executar `Orbi
 11. Com opção `Reduzir para 1×` marcada e **nenhuma missão selecionada**, avançar ao próximo início de preparação: observar redução para 1× e centro da câmera na base de superfície (não no centro do planeta). No instante de ignição, observar câmera seguindo o veículo sem intervenção.
 12. Repetir usando o botão `Acompanhar` de uma missão na agenda, inicialmente com o checkbox de redução desmarcado: enquadramento na base durante preparação, nave após ignição. Manter follow de outra missão e verificar que novos avisos não sequestram a câmera.
 13. Fazer pan e zoom manual durante preparação e após lançamento, verificando a permanência do offset e do zoom escolhidos.
+
+## Smoke adicional — organização integral da interface
+
+14. Alternar **Corpos, Missões, Camadas**; verificar se seletores, programas, camadas e câmera continuam operacionais. Recarregar e confirmar aba preferida.
+15. Selecionar corpo e depois missão; comparar Observatório (índice / ações) com HUD (telemetria), sem repetição de AP/PE no feed.
+16. Conferir header em tela larga/estreita: seed/Gerar, pausa, warp, visão geral, ambiente e fullscreen.
+17. Conferir rodapé: tempo, corpo/universo, missão atual, mensagem operacional e botão **Atalhos ?**. Testar os atalhos de teclado e ausência de obstrução da cena.
