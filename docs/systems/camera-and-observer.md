@@ -30,3 +30,7 @@ A camada de apresentação da Fase 4 usa `hudIcon` (`src/ui/hud-icons.ts`) e est
 ### Preferências visuais de Fase 4
 
 Interface inclui duas opções independentes no observatório (ênfase cinematográfica de notificações e redução automática após inatividade), persistidas como `orbiter.visual.v1`. Não mudam o schema de `orbiter.observatory.v2`, nem câmera, clock ou saves. O modo ambiente dedicado existente continua disponível; redução por inatividade é somente visual e reversível.
+
+### Correção de preparação e acompanhamento de lançamento
+
+`src/ui/mission-camera.ts` resolve a posição global da base de lançamento via `homeLaunchSite` + `sitePosition` + `positionsAt` (ou posição inicial imutável do plano V2). Selecionar a missão na agenda agora inicia acompanhamento da **base na superfície**, com enquadramento local inicial; no lançamento, o mesmo ID passa a seguir o símbolo físico da nave. `watch-launch` continua controlando apenas a redução do warp a 1×; não usa mais `trackBody` para centralizar o planeta na preparação. Se uma missão já está sendo acompanhada, a preparação de outra não sequestra a câmera. Testes puros em `tests/mission-camera.test.ts`; smoke humano pendente.
