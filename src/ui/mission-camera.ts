@@ -1,4 +1,4 @@
-import {positionsAt,type World} from '../simulation/world';
+import {AU,positionsAt,type World} from '../simulation/world';
 import {homeLaunchSite,sitePosition} from '../simulation/spaceflight/surface-site';
 import type {Mission} from '../simulation/civilization';
 import type {Vec2} from '../simulation/orbits';
@@ -15,6 +15,5 @@ export function launchPadPosition(world:World,mission:Mission,timeS:number):Vec2
 /** Local launch framing, with the planet limb visible at typical desktop sizes. */
 export function launchCameraZoom(planetRadiusM:number,viewportShortSidePx:number):number{
  if(!(planetRadiusM>0)||!(viewportShortSidePx>0))return 1;
- const {AU}= {AU:149597870700};
  return Math.max(.035,Math.min(2_000_000,125*12*AU/(viewportShortSidePx*planetRadiusM)));
 }
