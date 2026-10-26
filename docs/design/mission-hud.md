@@ -21,3 +21,9 @@ Agenda usa dados de scheduler persistido. Missão marcada para acompanhar = inte
 ## Testes necessários
 
 Sem seleção, preparação, ascensão, coast, órbita, falha/impacto, valores N/D, diferenças de referencial, 1×/warp, modo ambiente, reload e conflito entre lançamentos.
+
+## Refino instrumental aprovado (2026-10-25)
+
+O PO pediu explicitamente um **HUD operacional em vez de dashboard de cartões**. `src/ui/hud-icons.ts` fornece SVGs semânticos originais para altitude, velocidade, propelente, AP, PE, massa, ΔV e Isp; `renderMissionPanel` compõe faixa primária (ALT, VEL, propelente), par orbital AP/PE (atual e alvo) e faixa secundária (massa, ΔV, Isp). O CSS utiliza divisórias finas e menos blocos retangulares, preservando valores tabulares e estados N/D. Ícones não carregam significado exclusivamente pela cor e são decorativos, pois os rótulos textuais permanecem.
+
+Futuro: sprite sheet das naves com LOD distante/glifo, médio/vetor, próximo/sprite, sujeito a implementação e testes próprios; não implica alterar física ou persistência.
