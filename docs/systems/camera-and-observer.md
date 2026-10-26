@@ -26,3 +26,7 @@ Referências: `src/rendering/camera.ts`, `src/rendering/canvas.ts`, `src/renderi
 ### Refino do HUD como instrumento
 
 A camada de apresentação da Fase 4 usa `hudIcon` (`src/ui/hud-icons.ts`) e estrutura CSS `mission-hud-{primary,orbit,apsides,secondary,footnote}` em lugar de uma grade uniforme de cards. Não houve mudança no `missionTelemetry` nem em física/câmera/saves. Estados reais de acompanhamento continuam fonte do cabeçalho; dados sem fonte permanecem N/D. Requer inspeção visual humana no próximo smoke.
+
+### Preferências visuais de Fase 4
+
+Interface inclui duas opções independentes no observatório (ênfase cinematográfica de notificações e redução automática após inatividade), persistidas como `orbiter.visual.v1`. Não mudam o schema de `orbiter.observatory.v2`, nem câmera, clock ou saves. O modo ambiente dedicado existente continua disponível; redução por inatividade é somente visual e reversível.
