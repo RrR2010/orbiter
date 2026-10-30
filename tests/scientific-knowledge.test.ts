@@ -1,5 +1,6 @@
 import {describe,expect,it} from 'vitest';
 import {generateWorld} from '../src/simulation/world';
+import {gravityForRadius} from '../src/simulation/spaceflight/gravity';
 import {initialScientificRecord,receiveGravityObservation} from '../src/simulation/scientific-knowledge';
 
 describe('scientific knowledge',()=>{
@@ -9,6 +10,11 @@ describe('scientific knowledge',()=>{
   const before=JSON.stringify(world);
   expect(initialScientificRecord(world)).toEqual(initialScientificRecord(world));
   expect(JSON.stringify(world)).toBe(before);
+  const trueGravity=gravityForRadius(first.radius).muM3S2/first.radius**2;
+  const estimate=initialScientificRecord(world).knowledge[first.id].gravity;
+  expect(estimate.value/trueGravity).toBeGreaterThanOrEqual(.7);
+  expect(estimate.value/trueGravity).toBeLessThanOrEqual(1.3);
+  expect(estimate.uncertainty/estimate.value).toBeCloseTo(.45);
  });
  it('requires transmission and is idempotent on replay',()=>{
   const prior=initialScientificRecord(world);
