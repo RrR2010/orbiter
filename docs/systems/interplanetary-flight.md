@@ -75,3 +75,7 @@ A transferência contínua agora informa `closestTimeS` e refina a menor distân
 ## Telemetria geométrica do encontro (incremento 5B)
 
 `simulateContinuousTransfer` também retorna `closestAltitudeM` (distância mínima ao centro menos raio físico do destino) e `closestRelativeSpeedMs`, derivada da velocidade heliocêntrica da sonda menos a velocidade inferida das efemérides do destino no instante da aproximação. São dados do cenário físico propagado, não previsões de sucesso. Altitude negativa indica interseção geométrica com o corpo **sem simulação de impacto/captura**; não classificá-la automaticamente como sobrevôo científico. O teste correspondente verifica finitude, consistência da altitude e determinismo. O primeiro flyby positivo após handoff e o miss integrado continuam gates abertos.
+
+## Classificação geométrica preliminar (incremento 5B)
+
+`src/simulation/interplanetary-approach.ts` distingue `flyby`, `impact-risk` e `distant-miss` a partir da distância e altitude mínima **já calculadas na trajetória propagada**. O limite operacional de reconhecimento é 10 raios planetários; distância menor ou igual ao raio representa risco de impacto, não sobrevoo científico. Valida consistência da geometria e velocidade relativa. `tests/interplanetary-approach.test.ts` cobre fronteiras e estados inválidos com geometrias sintéticas. A classificação ainda não é transmitida nem persistida no scheduler e não comprova o flyby positivo após handoff; não interpretar `flyby` como ciência automaticamente recebida.
