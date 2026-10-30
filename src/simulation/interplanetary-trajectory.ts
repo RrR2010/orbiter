@@ -35,7 +35,6 @@ export function createInterplanetaryTrajectory(world:World,plan:TransferOpportun
  const position=orbitalPosition(origin.orbit,plan.departureS);
  const planetaryVelocity=velocityAt(world,origin.id,plan.departureS);
  const radialDistance=length(position),tangent={x:-position.y/radialDistance,y:position.x/radialDistance};
- const outward=target.orbit.semiMajorAxis>origin.orbit.semiMajorAxis;
  const desiredSpeed=Math.sqrt(SOLAR_MU*(2/radialDistance-2/(radialDistance+target.orbit.semiMajorAxis)));
  const circularSpeed=Math.sqrt(SOLAR_MU/radialDistance);
  const burn=desiredSpeed-circularSpeed;
@@ -47,7 +46,7 @@ export function createInterplanetaryTrajectory(world:World,plan:TransferOpportun
 /** Propagate the probe using solar gravity at an absolute simulation epoch. */
 export function interplanetaryStateAt(trajectory:InterplanetaryTrajectory,timeS:number):FlightState{
  if(!Number.isFinite(timeS)||timeS<trajectory.initial.timeS)throw new Error('Invalid probe epoch');
- return propagateCoast(trajectory.initial,SOLAR_MU,timeS-trajectory.initial.timeS);
+ return propagateCoast(trajectory.initial,{radiusM:1,muM3S2:SOLAR_MU},timeS-trajectory.initial.timeS);
 }
 
 /** Sample physical probe-target separation; refine the closest sampled interval.
