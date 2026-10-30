@@ -9,7 +9,7 @@ let testSummary = null;
 
 // Read Vitest's aggregate test count without depending on suite or file names.
 function parseTestSummary(output) {
-  const line = output.replace(/\x1b\[[0-9;]*m/g, '').split(/\r?\n/)
+  const line = output.replace(new RegExp(String.fromCharCode(27) + '\\[[0-9;]*m', 'g'), '').split(/\r?\n/)
     .find(row => /^\s*Tests\s+(?:(?:\d+\s+(?:passed|failed|skipped|todo|pending)\b[^()]*)+)\(\d+\)/i.test(row));
   if (!line) return null;
   const total = Number(line.match(/\((\d+)\)/)?.[1]);
