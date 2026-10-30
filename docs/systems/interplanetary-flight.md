@@ -17,3 +17,11 @@
 ## Validação
 
 `tests/interplanetary-planner.test.ts`: determinismo, futuro, finitude de estimativas, rejeição de origens indevidas e imutabilidade do mundo. Os testes de voo causal, chegada física, saves e warp ainda são gates abertos.
+
+## Propagação física experimental (incremento seguinte)
+
+`src/simulation/interplanetary-trajectory.ts` usa `propagateCoast` da mecânica V2 com gravidade solar para calcular posição/velocidade heliocêntricas em tempo absoluto. O estado inicial é derivado da posição e velocidade do planeta na época planejada e de um impulso tangencial aproximado. `evaluateInterplanetaryEncounter` compara as posições reais calculadas da sonda e do planeta ao longo do intervalo de viagem, refinando o mínimo amostrado e reportando distância, tempo e velocidade relativa. Não chama encontro apenas por época prevista.
+
+**Importante:** ainda é um protótipo isolado: a sonda começa idealmente na órbita heliocêntrica do planeta, sem simular escape, queima planetocêntrica, combustível ou SOI; o perfil de impulso não garante intercepção. O detector amostrado não comprova ausência de encontros breves e precisa de testes de precisão antes de uso como autoridade para resultado de missão. A velocidade planetária é calculada por diferença central das efemérides. Não há missão integrada nem resultado estratégico.
+
+`tests/interplanetary-trajectory.test.ts` cobre reprodutibilidade de propagação e medida de separação. Não considerar gates A2–A4 atendidos até integrar à física/estratégia com cenários positivos e negativos verificáveis.
