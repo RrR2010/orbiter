@@ -41,3 +41,7 @@ O incremento de testes mede conservação aproximada de energia específica e mo
 ## Intenção de agenda sem efeito colateral (incremento 5B)
 
 `src/simulation/interplanetary-schedule.ts` acrescenta `proposeInterplanetaryLaunch`, que só propõe uma janela futura se há estágio tecnológico 4, recursos suficientes, nenhuma missão local ativa, antecedência mínima para preparação e espera limitada. Esta função **não** altera `Civilization.nextAt`, missões ou scheduler: é uma pré-condição testável para a futura integração causal, não um lançamento disponível ao observador. A seleção retorna nulo quando não existe orçamento viável. `tests/interplanetary-schedule.test.ts` verifica ausência de efeitos colaterais e limites. Antes de ligar ao scheduler, devem ser entregues escape físico, transmissão/encounter e testes de persistência/warp.
+
+## Handoff de referencial SOI (incremento 5B)
+
+`src/simulation/interplanetary-handoff.ts` define o raio de esfera de influência de Laplace aproximado `a (mu_planeta/mu_sol)^(2/5)` e transforma um estado planetocêntrico inercial **já na borda ou além da SOI** em coordenadas heliocêntricas somando posição e velocidade do planeta obtidas de efemérides determinísticas. Massa, combustível e tempo não mudam. Estados ainda internos à SOI são rejeitados. `tests/interplanetary-handoff.test.ts` verifica transformação, determinismo e pré-condição de cruzamento. **Não há ainda propagação de escape até a SOI nem integração do handoff ao voo/missão; este módulo não autoriza salto físico para a borda.**
