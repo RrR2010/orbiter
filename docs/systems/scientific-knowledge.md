@@ -4,9 +4,9 @@
 
 ## Responsabilidade
 
-`src/simulation/scientific-knowledge.ts` separa estimativas da civilização do estado físico de `World`. `initialScientificRecord(world)` cria um valor inicial reproduzível por planeta, com incerteza elevada. `receiveGravityObservation(state, observation)` exige sinal de transmissão, valida campos, recebe evento por ID uma única vez e atualiza a estimativa por precisão ponderada; o histórico de IDs impede duplicação após replay/save.
+`src/simulation/scientific-knowledge.ts` separa estimativas da civilização do estado físico de `World`. `initialScientificRecord(world)` cria uma estimativa inicial reproduzível da aceleração superficial em m/s² para cada planeta, com incerteza elevada (45% da estimativa), a partir do modelo de densidade constante já utilizado pelo motor e de um viés por seed. Este é um modelo inicial de observação imperfeita, não um novo parâmetro gravitacional físico. `receiveGravityObservation(state, observation)` exige sinal de transmissão, valida campos, recebe evento por ID uma única vez e atualiza a estimativa por precisão ponderada; o histórico de IDs impede duplicação após replay/save.
 
-**Limite provisório importante:** o valor inicial de gravidade é uma escala relativa ilustrativa sem unidade SI ou conexão com a gravidade real. Não deve orientar manobras até o contrato de gravidade física do motor interplanetário estar conectado. Os eventos científicos ainda são passados diretamente ao módulo; o fluxo aquisição/telemetria/transmissão não foi implementado.
+**Limite provisório importante:** as estimativas estão em SI mas são geradas com um prior simplificado a partir do modelo físico existente; não existe ainda uma cadeia independente de observação astronômica nem diferenças planetárias de densidade. Não orientar manobras até a conexão validada ao planner. Os eventos científicos ainda são passados diretamente ao módulo; o fluxo aquisição/telemetria/transmissão não foi implementado.
 
 ## Testes
 
@@ -14,4 +14,4 @@
 
 ## Próximos passos de integração
 
-Definir gravidade verdadeira em SI por corpo de maneira estável, calibrar priors, persistir registros cientificos e seus IDs em migração segura do save V2, associar observações ao flyby fisicamente verificado e à comunicação.
+Calibrar priors e distinguir conhecimento observável de estado físico, persistir registros cientificos e seus IDs em migração segura do save V2, associar observações ao flyby fisicamente verificado e à comunicação.
