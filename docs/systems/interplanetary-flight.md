@@ -29,3 +29,7 @@
 ## Novos testes de integridade orbital (5B)
 
 O incremento de testes mede conservação aproximada de energia específica e momento angular sob gravidade solar, compara propagação em um único intervalo com duas partições e verifica que `withinTargetRadius` corresponde exclusivamente à distância física mínima versus raio do destino. Tolerâncias relativas de 1e-6 são usadas para estados numéricos. Estes testes são necessários, mas ainda não suficientes para comprovar encontro científico ou evitar falsos negativos do detector amostrado. `tests/interplanetary-trajectory.test.ts`.
+
+## Estimativa preliminar de orçamento de partida (incremento 5B)
+
+`src/simulation/interplanetary-budget.ts` estima o delta-v de inserção em órbita de estacionamento e o incremento de escape planetário até uma velocidade de excesso hiperbólico associada à transferência circular. Usa gravidade planetária V2, órbita de estacionamento heurística e reserva configurável; compara a soma com o delta-v ideal `VehicleCapability.deltaVMs`. `feasible` indica **somente viabilidade de orçamento ideal aproximado**, não sucesso do voo nem autorização para produzir eventos históricos. Não há integração com planner estratégico/scheduler, nem contabilização física de queima/combustível. Despreza arrasto, gravity losses detalhadas, inclinação e geometria real de escape. Flyby não exige circularização no destino. Testes em `tests/interplanetary-budget.test.ts`.
