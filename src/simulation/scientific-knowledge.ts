@@ -1,7 +1,8 @@
 import {seededRandom} from '../core/random';
+import {gravityForRadius} from './spaceflight/gravity';
 import type {World} from './world';
 
-/** A body's real gravity is independent of the observer's estimates. */
+/** Gravity estimates and their one-sigma uncertainty are in m/s². */
 export type ScientificEstimate=Readonly<{value:number;uncertainty:number;observations:number}>;
 export type PlanetKnowledge=Readonly<{bodyId:string;gravity:ScientificEstimate}>;
 export type ScientificKnowledge=Readonly<Record<string,PlanetKnowledge>>;
@@ -10,19 +11,20 @@ export type ScientificRecord=Readonly<{knowledge:ScientificKnowledge;receivedIds
 
 const clamp=(value:number,min:number,max:number):number=>Math.max(min,Math.min(max,value));
 
-/** Construct reproducible initial estimates; this does not read the true gravity. */
+/** Seeded imperfect astronomical inference; the physics remains authoritative and unchanged. */
 export function initialScientificRecord(world:World):ScientificRecord{
  const knowledge:Record<string,PlanetKnowledge>={};
  for(const body of world.bodies){
   if(body.kind!=='planet')continue;
-  const random=seededRandom('orbiter:science:initial:v1:'+world.seed+':'+body.id);
-  // Gravity is represented as a relative scale until the simulator supplies an authoritative SI value.
-  knowledge[body.id]={bodyId:body.id,gravity:{value:.7+random()*.6,uncertainty:.45,observations:0}};
+  const random=seededRandom('orbiter:science:initial:v2:'+world.seed+':'+body.id);
+  const gravity=gravityForRadius(body.radius).muM3S2/(body.radius*body.radius);
+  const value=gravity*(.7+random()*.6);
+  knowledge[body.id]={bodyId:body.id,gravity:{value,uncertainty:value*.45,observations:0}};
  }
  return {knowledge,receivedIds:[]};
 }
 
-/** Apply only received observations, once per ID; new data narrow uncertainty. */
+/** Assimilate a received measurement once, weighting prior and measurement by variance. */
 export function receiveGravityObservation(state:ScientificRecord,observation:GravityObservation):ScientificRecord{
  const {bodyId,measuredGravity,relativeError,transmitted,observationId}=observation;
  if(!transmitted)return state;
@@ -30,9 +32,11 @@ export function receiveGravityObservation(state:ScientificRecord,observation:Gra
  if(state.receivedIds.includes(observationId))return state;
  const prior=state.knowledge[bodyId];
  if(!prior)throw new Error('Unknown science destination');
- const weight=1/(relativeError*relativeError);
- const initialWeight=prior.gravity.observations===0?0:1/(prior.gravity.uncertainty**2);
- const value=(prior.gravity.value*initialWeight+measuredGravity*weight)/(initialWeight+weight);
- const uncertainty=clamp(Math.sqrt(1/(initialWeight+weight)),.001,1);
- return {knowledge:{...state.knowledge,[bodyId]:{bodyId,gravity:{value,uncertainty,observations:prior.gravity.observations+1}}},receivedIds:[...state.receivedIds,observationId]};
+ const measuredSigma=measuredGravity*relativeError;
+ const priorWeight=1/(prior.gravity.uncertainty**2);
+ const measurementWeight=1/(measuredSigma**2);
+ const value=(prior.gravity.value*priorWeight+measuredGravity*measurementWeight)/(priorWeight+measurementWeight);
+ const uncertainty=Math.sqrt(1/(priorWeight+measurementWeight));
+ if(!Number.isFinite(value)||!Number.isFinite(uncertainty)||uncertainty<=0)throw new Error('Invalid measurement precision');
+ return {knowledge:{...state.knowledge,[bodyId]:{bodyId,gravity:{value,uncertainty:clamp(uncertainty,Number.MIN_VALUE,Infinity),observations:prior.gravity.observations+1}}},receivedIds:[...state.receivedIds,observationId]};
 }
