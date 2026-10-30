@@ -20,7 +20,7 @@ describe('local mission visualization',()=>{
   const partial={...mission,status:'success' as const,flight:{...mission.flight,orbital:false}};
   expect(shouldDrawMissionTrail(partial,mission.flight.terminal.timeS+1)).toBe(false);
   const orbiter={...mission,status:'success' as const,flight:{...mission.flight,orbital:true,checkpoints:mission.flight.checkpoints.filter(c=>c.kind!=='impact')}};
-  expect(shouldDrawMissionTrail(orbiter,mission.flight.terminal.timeS+1)).toBe(true);
+  expect(shouldDrawMissionTrail(orbiter,mission.flight.terminal.timeS+1)).toBe(false);
   const crashed={...mission,flight:{...mission.flight,checkpoints:[...mission.flight.checkpoints,{timeS:mission.flight.terminal.timeS+1,state:mission.flight.terminal,kind:'impact' as const,reason:'impact'}]}};
   expect(shouldDrawMissionTrail(crashed,mission.flight.terminal.timeS+2)).toBe(false);
   const early=poweredTrack(mission,mission.flight.plan.ignitionS+20);

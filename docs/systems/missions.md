@@ -10,3 +10,7 @@ No lançamento, calcula-se toda a trajetória determinística; a conclusão estr
 
 ## API, consumidores, testes
 `src/simulation/civilization.ts`, `spaceflight/objectives.ts`, `spaceflight/flight-v2.ts`; `src/rendering/{flight-view,mission-symbols,mission-trajectory,pick-mission,predicted-orbit}.ts` e `src/main.ts` exibem missão/seleção sem alterar destino. `tests/{flight-v2,mission-view,flight-view,suborbital-impact,failed-insertion-descent,mission-trajectory,launch-phase}.test.ts` exercitam diferentes fases e impacto. Histórico limitado a 60 missões por civilização; os resultados anteriores não são recalculados na renderização. Sem ordens manuais, destinos interplanetários ou regresso controlado.
+
+## Agenda observatória — Fase 4 (branch de desenvolvimento)
+
+O novo HUD e a agenda são consumidores somente-leitura de missões. Agenda mostra até cinco missões `status='preparing'` com `launchAt >= clock.time`; intenção de acompanhar é guardada por ID fora do estado estratégico em `orbiter.mission-watch.v1`. A detecção por IDs de eventos processados (não só último evento) evita perder lançamentos intermediários do lote do scheduler; não altera evento/clock nem decide resultado. Seleção permanece contextual. Sem civilizações paralelas implementadas; uma agenda global agregada exigirá extensão futura.

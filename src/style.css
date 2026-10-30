@@ -10,3 +10,156 @@
 .space-mission-detail{font-size:11px;line-height:1.5;margin-top:10px;color:#9fd9e9;border-top:1px solid #ffffff20;padding-top:9px}
 
 .launch-watch{display:flex;align-items:flex-start;gap:8px;margin:10px 0;padding:9px;border:1px solid #34475d;border-radius:8px;line-height:1.35;cursor:pointer}.launch-watch input{margin-top:2px;accent-color:#8ed5eb;flex-shrink:0}
+
+
+/* Phase 4: scene-led mission control; content never changes simulation state. */
+:root{--surface:#0a1729ed;--stroke:#2e4c66;--cyan:#66d5e6;--amber:#e8bb72;--subtle:#a4b9d0}
+.brand strong{letter-spacing:.28em;text-shadow:0 0 18px #6ba8d63a}
+.hud{z-index:4;border-bottom:1px solid #43648130;padding:15px 22px;background:linear-gradient(#050c1bef,#061124cf 65%,#050b1800)}
+.controls button,.controls input,.controls select{border-color:#365574;border-radius:7px;background:#101f35e8}
+.controls button:hover,.observatory button:hover,.mission-hud button:hover,.launch-agenda button:hover{border-color:#6dbdd8;background:#1a3550}
+.observatory{z-index:3;background:var(--surface);border-color:var(--stroke);box-shadow:0 16px 50px #0009}
+.info{left:12px;right:12px;bottom:10px;padding:9px 13px;background:#08182dd9;border:1px solid #34526b;border-radius:10px;z-index:3}
+.mission-hud,.launch-agenda{position:absolute;left:16px;z-index:2;color:#e9f2fc;background:var(--surface);border:1px solid var(--stroke);border-radius:12px;box-shadow:0 15px 46px #0009;backdrop-filter:blur(12px)}
+.mission-hud{top:91px;width:min(344px,calc(100vw - 36px));max-height:calc(100vh - 196px);overflow:auto;padding:15px}
+.mission-hud-heading{display:grid;gap:5px;padding-bottom:12px;border-bottom:1px solid #36536a}
+.mission-hud-heading strong{color:#d9effb;font-size:15px}
+.mission-hud-heading small{line-height:1.45;color:var(--subtle);font-size:10px}
+.mission-hud-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.mission-hud-metric{display:grid;gap:7px;min-width:0;padding:11px;background:#112239ae;border:1px solid #2b4964;border-radius:8px}
+.mission-hud-metric small{color:#9fb8d1;font-size:10px}
+.mission-hud-metric strong{font-size:15px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.mission-hud-metric:nth-child(3) strong{color:#7bdec7}
+.mission-hud-target{font-size:11px;color:var(--amber);line-height:1.55;padding:10px 0;border-top:1px solid #36536a}
+.mission-hud button,.launch-agenda button{background:#152b43;color:#e5f3ff;border:1px solid #395d7c;border-radius:7px;padding:6px 9px;cursor:pointer;font-size:11px}
+.launch-agenda{top:91px;padding:12px 14px;width:min(340px,calc(100vw - 36px));font-size:12px}
+.launch-agenda strong{display:block;margin-bottom:9px}
+.launch-agenda-list{display:grid;gap:5px}
+.launch-agenda-row{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#adbed1;font-size:11px}
+.launch-agenda-row button[aria-pressed=true]{color:#83e6d5;border-color:#407e7f}
+#app:has(.mission-hud:not([hidden])) .launch-agenda{top:auto;bottom:92px}
+@media(max-width:1050px){.mission-hud{top:85px;width:280px}.mission-hud-metric strong{font-size:13px}.launch-agenda{width:280px}.observatory{width:280px}}
+@media(max-width:800px){.hud{padding:10px}.mission-hud{top:144px;left:10px;max-height:40vh}.launch-agenda{left:10px;top:144px}#app:has(.mission-hud:not([hidden])) .launch-agenda{bottom:62px}.observatory{top:144px;max-height:45vh}.info{bottom:6px}}
+@media(prefers-reduced-motion:reduce){.mission-hud,.launch-agenda{animation:none;transition:none}}
+
+
+/* Phase 4 HUD: instruments rather than equal-weight dashboard tiles. */
+.mission-hud{width:min(365px,calc(100vw - 36px));padding:16px 17px;background:#081728eb}
+.mission-hud-heading{padding-bottom:11px;margin-bottom:7px;border-color:#456078}
+.mission-hud-heading strong{font-size:15px;letter-spacing:.015em}
+.mission-hud-primary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:12px 0 13px;border-bottom:1px solid #38516b}
+.mission-hud-instrument{min-width:0;padding:7px 9px}
+.mission-hud-primary .mission-hud-instrument:not(:first-child),.mission-hud-secondary .mission-hud-instrument:not(:first-child){border-left:1px solid #314960}
+.mission-hud-label{display:flex;align-items:center;gap:6px;color:#91adc8}
+.mission-hud-label small{font-size:9px;letter-spacing:.06em}
+.mission-hud-icon{width:19px;height:19px;flex:0 0 19px;color:#74cde3}
+.mission-hud-value{display:block;padding:9px 0 1px;font-size:15px;font-variant-numeric:tabular-nums;line-height:1.2;color:#f2f7ff;overflow-wrap:anywhere}
+.mission-hud-fuel .mission-hud-value{color:#7be0c5}
+.mission-hud-orbit{padding:12px 0;border-bottom:1px solid #38516b}
+.mission-hud-section-title{display:block;font-size:10px;color:#8da6bf;letter-spacing:.1em;margin:0 0 5px}
+.mission-hud-apsides{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.mission-hud-apsides .mission-hud-instrument{padding:9px 10px;border:1px solid #2d4a64;border-radius:7px;background:#10223a88}
+.mission-hud-apsides .mission-hud-value{font-size:18px}
+.mission-hud-aim{display:block;margin-top:6px;color:#dcb474;font-size:10px;font-variant-numeric:tabular-nums}
+.mission-hud-secondary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:11px 0}
+.mission-hud-secondary .mission-hud-value{font-size:13px}
+.mission-hud-secondary .mission-hud-icon{width:16px;height:16px;flex-basis:16px;color:#99bbcf}
+.mission-hud-footnote{font-size:10px;line-height:1.45;color:#9eafc2;padding:10px 0;border-top:1px solid #38516b}
+.mission-hud>button{margin-top:2px;background:transparent;border-color:#31506a}
+@media(max-width:1050px){.mission-hud{width:310px}.mission-hud-primary .mission-hud-value{font-size:13px}.mission-hud-label{gap:3px}.mission-hud-icon{width:16px;height:16px;flex-basis:16px}}
+@media(max-width:500px){.mission-hud{width:min(350px,calc(100vw - 20px))}.mission-hud-primary .mission-hud-value{font-size:12px}}
+
+
+/* Optional presentation modes: no causal simulation changes. */
+.visual-controls{display:grid;gap:9px;padding:11px 0;margin-top:10px;border-top:1px solid #314861}
+.visual-controls label{display:flex;align-items:center;gap:7px;color:#9fb8d1;font-size:11px;cursor:pointer}
+.visual-controls input{accent-color:#67cddd}
+.ui-idle .hud,.ui-idle .info,.ui-idle .observatory,.ui-idle .mission-hud,.ui-idle .launch-agenda{opacity:.38;transition:opacity .5s ease}
+.ui-idle .hud:hover,.ui-idle .observatory:hover,.ui-idle .mission-hud:hover,.ui-idle .launch-agenda:hover{opacity:1}
+.flight-spotlight.cinematic{border-color:#e3b96b;box-shadow:0 0 35px #d6a95a42,0 10px 35px #0009;animation:mission-reveal .36s ease-out}
+@keyframes mission-reveal{from{opacity:0;transform:translate(-50%,12px) scale(.97)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.ui-idle .hud,.ui-idle .info,.ui-idle .observatory,.ui-idle .mission-hud,.ui-idle .launch-agenda{transition:none}.flight-spotlight.cinematic{animation:none}}
+
+
+/* Phase 4 holistic UX: each surface has one job. */
+.hud{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center;min-height:69px}
+.controls{justify-content:flex-end;align-content:center}
+.control-group{display:flex;align-items:center;gap:7px;padding-left:13px;border-left:1px solid #38516b88}
+.controls>label[for="seed"]{letter-spacing:.06em}
+.time-controls{padding-right:5px}
+.view-controls button:first-child{border-color:#4a8baf;color:#c9efff}
+.observatory{top:87px;max-height:calc(100vh - 156px);padding:13px}
+.panel-heading{margin-bottom:8px}
+.observatory-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:3px;background:#0e1f33;border:1px solid #304860;border-radius:9px;margin-bottom:14px}
+.observatory-tabs button{font-size:11px;border:0;padding:9px 4px;background:transparent;color:#9cb4cd;border-radius:7px}
+.observatory-tabs button[aria-selected=true]{background:#1e4167;color:#f0faff;box-shadow:inset 0 0 0 1px #426d93}
+.observatory-tab-page{min-width:0}
+.observatory-tab-page[hidden]{display:none}
+.observatory-tab-page>.panel-actions{margin-top:10px}
+.observatory-tab-page #mission-feed{display:grid;gap:6px;margin-top:10px}
+.observatory-tab-page #mission-feed button{display:block;width:100%;text-align:left;border-color:#304a64}
+.observatory-tab-page #civilization{color:#a5b9ce;font-size:11px;line-height:1.55}
+.observatory-tab-page #space-program-section{line-height:1.55}
+.observatory-tab-page .visual-controls{margin-top:14px}
+.status-console{z-index:4;bottom:10px;left:12px;right:12px;min-height:42px;padding:7px 12px;flex-wrap:nowrap;gap:13px}
+.status-console>span{white-space:nowrap}
+.status-system{font-size:10px;letter-spacing:.1em;color:#7bd6c6!important}
+.status-mission{color:#b4daf0!important;max-width:22ch;overflow:hidden;text-overflow:ellipsis}
+.status-console #status{overflow:hidden;text-overflow:ellipsis;max-width:30ch}
+.status-console .status-help{margin-left:auto;white-space:nowrap;padding:5px 8px;border:1px solid #35506b;background:#102137;color:#afcbe1;border-radius:7px;cursor:pointer;pointer-events:auto}
+.status-console .hint:not([hidden]){position:absolute;right:8px;bottom:calc(100% + 8px);max-width:min(700px,90vw);padding:12px 15px;background:#0c1e33f5;border:1px solid #36536d;border-radius:9px;color:#dbeafb;opacity:1;white-space:normal;box-shadow:0 10px 35px #000a}
+@media(max-width:1100px){.hud{grid-template-columns:1fr}.controls{justify-content:flex-start}.observatory{top:124px}.mission-hud{top:124px}.status-console{gap:8px}.status-system{display:none}}
+@media(max-width:760px){.controls{flex-wrap:wrap}.control-group{padding-left:6px}.observatory{top:157px;max-height:calc(100vh - 220px)}.mission-hud{top:157px}.status-console .status-mission{display:none}.status-console #status{max-width:20ch}.status-console{font-size:10px}}
+
+
+/* Orbiter Mission Control — cinematic observatory visual layer (no fake 3D assets). */
+:root{--orbiter-glow:#61cde7;--orbiter-glow-soft:#59c5e52c;--orbiter-surface:#071424f0}
+#sky{background:radial-gradient(ellipse at 50% 40%,#112940,#050b18 70%)}
+.hud{background:linear-gradient(180deg,#061220f7,#07152ce8);box-shadow:0 1px 0 #5eb9db25,0 8px 30px #0309118a}
+.brand strong{font-size:21px;letter-spacing:.34em;color:#edf8ff;text-shadow:0 0 20px #71b9f443}
+.brand small{color:#91bbd9;letter-spacing:.17em}
+.controls button,.controls select,.controls input{background:linear-gradient(180deg,#10233a,#081728);border-color:#345a7a;box-shadow:inset 0 1px 0 #a0daf00d}
+.controls button:hover{box-shadow:inset 0 0 12px #59c5e525}
+.observatory,.mission-hud,.launch-agenda{background:linear-gradient(145deg,#0a1c2eea,#061222f2);border:1px solid #38698a;box-shadow:0 0 0 1px #0b2e45a8,0 14px 36px #000b,inset 0 1px 0 #77c9e01a}
+.observatory{padding:14px;max-height:calc(100vh - 155px)}
+.panel-heading strong{letter-spacing:.04em;color:#e3f4ff}
+.observatory-tabs{border-color:#24465f;background:#071526}
+.observatory-tabs button[aria-selected=true]{background:linear-gradient(180deg,#1d5174,#12344f);box-shadow:inset 0 0 0 1px #429ac2,0 0 12px #3192cd23}
+.body-navigator{display:grid;gap:4px;max-height:248px;overflow:auto;margin:6px 0 10px;scrollbar-color:#38617b transparent;scrollbar-width:thin}
+.body-nav-item{display:flex;align-items:center;gap:11px;width:100%;padding:7px 9px!important;background:#07182a66!important;border:1px solid transparent!important;border-radius:8px!important;text-align:left;min-height:43px}
+.body-nav-item:hover,.body-nav-item[aria-pressed=true]{background:#103251ad!important;border-color:#3886a6!important}
+.body-nav-item[aria-pressed=true]{box-shadow:inset 3px 0 #59d0eb,0 0 15px #147ca320}
+.body-nav-marker{width:25px;height:25px;flex:0 0 25px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#ffffff99,var(--body-color) 35%,#08182b 95%);box-shadow:0 0 10px color-mix(in srgb,var(--body-color),transparent 65%);border:1px solid #ffffff30}
+.body-nav-identity{display:flex;flex-direction:column;gap:3px;min-width:0}
+.body-nav-identity strong{font-size:12px;font-weight:600;color:#e8f1ff}
+.body-nav-identity small{color:#8faec5;font-size:10px}
+#inspector{border-top:1px solid #34546a;padding-top:10px}
+#inspector h3{color:#98e0f1;margin:0 0 8px}
+.metric{padding:7px 2px;border-color:#38526a55}
+.metric strong{font-variant-numeric:tabular-nums}
+.status-console{background:linear-gradient(180deg,#08192beb,#06101cf5);border-color:#335e7e;box-shadow:0 -6px 24px #0008;min-height:45px}
+.status-console>span{padding-right:12px;border-right:1px solid #43658170}
+.status-console .status-help{margin-left:auto}
+.status-activity{color:#6be0ba!important;font-size:10px;font-weight:700;letter-spacing:.07em}
+.status-activity:before{content:'';display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:100%;background:#54deb4;box-shadow:0 0 9px #56dfbc7a}
+.status-activity[data-paused=true]{color:#e9b97b!important}
+.status-activity[data-paused=true]:before{background:#dfad67;box-shadow:none}
+.mission-hud-primary,.mission-hud-orbit,.mission-hud-secondary{border-color:#47779760}
+.mission-hud-icon{filter:drop-shadow(0 0 4px #65d6ef32)}
+.mission-hud-apsides .mission-hud-instrument{background:linear-gradient(150deg,#102943b8,#0a1a2dab)}
+.observatory button:focus-visible,.body-nav-item:focus-visible,.status-help:focus-visible{outline:2px solid #70d8ed;outline-offset:2px}
+@media(max-width:760px){.body-navigator{max-height:150px}.status-console .status-activity{display:none}}
+@media(prefers-reduced-motion:reduce){.body-nav-item,.status-activity{transition:none}}
+
+
+/* Phase 4 final usability: readable status rail and contextual navigation. */
+.status-console{display:flex;align-items:center;gap:10px}
+.status-console #status{flex:1 1 150px;max-width:none;min-width:90px;overflow:hidden;text-overflow:ellipsis}
+.status-console .status-mission{flex:0 1 190px;max-width:190px;min-width:80px}
+.status-console .status-help{flex:0 0 auto}
+.status-console .hint:not([hidden]){z-index:9;line-height:1.5}
+.body-nav-item.contains-selection{background:#0d283ca8!important;border-color:#34708a88!important}
+.body-nav-item.contains-selection .body-nav-identity small{color:#6dd8df}
+.body-nav-item.contains-selection:before{content:'◦';color:#73e0ed;font-size:16px}
+@media(max-width:1050px){.status-console .status-mission{display:none}.status-console #bodies{display:none}}
+@media(max-width:650px){.status-console #status{flex-basis:75px}.status-console .status-activity{display:none}}

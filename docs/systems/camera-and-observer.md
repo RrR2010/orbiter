@@ -16,3 +16,33 @@ Configurações são serializadas na chave `orbiter.observatory.v2`; `parseObser
 `tests/observatory.test.ts` cobre seleção, foco, follow em warp extremo, offsets de pan, zoom manual, projeção roundtrip e picking, métricas e defaults de preferências. Diferenças relevantes frente à Fase 2 histórica: **Focar** e **Acompanhar** são botões/ações distintos na main, e a chave do observatório é v2. Não extrapolar o comportamento de handoff antigo.
 
 Referências: `src/rendering/camera.ts`, `src/rendering/canvas.ts`, `src/rendering/pick.ts`, `src/ui/observatory.ts`, `src/main.ts`; ADR-0006 a ADR-0009; PR #4, e alterações posteriores da Fase 3.
+
+## Extensões de interface — Fase 4 (branch de desenvolvimento)
+
+`src/main.ts` monta uma agenda contextual de missões em preparação e HUD para missão selecionada; `src/style.css` contém os estilos responsivos `.mission-hud` e `.launch-agenda`. O mapa e câmera continuam em Canvas e comandos existentes; missão selecionada usa `trackedMissionId`. O modo ambiente recolhe ambos os painéis. A preferência de marcações da agenda usa `orbiter.mission-watch.v1`, lista de IDs persistida separadamente (não faz parte do save físico nem do observatório V2). O código trata eventos de lançamento recém-processados em lote e não troca câmera se já houver acompanhamento de missão. Há somente uma civilização no modelo atual; concorrência entre múltiplas civilizações permanece futuro, não implementado.
+
+**Limitações:** o painel usa seleção/acompanhamento unificados, sem modo independente de inspeção passiva de missão; não há cronograma global multi-civilização; nem alerta programado com confirmação. A agenda exibe apenas missões que já possuem `launchAt` real, nunca inventa eventos. Testes de navegador/reload pendentes antes do aceite.
+
+### Refino do HUD como instrumento
+
+A camada de apresentação da Fase 4 usa `hudIcon` (`src/ui/hud-icons.ts`) e estrutura CSS `mission-hud-{primary,orbit,apsides,secondary,footnote}` em lugar de uma grade uniforme de cards. Não houve mudança no `missionTelemetry` nem em física/câmera/saves. Estados reais de acompanhamento continuam fonte do cabeçalho; dados sem fonte permanecem N/D. Requer inspeção visual humana no próximo smoke.
+
+### Preferências visuais de Fase 4
+
+Interface inclui duas opções independentes no observatório (ênfase cinematográfica de notificações e redução automática após inatividade), persistidas como `orbiter.visual.v1`. Não mudam o schema de `orbiter.observatory.v2`, nem câmera, clock ou saves. O modo ambiente dedicado existente continua disponível; redução por inatividade é somente visual e reversível.
+
+### Correção de preparação e acompanhamento de lançamento
+
+`src/ui/mission-camera.ts` resolve a posição global da base de lançamento via `homeLaunchSite` + `sitePosition` + `positionsAt` (ou posição inicial imutável do plano V2). Selecionar a missão na agenda agora inicia acompanhamento da **base na superfície**, com enquadramento local inicial; no lançamento, o mesmo ID passa a seguir o símbolo físico da nave. `watch-launch` continua controlando apenas a redução do warp a 1×; não usa mais `trackBody` para centralizar o planeta na preparação. Se uma missão já está sendo acompanhada, a preparação de outra não sequestra a câmera. Testes puros em `tests/mission-camera.test.ts`; smoke humano pendente.
+
+### Organização global de UI na Fase 4
+
+`src/main.ts` reorganiza nós DOM existentes do Observatório em páginas **Corpos / Missões / Camadas**, com `aria-selected` e persistência independente de aba (`orbiter.observatory-tab.v1`). Não duplica AP/PE em histórico textual quando o HUD já fornece essa informação. Header agrupa controles de tempo e visualização sem mudar IDs ou eventos; rodapé mostra tempo, seed/corpos, missão acompanhada, status e ajuda de atalhos recolhível. A página Missões permanece disponível mesmo após seleção de outro corpo. Todos os botões originais continuam conectados aos seus handlers.
+
+### Navegador visual e acabamento cinematográfico (Fase 4)
+
+Na página Corpos, `renderBodyNavigator` em `src/main.ts` acrescenta botões de seleção de estrela e planetas com marcador visual derivado de `body.color` e texto real do mundo. Não substitui `#body-list`, que permanece para acesso às luas e como controle completo. O navegador chama o mesmo comando `select`, sem alterar estado físico. O rodapé usa estado verdadeiro de pausa/execução para o sinalizador de simulação. `src/style.css` define a nova pele cinematográfica para navegador, controles, Observatório, HUD e status. Testar contraste, layout compacto e reload; CI ainda pendente.
+
+### Polimento de navegação e ajuda
+
+O balão de atalhos agora fecha por clique externo ou Esc (primeiro Esc consome o evento quando o balão está aberto). O rodapé reserva espaço flexível à mensagem operacional, com prioridades em breakpoints menores. O navegador visual distingue o próprio planeta selecionado de uma lua selecionada sob ele: o planeta pai recebe classe `contains-selection`, sem modificar `selectedId`. Sem alteração na simulação ou em saves V2.

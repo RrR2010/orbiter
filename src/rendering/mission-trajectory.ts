@@ -25,6 +25,10 @@ export function shouldDrawMissionTrail(mission:Mission,timeS:number):boolean{
  const flight=mission.flight;
  if(!flight)return false;
  if(flight.checkpoints.some(c=>c.kind==='impact'&&c.timeS<=timeS))return false;
- if(mission.status==='ascending')return true;
- return mission.status==='success'&&flight.orbital;
+ // Powered ascent trail has a finite presentation lifetime; completed or
+ // coasting spacecraft retain their physical orbit, never a frozen launch scar.
+ if(mission.status!=='ascending')return false;
+ const ascent=flight.checkpoints.filter(c=>c.reason==='Physical liftoff'||c.reason==='Ascent telemetry checkpoint'||c.reason.startsWith('Ascent '));
+ const end=ascent.at(-1)?.timeS??flight.plan.ignitionS;
+ return timeS<=end+90;
 }

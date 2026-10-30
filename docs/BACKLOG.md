@@ -41,3 +41,27 @@ Se for correção de bug que bloqueia critério da fase atual, registrar na issu
 - **Risco/dependências:** generalização do seletor e do follow; cuidar para não misturar trajetória representacional e física
 - **Triagem:** now
 - **Status:** pendente de conclusão do gate A4 da Fase 3
+
+
+### IDEA-014 — Agenda global multi-civilização
+- **Origem:** Discovery Fase 4, desejo de lançamentos paralelos.
+- **Experiência desejada:** priorização clara entre lançamentos de civilizações diferentes, com fila visual de observação.
+- **Motivação:** manter controle de atenção sem teleporte de câmera.
+- **Risco/dependências:** existência efetiva de múltiplas civilizações e scheduler global, ausentes da Fase 3.
+- **Triagem:** later
+- **Status:** capturada; **não implementada** na Fase 4.
+
+### IDEA-015 — Modos de câmera e miniaturas de navegação
+- **Origem:** mockup visual aprovado, com cartões de visões e mapa de manobra.
+- **Experiência desejada:** acesso rápido a visões distintas sem confundir representações.
+- **Risco/dependências:** estados e referencial de câmera adicionais; mapa de manobra requer dados físicos reais.
+- **Triagem:** later
+- **Status:** capturada; não implementar a partir de arte ilustrativa.
+
+
+### IDEA-016 — Atlas de naves com LOD visual
+- **Origem:** feedback do PO durante refinamento da Fase 4.
+- **Experiência desejada:** glifo distante, silhueta intermediária e sprite em zoom próximo, preservando reconhecimento e orientação física 2D.
+- **Risco/dependências:** atlas original, política de escala e fallback vetorial, consistência de picking e performance.
+- **Triagem:** later
+- **Status:** capturada; sprites definitivos não implementados neste refinamento.

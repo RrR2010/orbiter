@@ -16,3 +16,9 @@ O plano V2 retorna `AutonomousFlightResultV2` com `checkpoints`, `terminal`, `ou
 
 ## Testes e extensões
 `tests/{spaceflight,ascent-v2,guidance-v2,executor-v2,flight-v2,suborbital-impact,failed-insertion-descent,predicted-orbit,flight-view}.test.ts`. Benchmark não destrutivo `npm run benchmark:orbits` mediu propagação sintética; não mede FPS do Canvas ou scheduler de milhares de lançamentos. Extensões futuras exigem preservar determinismo entre warp, câmera e recarga.
+
+## Telemetria de observação — Fase 4 (branch de desenvolvimento)
+
+`src/ui/mission-telemetry.ts` deriva `MissionTelemetry` de `flightViewAt(mission,radiusM,timeS)`, `FlightState`, `Trajectory`, `plan.target` e `plan.ispS`. Valores em SI, com formatação localizada na apresentação: altitude = módulo da posição planetocêntrica − raio; velocidade = módulo do vetor de velocidade planetocêntrica; massa e propelente = estado instantâneo; combustível fracionário = `fuelKg / plan.initial.fuelKg`; ΔV ideal restante = `g0 × Isp × ln(massa/(massa−propelente))` quando parâmetros válidos; AP/PE = raios das apsides − raio planetário. PE abaixo da superfície vira N/D; AP aberto vira N/D; missão sem voo físico ou impactada retorna campos físicos N/D. O alvo é intenção registrada, não previsão. Não altera simulação nem outcome.
+
+Limitações: ΔV é capacidade ideal de motor, sem perdas gravitacionais/arrasto; velocidade é relativa ao planeta natal, não à estrela. A amostragem herda limitações dos checkpoints V2. Testes unitários mínimos em `tests/mission-telemetry.test.ts`; exigem validação local e testes de cenário adicionais.

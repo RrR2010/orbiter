@@ -58,3 +58,8 @@ Documentar exclusivamente fatos verificados no código; sinalizar lacunas e dive
 ## Manutenção
 
 Novo comportamento ou contrato alterado => atualizar a documentação As-Built **no mesmo PR** de implementação. No handoff, listar os documentos atualizados. Documentos legados de fase/handoff são históricos; As-Built é a síntese vigente.
+
+
+## Desenvolvimento da Fase 4 (não integrado)
+
+Na branch `phase/04-visual-hud-ux`, o HUD observatório e telemetria de missão estendem os contratos [câmera e observatório](camera-and-observer.md), [voo](spaceflight.md) e [missões](missions.md). Render de glifos e setas orbitares está em `src/rendering/{vehicle-glyph,canvas,mission-trajectory}.ts`, com contrato visual em [docs/design](../design/README.md). **Estes itens não são contrato da main até merge validado.**
