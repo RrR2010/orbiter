@@ -150,3 +150,16 @@
 .observatory button:focus-visible,.body-nav-item:focus-visible,.status-help:focus-visible{outline:2px solid #70d8ed;outline-offset:2px}
 @media(max-width:760px){.body-navigator{max-height:150px}.status-console .status-activity{display:none}}
 @media(prefers-reduced-motion:reduce){.body-nav-item,.status-activity{transition:none}}
+
+
+/* Phase 4 final usability: readable status rail and contextual navigation. */
+.status-console{display:flex;align-items:center;gap:10px}
+.status-console #status{flex:1 1 150px;max-width:none;min-width:90px;overflow:hidden;text-overflow:ellipsis}
+.status-console .status-mission{flex:0 1 190px;max-width:190px;min-width:80px}
+.status-console .status-help{flex:0 0 auto}
+.status-console .hint:not([hidden]){z-index:9;line-height:1.5}
+.body-nav-item.contains-selection{background:#0d283ca8!important;border-color:#34708a88!important}
+.body-nav-item.contains-selection .body-nav-identity small{color:#6dd8df}
+.body-nav-item.contains-selection:before{content:'◦';color:#73e0ed;font-size:16px}
+@media(max-width:1050px){.status-console .status-mission{display:none}.status-console #bodies{display:none}}
+@media(max-width:650px){.status-console #status{flex-basis:75px}.status-console .status-activity{display:none}}
