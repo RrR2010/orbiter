@@ -1,3 +1,5 @@
+> **ESTADO VIGENTE — 2026-10-29:** Fase 4 INTEGRADA, [PR #9](https://github.com/RrR2010/orbiter/pull/9), squash `8206d8533cd2c0437e0f5ce14b9886897041409f`. CI final manual verde, validação e smoke aprovados conforme PR. Design system em `docs/design/`. **Fase 5 AUTORIZADA:** primeira exploração interplanetária, [Issue #10](https://github.com/RrR2010/orbiter/issues/10) e `docs/phases/PHASE_05.md`; começar por Discovery com PO. **Fase 6 não autorizada.** Blocos abaixo são histórico, não status corrente.
+
 > **Atualização 2026-10-25:** PO confirmou `npm ci`, `npm audit` **0 vulnerabilidades**, e `npm run validate` **4/4** no HEAD anterior à limpeza autorizada de V1. Removido `spaceflight/flight.ts` e criado `npm run benchmark:orbits`, **sem mexer em saves**. Novos commits ainda precisam de `npm run validate` e execução do benchmark no computador do PO; sem números medidos, não declarar gate de escala aprovado. PR #7 permanece draft, CI não executado e main intacta. Ver [auditoria](phases/PHASE_03_FINAL_AUDIT.md).
 
 > **ESTADO VIGENTE — 2026-10-25 / PR #7: AUDITORIA FINAL CONDICIONAL, NÃO INTEGRADO.**
