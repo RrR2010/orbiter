@@ -15,3 +15,7 @@ Validação estrutural estratégica não verifica recursivamente todos os campos
 ## Extensão em desenvolvimento — Fase 5A (branch, ainda não integrada)
 
 Campo aditivo `Civilization.science` para estimativas gravitacionais e IDs de observações já recebidas. Saves V2 antigos sem o campo recebem priors determinísticos, sem alteração de missões, eventos, recursos ou do clock. Registros científicos existentes são validados ao carregar; formato malformado segue a política de rejeição já existente (reinicialização estratégica), um risco a revisar antes do merge. `tests/scientific-knowledge.test.ts` cobre legado, continuidade e deduplicação. A fase permanece em desenvolvimento e o contrato final será revisado depois da integração.
+
+## Extensão em desenvolvimento — Fase 5C (2026-10-30)
+
+O formato V2 atual serializa `science` e `scienceInbox` no objeto `Civilization`. O scheduler processa recepções pendentes como eventos cronológicos antes de eventos estratégicos simultâneos; salvamento/recarregamento intermediário mantém a recepção futura, sem concessão prematura de conhecimento. Testes: `tests/interplanetary-science-persistence.test.ts` e `tests/interplanetary-scheduler-reception.test.ts`. Conforme ADR-0017, saves de desenvolvimento de versões anteriores são descartáveis e não exigem migração. A integração física das missões científicas permanece pendente.
