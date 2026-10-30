@@ -62,3 +62,9 @@ Somente depois de correções e todos os gates A1–A7 aprovados: executar `Orbi
 18. Abrir aba Corpos e clicar em estrela e planetas pelo navegador visual, conferir que a lista nativa e a seleção do mapa continuam sincronizadas. Testar seleção de lua pela lista e foco/follow.
 19. Testar a sinalização inferior de **SIMULAÇÃO ATIVA/PAUSADA** contra o tempo real e alternar pausa via botão e barra de espaço. Não aceitar estado verde durante pausa.
 20. Confirmar visual geral escuro, leitura de textos, foco por teclado, responsividade, fullscreen e modo ambiente. A arte do planeta continua Canvas 2D; não há minimapa ou 3D simulados.
+
+## Polimento final — atalhos e rodapé
+
+21. Abrir **Atalhos ?**, clicar na cena, no painel e em outro controle; em todos os casos o balão fecha. Reabrir e pressionar Esc: fecha apenas a ajuda, sem desmarcar a seleção; Esc seguinte retoma comportamento normal.
+22. Testar rodapé em largura grande e estreita, com mensagem de missão longa, garantindo que a mensagem operacional tenha prioridade e nenhum elemento cubra o botão Atalhos.
+23. Selecionar uma lua pela lista: o planeta pai deve receber indicação visual contextual sem parecer que o próprio planeta foi selecionado.
