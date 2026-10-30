@@ -15,3 +15,7 @@
 ## Próximos passos de integração
 
 Calibrar priors e distinguir conhecimento observável de estado físico, persistir registros cientificos e seus IDs em migração segura do save V2, associar observações ao flyby fisicamente verificado e à comunicação.
+
+## Integração de persistência (incremento 5A)
+
+`Civilization.science` armazena o registro de estimativas e IDs de observações recebidas. Civilizações V2 novas começam com priors reproduzíveis; saves V2 anteriores sem `science` recebem apenas estimativas iniciais ao carregar, sem descobertas retroativas. `parseCivilization` valida registros presentes e rejeita registros inválidos conforme a política atual de recuperação. A aquisição e transmissão ainda não são geradas automaticamente por missões.
