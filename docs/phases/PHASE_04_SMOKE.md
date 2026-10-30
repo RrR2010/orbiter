@@ -56,3 +56,9 @@ Somente depois de correções e todos os gates A1–A7 aprovados: executar `Orbi
 15. Selecionar corpo e depois missão; comparar Observatório (índice / ações) com HUD (telemetria), sem repetição de AP/PE no feed.
 16. Conferir header em tela larga/estreita: seed/Gerar, pausa, warp, visão geral, ambiente e fullscreen.
 17. Conferir rodapé: tempo, corpo/universo, missão atual, mensagem operacional e botão **Atalhos ?**. Testar os atalhos de teclado e ausência de obstrução da cena.
+
+## Smoke — acabamento global cinematográfico
+
+18. Abrir aba Corpos e clicar em estrela e planetas pelo navegador visual, conferir que a lista nativa e a seleção do mapa continuam sincronizadas. Testar seleção de lua pela lista e foco/follow.
+19. Testar a sinalização inferior de **SIMULAÇÃO ATIVA/PAUSADA** contra o tempo real e alternar pausa via botão e barra de espaço. Não aceitar estado verde durante pausa.
+20. Confirmar visual geral escuro, leitura de textos, foco por teclado, responsividade, fullscreen e modo ambiente. A arte do planeta continua Canvas 2D; não há minimapa ou 3D simulados.
