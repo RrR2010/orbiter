@@ -25,3 +25,7 @@
 **Importante:** ainda é um protótipo isolado: a sonda começa idealmente na órbita heliocêntrica do planeta, sem simular escape, queima planetocêntrica, combustível ou SOI; o perfil de impulso não garante intercepção. O detector amostrado não comprova ausência de encontros breves e precisa de testes de precisão antes de uso como autoridade para resultado de missão. A velocidade planetária é calculada por diferença central das efemérides. Não há missão integrada nem resultado estratégico.
 
 `tests/interplanetary-trajectory.test.ts` cobre reprodutibilidade de propagação e medida de separação. Não considerar gates A2–A4 atendidos até integrar à física/estratégia com cenários positivos e negativos verificáveis.
+
+## Novos testes de integridade orbital (5B)
+
+O incremento de testes mede conservação aproximada de energia específica e momento angular sob gravidade solar, compara propagação em um único intervalo com duas partições e verifica que `withinTargetRadius` corresponde exclusivamente à distância física mínima versus raio do destino. Tolerâncias relativas de 1e-6 são usadas para estados numéricos. Estes testes são necessários, mas ainda não suficientes para comprovar encontro científico ou evitar falsos negativos do detector amostrado. `tests/interplanetary-trajectory.test.ts`.
