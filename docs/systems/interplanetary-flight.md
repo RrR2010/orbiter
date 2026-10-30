@@ -37,3 +37,7 @@ O incremento de testes mede conservação aproximada de energia específica e mo
 ## Seleção por capacidade e incerteza (incremento 5B)
 
 `src/simulation/interplanetary-selection.ts` implementa seleção pura: requer tecnologia no estágio 4 e memória científica presente, avalia oportunidades segundo delta-v ideal disponível do veículo, e classifica candidatas viáveis por esforço, tempo de espera, erro de fase e incerteza gravitacional da estimativa científica. Retorna `null` caso nenhuma candidata supere o orçamento ideal. Não cria missão, não agenda lançamentos nem reserva recursos. A pontuação é heurística e o campo `feasible` continua indicando **apenas** orçamento estimado, não encontro demonstrado. Testes em `tests/interplanetary-selection.test.ts`.
+
+## Intenção de agenda sem efeito colateral (incremento 5B)
+
+`src/simulation/interplanetary-schedule.ts` acrescenta `proposeInterplanetaryLaunch`, que só propõe uma janela futura se há estágio tecnológico 4, recursos suficientes, nenhuma missão local ativa, antecedência mínima para preparação e espera limitada. Esta função **não** altera `Civilization.nextAt`, missões ou scheduler: é uma pré-condição testável para a futura integração causal, não um lançamento disponível ao observador. A seleção retorna nulo quando não existe orçamento viável. `tests/interplanetary-schedule.test.ts` verifica ausência de efeitos colaterais e limites. Antes de ligar ao scheduler, devem ser entregues escape físico, transmissão/encounter e testes de persistência/warp.
