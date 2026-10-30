@@ -45,3 +45,9 @@ O incremento de testes mede conservação aproximada de energia específica e mo
 ## Handoff de referencial SOI (incremento 5B)
 
 `src/simulation/interplanetary-handoff.ts` define o raio de esfera de influência de Laplace aproximado `a (mu_planeta/mu_sol)^(2/5)` e transforma um estado planetocêntrico inercial **já na borda ou além da SOI** em coordenadas heliocêntricas somando posição e velocidade do planeta obtidas de efemérides determinísticas. Massa, combustível e tempo não mudam. Estados ainda internos à SOI são rejeitados. `tests/interplanetary-handoff.test.ts` verifica transformação, determinismo e pré-condição de cruzamento. **Não há ainda propagação de escape até a SOI nem integração do handoff ao voo/missão; este módulo não autoriza salto físico para a borda.**
+
+## Escape planetocêntrico experimental (incremento 5B)
+
+`src/simulation/interplanetary-escape.ts` implementa `propagatePlanetaryEscape(world, planetId, initial, maxDurationS)`: exige estado inicial fora da superfície e dentro da SOI, velocidade radial positiva e energia específica positiva (hipérbole). Propaga analiticamente com o contrato V2 `propagateCoast`, busca a primeira passagem para além da SOI por dobramento temporal limitado e refina o cruzamento com 56 iterações de bisseção. Só após alcançar fisicamente a fronteira chama `handoffToHeliocentric`; preserva instante, massa e combustível. Retorna `null` se o estado não for hiperbólico externo ou não alcançar a fronteira até o limite de tempo. Os testes em `tests/interplanetary-escape.test.ts` cobrem cruzamento, estados inválidos e orçamento temporal.
+
+**Limites atuais:** o estado inicial precisa já estar em escape, fornecido externamente; não foi implementada queima real de injeção, escolha de direção, perdas ou conexão com o lançamento V2. A trajetória ainda não está ligada ao scheduler, missões, HUD nem produção de observações científicas. Não declarar missão interplanetária concluída.
