@@ -2,6 +2,7 @@ import {describe,expect,it} from 'vitest';
 import {generateWorld} from '../src/simulation/world';
 import {gravityForRadius} from '../src/simulation/spaceflight/gravity';
 import {initialScientificRecord,receiveGravityObservation} from '../src/simulation/scientific-knowledge';
+import {createCivilization,parseCivilization,serializeCivilization} from '../src/simulation/civilization';
 
 describe('scientific knowledge',()=>{
  const world=generateWorld('phase-five-science');
@@ -25,6 +26,25 @@ describe('scientific knowledge',()=>{
   expect(received.knowledge[first.id].gravity.uncertainty).toBeLessThan(prior.knowledge[first.id].gravity.uncertainty);
   expect(receiveGravityObservation(received,{...observation,transmitted:true})).toBe(received);
   expect(receiveGravityObservation(JSON.parse(JSON.stringify(received)),{...observation,transmitted:true})).toEqual(received);
+ });
+ it('migrates legacy V2 saves without inventing historical discoveries',()=>{
+  const civilization=createCivilization(world,1200);
+  const old=JSON.parse(serializeCivilization(civilization));
+  delete old.science;
+  const restored=parseCivilization(JSON.stringify(old),world,1200);
+  expect(restored.science).toEqual(initialScientificRecord(world));
+  expect(restored.missions).toEqual(old.missions);
+  expect(restored.events).toEqual(old.events);
+  expect(restored.time).toBe(old.time);
+  expect(parseCivilization(serializeCivilization(restored),world,1200)).toEqual(restored);
+ });
+ it('preserves received observations across reloads and prevents duplicate science',()=>{
+  const civilization=createCivilization(world,1200);
+  const observation={bodyId:first.id,measuredGravity:1.2,relativeError:.08,transmitted:true,observationId:'probe-1'};
+  civilization.science=receiveGravityObservation(civilization.science!,observation);
+  const restored=parseCivilization(serializeCivilization(civilization),world,1200);
+  expect(restored).toEqual(civilization);
+  expect(receiveGravityObservation(restored.science!,observation)).toBe(restored.science);
  });
  it('rejects malformed data without granting discovery',()=>{
   const state=initialScientificRecord(world);
