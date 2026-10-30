@@ -27,11 +27,11 @@ explorePage.insertBefore(bodyNavigator,bodyList);
 function renderBodyNavigator():void{
  bodyNavigator.replaceChildren();
  for(const body of world.bodies.filter(b=>b.kind!=='moon').slice(0,12)){
-  const button=document.createElement('button');button.type='button';button.className='body-nav-item';button.setAttribute('aria-pressed',String(observatory.selectedId===body.id));
+  const button=document.createElement('button');button.type='button';button.className='body-nav-item';button.setAttribute('aria-pressed',String(observatory.selectedId===body.id));button.classList.toggle('contains-selection',world.bodies.some(candidate=>candidate.id===observatory.selectedId&&candidate.parentId===body.id));
   const marker=document.createElement('span');marker.className='body-nav-marker';marker.style.setProperty('--body-color',body.color);
   const identity=document.createElement('span');identity.className='body-nav-identity';
   const name=document.createElement('strong');name.textContent=body.name;
-  const kind=document.createElement('small');kind.textContent=body.kind==='star'?'Estrela':'Planeta';
+  const kind=document.createElement('small');kind.textContent=body.kind==='star'?'Estrela':'Planeta';if(body.kind==='planet'&&world.bodies.some(candidate=>candidate.parentId===body.id&&candidate.kind==='moon'))kind.textContent+=' · luas';
   identity.append(name,kind);button.append(marker,identity);
   button.addEventListener('click',()=>select(body.id));bodyNavigator.append(button);
  }
@@ -66,7 +66,13 @@ if(footer){
  const indicator=document.createElement('span');indicator.className='status-activity';indicator.textContent='SIMULAÇÃO ATIVA';footer.insertBefore(indicator,status);
  const help=document.createElement('button');help.type='button';help.className='status-help';help.textContent='Atalhos ?';help.setAttribute('aria-expanded','false');
  const hints=footer.querySelector<HTMLElement>('.hint');
- if(hints){hints.hidden=true;help.addEventListener('click',()=>{hints.hidden=!hints.hidden;help.setAttribute('aria-expanded',String(!hints.hidden));});footer.append(help);}
+ if(hints){
+  hints.hidden=true;const closeHelp=():void=>{hints.hidden=true;help.setAttribute('aria-expanded','false');};
+  help.addEventListener('click',()=>{const opening=hints.hidden;hints.hidden=!opening;help.setAttribute('aria-expanded',String(opening));});
+  document.addEventListener('pointerdown',event=>{if(!hints.hidden&&event.target instanceof Node&&!hints.contains(event.target)&&!help.contains(event.target))closeHelp();});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!hints.hidden){event.preventDefault();event.stopImmediatePropagation();closeHelp();}},true);
+  footer.append(help);
+ }
 }
 const VISUAL_KEY='orbiter.visual.v1';const visual={cinematic:false,autoDim:true};
 try{const raw=JSON.parse(localStorage.getItem(VISUAL_KEY)??'null') as unknown;if(raw&&typeof raw==='object'){const v=raw as Record<string,unknown>;if(typeof v.cinematic==='boolean')visual.cinematic=v.cinematic;if(typeof v.autoDim==='boolean')visual.autoDim=v.autoDim;}}catch{/* visual preferences are optional */}
