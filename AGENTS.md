@@ -26,11 +26,11 @@ O executor é responsável por conduzir a fase até o fim, não só entregar có
 - Código, comentários, identificadores e docstrings em inglês; documentação/handoff em português.
 - Atualizar o backlog ao descobrir ideias fora do escopo, sem implementá-las implicitamente.
 - Registrar decisões técnicas transversais em `docs/DECISIONS.md` com justificativa.
-- Proteger compatibilidade de saves; migração/teste obrigatório se o formato mudar.
+- Durante o desenvolvimento pré-release, saves locais são descartáveis por decisão expressa do Product Owner (2026-10-30). Mudanças de esquema podem invalidar saves existentes sem migração; manter validação de entradas, determinismo e testes de persistência do formato vigente. Não apagar arquivos locais do usuário automaticamente.
 
 ## Limites que exigem escalonamento
 
-**PARE e escale** quando houver: mudança funcional relevante fora do brief; necessidade de novo PR/dependência de fase prévia; risco de apagar/corromper universos existentes sem migração segura; remoção de segurança/testes; mudança de arquitetura estrutural incompatível; dependência de segredo, credencial ou aprovação externa; bloqueio CI/repo não resolvível com manutenção de escopo; desacordo material com o product owner.
+**PARE e escale** quando houver: mudança funcional relevante fora do brief; necessidade de novo PR/dependência de fase prévia; risco de apagar dados não descartáveis do usuário ou outros dados fora dos saves de desenvolvimento; remoção de segurança/testes; mudança de arquitetura estrutural incompatível; dependência de segredo, credencial ou aprovação externa; bloqueio CI/repo não resolvível com manutenção de escopo; desacordo material com o product owner.
 
 **Não escale** escolha de nomes, bibliotecas compatíveis, organização interna, melhoria de performance, fix de bugs, revisão de teste ou detalhes reversíveis. Documente e prossiga.
 
@@ -53,7 +53,7 @@ O executor é responsável por conduzir a fase até o fim, não só entregar có
 - `npm audit` sem vulnerabilidades conhecidas relevantes ou risco formalmente escalado/aceito; nenhum bypass silencioso.
 - Testes necessários executados de verdade e resultados registrados.
 - Documentação, backlog, ADR e release/handoff coerentes com implementação.
-- Sem perda irreversível de dados, segredos ou mudanças inesperadas no escopo.
+- Sem perda irreversível de dados não descartáveis, segredos ou mudanças inesperadas no escopo.
 - PR integrado via método suportado pela configuração do repositório; se regras do GitHub exigirem revisão externa, respeitá-las.
 
 ## Decisão sob ambiguidade
