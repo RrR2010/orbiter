@@ -42,7 +42,7 @@
 Abrir comentário na issue e comunicar ao humano/orquestradora apenas para:
 - Expansão de escopo/alteração significativa de experiência.
 - Dependência que requeira PR separado fora da fase.
-- Quebra de API/arquitetura global ou save incompatível sem migração.
+- Quebra de API/arquitetura global. Save de desenvolvimento pré-release incompatível está autorizado pelo PO e não requer migração; não apagar saves automaticamente.
 - Perda potencial de dados, segredo, permissões ou segurança.
 - CI/regras GitHub irremediavelmente bloqueantes, ou aceitação de exceção a gate.
 - Incapacidade de validar critério obrigatório.
