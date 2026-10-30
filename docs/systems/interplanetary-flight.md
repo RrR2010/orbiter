@@ -95,3 +95,7 @@ A transferência contínua agora informa `closestTimeS` e refina a menor distân
 ## Persistência da inbox no save V2 (incremento 5C)
 
 `Civilization.scienceInbox` guarda a fila JSON de observações pendentes, inicializada vazia e serializada junto ao estado estratégico. `parseCivilization` migra saves V2 anteriores sem o campo, criando uma inbox vazia sem conceder observações retroativas; entradas existentes são validadas quanto a alvos, origem, tempos, medição, ordenação, duplicatas e sinais já recebidos. `tests/interplanetary-science-persistence.test.ts` cobre roundtrip, migração e rejeição de inbox adulterada. **O scheduler ainda não drena a inbox automaticamente e não existe criação integrada de missões interplanetárias.** Saves inválidos continuam sujeitos ao comportamento legado de reinicialização estratégica do parser V2.
+
+## Política de save durante a Fase 5 (decisão do PO de 2026-10-30)
+
+O PO dispensou compatibilidade com saves antigos pré-release. A implementação atual ainda contém caminhos de migração V2 por histórico incremental, mas eles **não são mais requisitos** e podem ser removidos em refatorações posteriores; campos novos podem exigir um save limpo. Permanecem obrigatórios validação do formato atual, persistência causal de observações recebidas/pendentes e determinismo no replay. Ver ADR-0017.
