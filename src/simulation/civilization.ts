@@ -3,12 +3,13 @@ import {gravityForRadius} from './spaceflight/gravity';
 import {seededRandom} from '../core/random';
 import {initialScientificRecord,type ScientificRecord} from './scientific-knowledge';
 import type {World} from './world';
+import {MAX_PENDING_SCIENCE,type ScienceInbox} from './interplanetary-science-inbox';
 
 export type Technology='astronomy'|'rocketry'|'orbitalFlight'|'satellites';
 export type MissionStatus='preparing'|'ascending'|'success'|'failure';
 export type Mission={id:string;originId:string;targetId:string;startedAt:number;launchAt:number;resolvedAt:number;status:MissionStatus;success:boolean|null;vehicleId:string;flight?:AutonomousFlightResultV2};
 export type SpaceEvent={id:string;time:number;kind:'research'|'preparation'|'launch'|'success'|'failure';missionId:string|null;detail:string};
-export type Civilization={version:2;id:string;homeId:string;seed:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number;science?:ScientificRecord};
+export type Civilization={version:2;id:string;homeId:string;seed:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number;science?:ScientificRecord;scienceInbox?:ScienceInbox};
 const TECH:readonly Technology[]=['astronomy','rocketry','orbitalFlight','satellites'];
 const RESEARCH_COST=[30,60,100,150];
 const RESEARCH_SECONDS=[900,1800,3600,7200];
@@ -23,7 +24,7 @@ export function createCivilization(world:World,time=0):Civilization{
  const planets=world.bodies.filter(b=>b.kind==='planet');
  const home=planets[Math.floor(probability(world.seed,'home')*planets.length)];
  if(!home||!Number.isFinite(time)||time<0)throw new Error('Invalid civilization origin');
- return {version:2,id:'civilization-0',homeId:home.id,seed:world.seed,time,accruedAt:time,stage:0,knowledge:0,resources:80,nextAt:time+RESEARCH_SECONDS[0],missionSerial:0,missions:[],events:[],successes:0,failures:0,science:initialScientificRecord(world)};
+ return {version:2,id:'civilization-0',homeId:home.id,seed:world.seed,time,accruedAt:time,stage:0,knowledge:0,resources:80,nextAt:time+RESEARCH_SECONDS[0],missionSerial:0,missions:[],events:[],successes:0,failures:0,science:initialScientificRecord(world),scienceInbox:{pending:[]}};
 }
 function record(c:Civilization,time:number,kind:SpaceEvent['kind'],detail:string,missionId:string|null=null):void{
  c.events.push({id:'event-'+time+'-'+kind+'-'+c.missionSerial,time,kind,detail,missionId});
@@ -97,6 +98,8 @@ export function parseCivilization(raw:string|null,world:World,time:number):Civil
   // V2 saves predating scientific records gain only initial estimates; never retroactively grant observations.
   if(v.science===undefined){v.science=initialScientificRecord(world);}
   else if(!isValidScientificRecord(v.science,world))throw Error('Invalid scientific record');
+  if(v.scienceInbox===undefined)v.scienceInbox={pending:[]};
+  else if(!isValidScienceInbox(v.scienceInbox,world,v.homeId,v.science))throw Error('Invalid science inbox');
   return v;
  }catch{return createCivilization(world,time);}
 }
@@ -114,4 +117,27 @@ function isValidScientificRecord(value:unknown,world:World):value is ScientificR
   const estimate=entry?.gravity;
   return entry?.bodyId===id&&!!estimate&&Number.isFinite(estimate.value)&&estimate.value>0&&Number.isFinite(estimate.uncertainty)&&estimate.uncertainty>0&&Number.isSafeInteger(estimate.observations)&&estimate.observations>=0;
  });
+}
+
+/** Refuse malformed or retroactively delivered inbox entries at the save boundary. */
+function isValidScienceInbox(value:unknown,world:World,homeId:string,science:ScientificRecord):value is ScienceInbox{
+ if(!value||typeof value!=='object'||!('pending' in value))return false;
+ const pending=(value as ScienceInbox).pending;
+ if(!Array.isArray(pending)||pending.length>MAX_PENDING_SCIENCE)return false;
+ const ids=new Set<string>();
+ let lastAt=-Infinity,lastId='';
+ for(const entry of pending){
+  if(!entry||typeof entry!=='object'||!entry.transmission||!entry.observation)return false;
+  const t=entry.transmission,o=entry.observation;
+  if(t.originId!==homeId||t.targetId!==o.bodyId||!world.bodies.some(b=>b.id===o.bodyId&&b.kind==='planet')||
+   !Number.isFinite(t.observationAtS)||t.observationAtS<0||!Number.isFinite(t.receivedAtS)||t.receivedAtS<t.observationAtS||
+   !Number.isFinite(t.distanceM)||t.distanceM<0||!Number.isFinite(t.signalTravelS)||t.signalTravelS<0||
+   Math.abs(t.signalTravelS-(t.receivedAtS-t.observationAtS))>1e-5||
+   typeof o.observationId!=='string'||!o.observationId||o.observationId.length>160||
+   !Number.isFinite(o.measuredGravity)||o.measuredGravity<=0||!Number.isFinite(o.relativeError)||o.relativeError<=0||o.relativeError>1||
+   typeof o.transmitted!=='boolean'||ids.has(o.observationId)||science.receivedIds.includes(o.observationId)||
+   t.receivedAtS<lastAt||(t.receivedAtS===lastAt&&o.observationId.localeCompare(lastId)<0))return false;
+  ids.add(o.observationId);lastAt=t.receivedAtS;lastId=o.observationId;
+ }
+ return true;
 }
