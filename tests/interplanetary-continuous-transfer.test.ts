@@ -20,6 +20,9 @@ describe('continuous escape and solar coasting',()=>{
   expect(result!.arrival.massKg).toBe(result!.escape.heliocentric.massKg);
   expect(result!.arrival.timeS).toBe(plan.arrivalS);
   expect(result!.closestDistanceM).toBeGreaterThanOrEqual(0);
+  expect(result!.closestTimeS).toBeGreaterThanOrEqual(result!.escape.heliocentric.timeS);
+  expect(result!.closestTimeS).toBeLessThanOrEqual(plan.arrivalS);
+  expect(result!.closestDistanceM).toBeLessThanOrEqual(result!.arrivalDistanceM);
   expect(Number.isFinite(result!.arrivalDistanceM)).toBe(true);
   expect(result).toEqual(simulateContinuousTransfer(world,plan,vehicle));
  });
