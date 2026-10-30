@@ -5,6 +5,19 @@ const MAX_OUTPUT = 2 * 1024 * 1024;
 const MAX_LINES = 12;
 const MAX_LINE_LENGTH = 220;
 const results = [];
+let testSummary = null;
+
+// Read Vitest's aggregate test count without depending on suite or file names.
+function parseTestSummary(output) {
+  const line = output.replace(/\x1b\[[0-9;]*m/g, '').split(/\r?\n/)
+    .find(row => /^\s*Tests\s+(?:(?:\d+\s+(?:passed|failed|skipped|todo|pending)\b[^()]*)+)\(\d+\)/i.test(row));
+  if (!line) return null;
+  const total = Number(line.match(/\((\d+)\)/)?.[1]);
+  const passed = Number(line.match(/(\d+)\s+passed\b/i)?.[1] ?? 0);
+  const failed = Number(line.match(/(\d+)\s+failed\b/i)?.[1] ?? 0);
+  return Number.isSafeInteger(total) && passed + failed <= total ? { total, passed, failed } : null;
+}
+
 
 function compactErrors(output) {
   const lines = output
@@ -38,6 +51,7 @@ for (const [label, script] of checks) {
   });
   const passed = !result.error && result.status === 0;
   const output = (result.stdout ?? '') + '\n' + (result.stderr ?? '');
+  if (script === 'test') testSummary = parseTestSummary(output);
   const errors = passed ? [] : compactErrors(output || result.error?.message || 'No diagnostic output');
   if (result.error) errors.unshift(`Process error: ${result.error.message}`);
   results.push({ label, passed, errors, seconds: ((Date.now() - start) / 1000).toFixed(1) });
@@ -49,6 +63,7 @@ for (const { label, passed, errors, seconds } of results) {
   for (const error of errors.slice(0, MAX_LINES + 2)) console.log(`  ${error}`);
 }
 const failed = results.filter(result => !result.passed).length;
-console.log(`RESULT: ${results.length - failed}/${results.length} passed`);
+const testDetail = testSummary ? ` (${testSummary.passed}/${testSummary.total} tests passed${testSummary.failed ? `, ${testSummary.failed} failed` : ''})` : '';
+console.log(`RESULT: ${results.length - failed}/${results.length} passed${testDetail}`);
 console.log('=== END ORBITER REPORT ===');
 process.exitCode = failed ? 1 : 0;
