@@ -8,7 +8,7 @@ import type {FlightState} from './spaceflight/types';
 import {orbitalPosition} from './orbits';
 
 const SOLAR_MU=1.32712440018e20;
-export type ContinuousTransfer=Readonly<{injection:EscapeInjection;escape:EscapeResult;arrival:FlightState;closestDistanceM:number;closestTimeS:number;arrivalDistanceM:number}>;
+export type ContinuousTransfer=Readonly<{injection:EscapeInjection;escape:EscapeResult;arrival:FlightState;closestDistanceM:number;closestTimeS:number;closestRelativeSpeedMs:number;closestAltitudeM:number;arrivalDistanceM:number}>;
 
 /** Bridge ideal parking-orbit injection to a continuous, unpowered heliocentric coast.
  * Departure and escape states keep physical mass, fuel and absolute time. The
@@ -46,5 +46,15 @@ export function simulateContinuousTransfer(world:World,plan:TransferOpportunity,
  const refinedTime=(lo+hi)/2,refinedDistance=distanceAt(refinedTime);
  if(refinedDistance<closestDistanceM){closestDistanceM=refinedDistance;closestTimeS=refinedTime;}
  const arrival=stateAt(plan.arrivalS);
- return {injection,escape,arrival,closestDistanceM,closestTimeS,arrivalDistanceM:distanceAt(plan.arrivalS)};
+ const probe=stateAt(closestTimeS);
+ // Derive the target's inertial velocity from the same ephemeris used for position.
+ const dt=Math.min(10,target.orbit.period/1e6);
+ const before=orbitalPosition(target.orbit,closestTimeS-dt);
+ const after=orbitalPosition(target.orbit,closestTimeS+dt);
+ const relativeX=probe.velocity.x-(after.x-before.x)/(2*dt);
+ const relativeY=probe.velocity.y-(after.y-before.y)/(2*dt);
+ return {injection,escape,arrival,closestDistanceM,closestTimeS,
+  closestRelativeSpeedMs:Math.hypot(relativeX,relativeY),
+  closestAltitudeM:closestDistanceM-target.radius,
+  arrivalDistanceM:distanceAt(plan.arrivalS)};
 }
