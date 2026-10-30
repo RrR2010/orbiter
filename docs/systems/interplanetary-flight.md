@@ -67,3 +67,7 @@ Quando o solver universal do coast não converge em um intervalo hiperbólico lo
 ## Refinamento geométrico de aproximação (incremento 5B)
 
 A transferência contínua agora informa `closestTimeS` e refina a menor distância encontrada na vizinhança da melhor amostra por busca ternária determinística. O refinamento não modifica a trajetória nem decide sucesso; reduz erro de discretização local, mas ainda não prova que não existe outro mínimo mais estreito entre amostras. Testes verificam intervalo temporal e distância mínima não maior que a da chegada. É obrigatório encontrar um caso de flyby positivo e um miss reproduzível antes da integração ao scheduler.
+
+## Referência de encontro e miss (teste adicional, pendente de execução local)
+
+`tests/interplanetary-reference-encounter.test.ts` cria duas órbitas circulares sintéticas no mesmo plano, uma com fase de Hohmann adequada e outra deslocada em 0,6 radiano. Verifica proximidade física dentro do raio do planeta no primeiro cenário e miss distante no segundo, a partir de propagação heliocêntrica de dois corpos. **Este é um teste isolado do motor heliocêntrico**, não demonstra ainda o encontro após escape da superfície/SOI em um sistema procedural. Esse gate integrado permanece aberto.
