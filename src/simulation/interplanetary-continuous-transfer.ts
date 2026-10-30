@@ -8,7 +8,7 @@ import type {FlightState} from './spaceflight/types';
 import {orbitalPosition} from './orbits';
 
 const SOLAR_MU=1.32712440018e20;
-export type ContinuousTransfer=Readonly<{injection:EscapeInjection;escape:EscapeResult;arrival:FlightState;closestDistanceM:number;arrivalDistanceM:number}>;
+export type ContinuousTransfer=Readonly<{injection:EscapeInjection;escape:EscapeResult;arrival:FlightState;closestDistanceM:number;closestTimeS:number;arrivalDistanceM:number}>;
 
 /** Bridge ideal parking-orbit injection to a continuous, unpowered heliocentric coast.
  * Departure and escape states keep physical mass, fuel and absolute time. The
@@ -29,11 +29,22 @@ export function simulateContinuousTransfer(world:World,plan:TransferOpportunity,
   return Math.hypot(state.position.x-position.x,state.position.y-position.y);
  };
  const count=128;
- let closestDistanceM=Infinity;
+ let closestDistanceM=Infinity,closestTimeS=escape.heliocentric.timeS;
+ const start=escape.heliocentric.timeS,span=plan.arrivalS-start;
+ let bestIndex=0;
  for(let i=0;i<=count;i++){
-  const time=escape.heliocentric.timeS+(plan.arrivalS-escape.heliocentric.timeS)*i/count;
-  closestDistanceM=Math.min(closestDistanceM,distanceAt(time));
+  const time=start+span*i/count,distance=distanceAt(time);
+  if(distance<closestDistanceM){closestDistanceM=distance;closestTimeS=time;bestIndex=i;}
  }
+ // Refine the closest sampled neighborhood without changing the actual probe orbit.
+ let lo=start+span*Math.max(0,bestIndex-1)/count;
+ let hi=start+span*Math.min(count,bestIndex+1)/count;
+ for(let i=0;i<48;i++){
+  const third=(hi-lo)/3,a=lo+third,b=hi-third;
+  if(distanceAt(a)<=distanceAt(b))hi=b;else lo=a;
+ }
+ const refinedTime=(lo+hi)/2,refinedDistance=distanceAt(refinedTime);
+ if(refinedDistance<closestDistanceM){closestDistanceM=refinedDistance;closestTimeS=refinedTime;}
  const arrival=stateAt(plan.arrivalS);
- return {injection,escape,arrival,closestDistanceM,arrivalDistanceM:distanceAt(plan.arrivalS)};
+ return {injection,escape,arrival,closestDistanceM,closestTimeS,arrivalDistanceM:distanceAt(plan.arrivalS)};
 }
