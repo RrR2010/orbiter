@@ -18,7 +18,7 @@ export function propagatePlanetaryEscape(world:World,planetId:string,initial:Fli
  const r0=Math.hypot(initial.position.x,initial.position.y);
  const v2=initial.velocity.x**2+initial.velocity.y**2;
  const radial=(initial.position.x*initial.velocity.x+initial.position.y*initial.velocity.y)/r0;
- if(!Number.isFinite(r0)||r0<=planet.radius||r0>=radius||!Number.isFinite(v2)||radial<=0||
+ if(!Number.isFinite(r0)||r0<=planet.radius||r0>=radius||!Number.isFinite(v2)||radial<0||
   v2/2-mu/r0<=0||initial.massKg<=0||initial.fuelKg<0||initial.fuelKg>=initial.massKg)return null;
  // Long hyperbolic intervals can defeat the universal-variable Newton guess.
  // Retry using deterministic equal coast segments, without altering dynamics.
