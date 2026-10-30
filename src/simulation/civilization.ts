@@ -3,7 +3,7 @@ import {gravityForRadius} from './spaceflight/gravity';
 import {seededRandom} from '../core/random';
 import {initialScientificRecord,type ScientificRecord} from './scientific-knowledge';
 import type {World} from './world';
-import {MAX_PENDING_SCIENCE,type ScienceInbox} from './interplanetary-science-inbox';
+import {MAX_PENDING_SCIENCE,drainScience,type ScienceInbox} from './interplanetary-science-inbox';
 
 export type Technology='astronomy'|'rocketry'|'orbitalFlight'|'satellites';
 export type MissionStatus='preparing'|'ascending'|'success'|'failure';
@@ -36,11 +36,20 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
  if(!Number.isFinite(target)||target<c.time)throw new Error('Invalid target time');
  if(!Number.isSafeInteger(budget)||budget<1)throw new Error('Invalid event budget');
  let processed=0;
- while(c.nextAt<=target&&processed<budget){
-  const time=c.nextAt;processed++;
+ while(Math.min(c.nextAt,c.scienceInbox?.pending[0]?.transmission.receivedAtS??Infinity)<=target&&processed<budget){
+  const reception=c.scienceInbox?.pending[0]?.transmission.receivedAtS;
+  const time=reception!==undefined?Math.min(c.nextAt,Math.max(c.time,reception)):c.nextAt;
+  processed++;
   // Accrue resources and knowledge at deterministic event boundaries.
   accrue(c,time);
   c.time=time;
+  // Receive signals before a simultaneous strategic event. This is replay-safe.
+  if(c.scienceInbox?.pending.length&&c.science){
+   const delivered=drainScience(c.scienceInbox,c.science,time);
+   c.scienceInbox=delivered.inbox;c.science=delivered.record;
+   for(const id of delivered.deliveredIds)record(c,time,'research','Scientific observation received: '+id);
+  }
+  if(time<c.nextAt)continue;
   const mission=c.missions.find(m=>m.status==='preparing'||m.status==='ascending');
   if(mission?.status==='preparing'){
    const home=world.bodies.find(b=>b.id===mission.originId);
@@ -75,7 +84,7 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
   }else c.nextAt=time+RECOVERY_SECONDS;
  }
  // Work cap never discards simulation debt; caller must resume before drawing an advanced timeline.
- if(c.nextAt>target){
+ if(Math.min(c.nextAt,c.scienceInbox?.pending[0]?.transmission.receivedAtS??Infinity)>target){
   accrue(c,target);
   c.time=target;
  }
