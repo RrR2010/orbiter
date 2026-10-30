@@ -38,3 +38,7 @@ Interface inclui duas opções independentes no observatório (ênfase cinematog
 ### Organização global de UI na Fase 4
 
 `src/main.ts` reorganiza nós DOM existentes do Observatório em páginas **Corpos / Missões / Camadas**, com `aria-selected` e persistência independente de aba (`orbiter.observatory-tab.v1`). Não duplica AP/PE em histórico textual quando o HUD já fornece essa informação. Header agrupa controles de tempo e visualização sem mudar IDs ou eventos; rodapé mostra tempo, seed/corpos, missão acompanhada, status e ajuda de atalhos recolhível. A página Missões permanece disponível mesmo após seleção de outro corpo. Todos os botões originais continuam conectados aos seus handlers.
+
+### Navegador visual e acabamento cinematográfico (Fase 4)
+
+Na página Corpos, `renderBodyNavigator` em `src/main.ts` acrescenta botões de seleção de estrela e planetas com marcador visual derivado de `body.color` e texto real do mundo. Não substitui `#body-list`, que permanece para acesso às luas e como controle completo. O navegador chama o mesmo comando `select`, sem alterar estado físico. O rodapé usa estado verdadeiro de pausa/execução para o sinalizador de simulação. `src/style.css` define a nova pele cinematográfica para navegador, controles, Observatório, HUD e status. Testar contraste, layout compacto e reload; CI ainda pendente.
