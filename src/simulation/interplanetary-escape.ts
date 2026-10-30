@@ -20,7 +20,21 @@ export function propagatePlanetaryEscape(world:World,planetId:string,initial:Fli
  const radial=(initial.position.x*initial.velocity.x+initial.position.y*initial.velocity.y)/r0;
  if(!Number.isFinite(r0)||r0<=planet.radius||r0>=radius||!Number.isFinite(v2)||radial<=0||
   v2/2-mu/r0<=0||initial.massKg<=0||initial.fuelKg<0||initial.fuelKg>=initial.massKg)return null;
- const stateAt=(dt:number):FlightState=>propagateCoast(initial,gravity,dt);
+ // Long hyperbolic intervals can defeat the universal-variable Newton guess.
+ // Retry using deterministic equal coast segments, without altering dynamics.
+ const stateAt=(dt:number):FlightState=>{
+  for(let segments=1;segments<=1024;segments*=2){
+   try{
+    let state=initial;
+    const step=dt/segments;
+    for(let i=0;i<segments;i++)state=propagateCoast(state,gravity,step);
+    return state;
+   }catch(error){
+    if(!(error instanceof Error)||!error.message.startsWith('Coast solver'))throw error;
+   }
+  }
+  throw new Error('Escape coast could not converge within segmentation budget');
+ };
  let lo=0,hi=Math.min(3600,maxDurationS);
  // A monotonically outgoing hyperbola eventually crosses the SOI. Bound work.
  while(Math.hypot(stateAt(hi).position.x,stateAt(hi).position.y)<radius){
