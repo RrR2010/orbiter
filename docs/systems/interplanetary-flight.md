@@ -99,3 +99,7 @@ A transferência contínua agora informa `closestTimeS` e refina a menor distân
 ## Política de save durante a Fase 5 (decisão do PO de 2026-10-30)
 
 O PO dispensou compatibilidade com saves antigos pré-release. A implementação atual ainda contém caminhos de migração V2 por histórico incremental, mas eles **não são mais requisitos** e podem ser removidos em refatorações posteriores; campos novos podem exigir um save limpo. Permanecem obrigatórios validação do formato atual, persistência causal de observações recebidas/pendentes e determinismo no replay. Ver ADR-0017.
+
+## Integração de recepção ao scheduler (incremento 5C; validação local pendente)
+
+`advanceCivilization` compara o próximo evento estratégico com a recepção mais próxima na `scienceInbox` e avança para o primeiro evento vencido; o processamento de ciência ocorre antes de qualquer evento estratégico simultâneo. `drainScience` atualiza o registro apenas quando a recepção realmente ocorre, remove sinais entregues e escreve no histórico o recebimento, sem alterar as decisões de lançamento local. A interrupção por orçamento de eventos conserva a dívida temporal, inclusive recepções pendentes. `tests/interplanetary-scheduler-reception.test.ts` cobre recepção futura, múltiplas partições de warp, recarga intermediária e não duplicação. **Ainda não há emissão a partir de missões reais nem encontro integrado**; a integração observa somente itens já enfileirados.
