@@ -42,3 +42,7 @@ Interface inclui duas opções independentes no observatório (ênfase cinematog
 ### Navegador visual e acabamento cinematográfico (Fase 4)
 
 Na página Corpos, `renderBodyNavigator` em `src/main.ts` acrescenta botões de seleção de estrela e planetas com marcador visual derivado de `body.color` e texto real do mundo. Não substitui `#body-list`, que permanece para acesso às luas e como controle completo. O navegador chama o mesmo comando `select`, sem alterar estado físico. O rodapé usa estado verdadeiro de pausa/execução para o sinalizador de simulação. `src/style.css` define a nova pele cinematográfica para navegador, controles, Observatório, HUD e status. Testar contraste, layout compacto e reload; CI ainda pendente.
+
+### Polimento de navegação e ajuda
+
+O balão de atalhos agora fecha por clique externo ou Esc (primeiro Esc consome o evento quando o balão está aberto). O rodapé reserva espaço flexível à mensagem operacional, com prioridades em breakpoints menores. O navegador visual distingue o próprio planeta selecionado de uma lua selecionada sob ele: o planeta pai recebe classe `contains-selection`, sem modificar `selectedId`. Sem alteração na simulação ou em saves V2.
