@@ -63,3 +63,7 @@ Quando o solver universal do coast não converge em um intervalo hiperbólico lo
 ## Transferência contínua experimental (incremento 5B)
 
 `src/simulation/interplanetary-continuous-transfer.ts` conecta a injeção impulsiva ideal de órbita de estacionamento, a propagação hiperbólica planetocêntrica até a SOI, o handoff de posição/velocidade e o coast heliocêntrico até o tempo previsto de chegada. A massa e combustível atravessam o handoff sem alteração, e o resultado reporta distância real ao destino em amostras fixas da viagem, sem declarar encontro ou sucesso. `tests/interplanetary-continuous-transfer.test.ts` verifica conservação de estado, tempo absoluto e falta de propelente. **Não há ainda lançamento físico da superfície, otimização do vetor de injeção para o destino, prova robusta da distância mínima ou integração à civilização.** A distância mínima amostrada pode perder uma aproximação estreita; a etapa permanece experimental.
+
+## Refinamento geométrico de aproximação (incremento 5B)
+
+A transferência contínua agora informa `closestTimeS` e refina a menor distância encontrada na vizinhança da melhor amostra por busca ternária determinística. O refinamento não modifica a trajetória nem decide sucesso; reduz erro de discretização local, mas ainda não prova que não existe outro mínimo mais estreito entre amostras. Testes verificam intervalo temporal e distância mínima não maior que a da chegada. É obrigatório encontrar um caso de flyby positivo e um miss reproduzível antes da integração ao scheduler.
