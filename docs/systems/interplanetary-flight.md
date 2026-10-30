@@ -71,3 +71,7 @@ A transferência contínua agora informa `closestTimeS` e refina a menor distân
 ## Referência de encontro e miss (teste adicional, pendente de execução local)
 
 `tests/interplanetary-reference-encounter.test.ts` cria duas órbitas circulares sintéticas no mesmo plano, uma com fase de Hohmann adequada e outra deslocada em 0,6 radiano. Verifica proximidade física dentro do raio do planeta no primeiro cenário e miss distante no segundo, a partir de propagação heliocêntrica de dois corpos. **Este é um teste isolado do motor heliocêntrico**, não demonstra ainda o encontro após escape da superfície/SOI em um sistema procedural. Esse gate integrado permanece aberto.
+
+## Telemetria geométrica do encontro (incremento 5B)
+
+`simulateContinuousTransfer` também retorna `closestAltitudeM` (distância mínima ao centro menos raio físico do destino) e `closestRelativeSpeedMs`, derivada da velocidade heliocêntrica da sonda menos a velocidade inferida das efemérides do destino no instante da aproximação. São dados do cenário físico propagado, não previsões de sucesso. Altitude negativa indica interseção geométrica com o corpo **sem simulação de impacto/captura**; não classificá-la automaticamente como sobrevôo científico. O teste correspondente verifica finitude, consistência da altitude e determinismo. O primeiro flyby positivo após handoff e o miss integrado continuam gates abertos.
