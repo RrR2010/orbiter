@@ -1,13 +1,14 @@
 import {createAutonomousFlightV2,resolveAutonomousFlightV2,type AutonomousFlightResultV2} from './spaceflight/flight-v2';
 import {gravityForRadius} from './spaceflight/gravity';
 import {seededRandom} from '../core/random';
+import {initialScientificRecord,type ScientificRecord} from './scientific-knowledge';
 import type {World} from './world';
 
 export type Technology='astronomy'|'rocketry'|'orbitalFlight'|'satellites';
 export type MissionStatus='preparing'|'ascending'|'success'|'failure';
 export type Mission={id:string;originId:string;targetId:string;startedAt:number;launchAt:number;resolvedAt:number;status:MissionStatus;success:boolean|null;vehicleId:string;flight?:AutonomousFlightResultV2};
 export type SpaceEvent={id:string;time:number;kind:'research'|'preparation'|'launch'|'success'|'failure';missionId:string|null;detail:string};
-export type Civilization={version:2;id:string;homeId:string;seed:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number};
+export type Civilization={version:2;id:string;homeId:string;seed:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number;science?:ScientificRecord};
 const TECH:readonly Technology[]=['astronomy','rocketry','orbitalFlight','satellites'];
 const RESEARCH_COST=[30,60,100,150];
 const RESEARCH_SECONDS=[900,1800,3600,7200];
@@ -22,7 +23,7 @@ export function createCivilization(world:World,time=0):Civilization{
  const planets=world.bodies.filter(b=>b.kind==='planet');
  const home=planets[Math.floor(probability(world.seed,'home')*planets.length)];
  if(!home||!Number.isFinite(time)||time<0)throw new Error('Invalid civilization origin');
- return {version:2,id:'civilization-0',homeId:home.id,seed:world.seed,time,accruedAt:time,stage:0,knowledge:0,resources:80,nextAt:time+RESEARCH_SECONDS[0],missionSerial:0,missions:[],events:[],successes:0,failures:0};
+ return {version:2,id:'civilization-0',homeId:home.id,seed:world.seed,time,accruedAt:time,stage:0,knowledge:0,resources:80,nextAt:time+RESEARCH_SECONDS[0],missionSerial:0,missions:[],events:[],successes:0,failures:0,science:initialScientificRecord(world)};
 }
 function record(c:Civilization,time:number,kind:SpaceEvent['kind'],detail:string,missionId:string|null=null):void{
  c.events.push({id:'event-'+time+'-'+kind+'-'+c.missionSerial,time,kind,detail,missionId});
@@ -93,6 +94,24 @@ export function parseCivilization(raw:string|null,world:World,time:number):Civil
    v.missions.some(m=>!m.id||!['preparing','ascending','success','failure'].includes(m.status)||m.flight?.version!==undefined&&m.flight.version!==2))throw Error();
   // Astronomy is authoritative; a future strategic save must not rewind orbital time.
   if(v.time>time)throw Error();
+  // V2 saves predating scientific records gain only initial estimates; never retroactively grant observations.
+  if(v.science===undefined){v.science=initialScientificRecord(world);}
+  else if(!isValidScientificRecord(v.science,world))throw Error('Invalid scientific record');
   return v;
  }catch{return createCivilization(world,time);}
+}
+
+/** Validate scientific save boundaries before returning untrusted persisted state. */
+function isValidScientificRecord(value:unknown,world:World):value is ScientificRecord{
+ if(!value||typeof value!=='object')return false;
+ const record=value as Partial<ScientificRecord>;
+ if(!record.knowledge||typeof record.knowledge!=='object'||Array.isArray(record.knowledge)||!Array.isArray(record.receivedIds)||record.receivedIds.length>10000)return false;
+ if(record.receivedIds.some(id=>typeof id!=='string'||!id||id.length>160)||new Set(record.receivedIds).size!==record.receivedIds.length)return false;
+ const planetIds=world.bodies.filter(body=>body.kind==='planet').map(body=>body.id);
+ if(Object.keys(record.knowledge).length!==planetIds.length)return false;
+ return planetIds.every(id=>{
+  const entry=record.knowledge?.[id];
+  const estimate=entry?.gravity;
+  return entry?.bodyId===id&&!!estimate&&Number.isFinite(estimate.value)&&estimate.value>0&&Number.isFinite(estimate.uncertainty)&&estimate.uncertainty>0&&Number.isSafeInteger(estimate.observations)&&estimate.observations>=0;
+ });
 }
