@@ -24,6 +24,9 @@ describe('continuous escape and solar coasting',()=>{
   expect(result!.closestTimeS).toBeLessThanOrEqual(plan.arrivalS);
   expect(result!.closestDistanceM).toBeLessThanOrEqual(result!.arrivalDistanceM);
   expect(Number.isFinite(result!.arrivalDistanceM)).toBe(true);
+  expect(result!.closestAltitudeM).toBeCloseTo(result!.closestDistanceM-target.radius,4);
+  expect(result!.closestRelativeSpeedMs).toBeGreaterThanOrEqual(0);
+  expect(Number.isFinite(result!.closestRelativeSpeedMs)).toBe(true);
   expect(result).toEqual(simulateContinuousTransfer(world,plan,vehicle));
  });
  it('does not transfer without adequate injection propellant',()=>{
