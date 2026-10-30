@@ -11,3 +11,7 @@ Em `src/main.ts`: `CIV_KEY='orbiter.civilization.v2'`, save astronômico `SAVE_K
 
 ## Limites e testes
 Validação estrutural estratégica não verifica recursivamente todos os campos internos de cada checkpoint/resultado, nem realiza escrita atômica/rollback; um JSON formalmente plausível mas corrompido internamente pode passar validação. `src/persistence/save.ts` valida separadamente versão/seed/time/warp/câmera do save de mundo. Sem backup, import/export, migração V1 ou avanço offline. `tests/civilization.test.ts` comprova recarga equivalente, seed divergente, limites e reset com save ausente; `tests/v2-reset.test.ts` rejeita versão legada e preserva checkpoints ao serializar. Contratos de eventos: [scheduler](mission-scheduler.md).
+
+## Extensão em desenvolvimento — Fase 5A (branch, ainda não integrada)
+
+Campo aditivo `Civilization.science` para estimativas gravitacionais e IDs de observações já recebidas. Saves V2 antigos sem o campo recebem priors determinísticos, sem alteração de missões, eventos, recursos ou do clock. Registros científicos existentes são validados ao carregar; formato malformado segue a política de rejeição já existente (reinicialização estratégica), um risco a revisar antes do merge. `tests/scientific-knowledge.test.ts` cobre legado, continuidade e deduplicação. A fase permanece em desenvolvimento e o contrato final será revisado depois da integração.
