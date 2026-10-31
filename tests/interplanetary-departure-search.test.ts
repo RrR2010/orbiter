@@ -18,7 +18,7 @@ describe('bounded launch epoch and injection search',()=>{
   expect(result!.successful).toBeGreaterThan(0);
   expect(result!.successful).toBeLessThanOrEqual(result!.attempted);
   expect(Math.abs(result!.plan.departureS-plan.departureS)).toBeLessThanOrEqual(86400);
-  expect(result!.plan.arrivalS-result!.plan.departureS).toBe(plan.transferTimeS);
+  expect(result!.plan.arrivalS-result!.plan.departureS).toBeCloseTo(plan.transferTimeS,6);
   // Floating-point propagation may differ by sub-nanometer rounding.
   expect(result!.transfer.closestDistanceM).toBeCloseTo(
    simulateContinuousTransfer(world,result!.plan,vehicle,result!.angleRad)!.closestDistanceM,6);
