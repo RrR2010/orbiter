@@ -10,18 +10,18 @@ export type InterplanetaryProbeSymbol=Readonly<{
  position:Vec2;state:FlightState;phase:InterplanetaryMissionPhase;
 }>;
 
-/** Render a probe only on the physically defined corrected coast leg.
- * Earlier departure/SOI flight needs its own saved conic patch; never draw
- * a fabricated straight line between planets.
+/** Render physical heliocentric coast before and after the correction.
+ * The departure-to-SOI escape leg remains unrendered without its planetary patch.
  */
 export function interplanetaryProbeSymbols(c:Readonly<Civilization>,timeS:number):InterplanetaryProbeSymbol[]{
  if(!Number.isFinite(timeS)||timeS<0)throw new Error('Invalid probe display time');
  return (c.interplanetaryTimelines??[]).flatMap(timeline=>{
-  const {manifest}=timeline,origin=manifest.correctedCoastStart;
-  if(!origin||timeS<origin.timeS||timeS>manifest.arrivalS||
-   timeline.cursor===0)return [];
+  const {manifest}=timeline,corrected=manifest.correctedCoastStart;
+  if(!corrected||timeS>manifest.arrivalS||timeline.cursor===0)return [];
   const view=interplanetaryMissionView(timeline);
-  if(view.phase==='scheduled'||view.phase==='coasting')return [];
+  if(view.phase==='scheduled')return [];
+  const origin=timeS<corrected.timeS?manifest.preCorrectionCoastStart:corrected;
+  if(!origin||timeS<origin.timeS)return [];
   const state=propagateCoast(origin,SOLAR_GRAVITY,timeS-origin.timeS);
   return [{missionId:timeline.missionId,originId:manifest.originId,
    targetId:manifest.targetId,position:state.position,state,phase:view.phase}];
