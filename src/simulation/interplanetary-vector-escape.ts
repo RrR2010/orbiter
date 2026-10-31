@@ -5,7 +5,6 @@ import type {FlightState} from './spaceflight/types';
 import {planLambertDeparture,type LambertDeparture} from './interplanetary-lambert-departure';
 import {propagatePlanetaryEscape,type EscapeResult} from './interplanetary-escape';
 
-const G0=9.80665;
 const rotate=(v:Vec2,angle:number):Vec2=>({
  x:v.x*Math.cos(angle)-v.y*Math.sin(angle),
  y:v.x*Math.sin(angle)+v.y*Math.cos(angle),
