@@ -19,8 +19,9 @@ describe('bounded launch epoch and injection search',()=>{
   expect(result!.successful).toBeLessThanOrEqual(result!.attempted);
   expect(Math.abs(result!.plan.departureS-plan.departureS)).toBeLessThanOrEqual(86400);
   expect(result!.plan.arrivalS-result!.plan.departureS).toBe(plan.transferTimeS);
-  expect(result!.transfer.closestDistanceM).toBe(
-   simulateContinuousTransfer(world,result!.plan,vehicle,result!.angleRad)!.closestDistanceM);
+  // Floating-point propagation may differ by sub-nanometer rounding.
+  expect(result!.transfer.closestDistanceM).toBeCloseTo(
+   simulateContinuousTransfer(world,result!.plan,vehicle,result!.angleRad)!.closestDistanceM,6);
   expect(result).toEqual(searchInterplanetaryDeparture(world,plan,vehicle,86400,2,2));
  });
  it('never plans an invalid interval or manufactures fuel',()=>{
