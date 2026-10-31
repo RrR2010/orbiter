@@ -101,7 +101,10 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
   }else if(c.resources>=LAUNCH_RESOURCE_COST){
    // Prefer a proven physical interplanetary flyby; otherwise preserve the
    // existing local mission path without charging for failed proposals.
-   const probe=authorizeInterplanetaryLaunch(c,world);
+   const canExplore=c.knowledge>=3000&&
+    c.missions.some(m=>m.status==='success')&&
+    !c.interplanetaryTimelines?.length;
+   const probe=canExplore?authorizeInterplanetaryLaunch(c,world):null;
    if(probe){
     record(c,time,'preparation','Interplanetary probe authorized for '+probe.manifest.targetId,probe.missionId);
     c.nextAt=time+RECOVERY_SECONDS;
