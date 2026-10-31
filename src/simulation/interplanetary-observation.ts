@@ -1,6 +1,6 @@
 import {seededRandom} from '../core/random';
 import {gravityForRadius} from './spaceflight/gravity';
-import {orbitalPosition} from './orbits';
+import {propagateCoast} from './spaceflight/coast';
 import {scheduleScienceTransmission} from './interplanetary-communications';
 import {assessPlanetaryApproach} from './interplanetary-approach';
 import type {ContinuousTransfer} from './interplanetary-continuous-transfer';
@@ -18,7 +18,8 @@ export function scienceFromPhysicalFlyby(
  if(!target||target.kind!=='planet'||!target.orbit||!missionId)return null;
  if(assessPlanetaryApproach(transfer,target).outcome!=='flyby')return null;
  const observationAtS=transfer.closestTimeS;
- const position=orbitalPosition(target.orbit,observationAtS);
+ const position=propagateCoast(transfer.escape.heliocentric,{radiusM:1,muM3S2:1.32712440018e20},
+  observationAtS-transfer.escape.heliocentric.timeS).position;
  const gravity=gravityForRadius(target.radius).muM3S2/(target.radius*target.radius);
  const random=seededRandom('orbiter:flyby:sensor:v1:'+world.seed+':'+missionId+':'+targetId);
  const relativeError=.05+random()*.10;
