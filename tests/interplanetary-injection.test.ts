@@ -37,6 +37,16 @@ describe('escape injection from established parking orbit',()=>{
   const radial=injection.state.position.x*velocity.x+injection.state.position.y*velocity.y;
   expect(Math.abs(radial)).toBeLessThan(1e-3);
  });
+ it('changes physical heading without changing the required ideal burn',()=>{
+  const base=planEscapeInjection(home,target,opportunity,vehicle,opportunity.departureS)!;
+  const steered=planEscapeInjection(home,target,opportunity,vehicle,opportunity.departureS,.15)!;
+  expect(steered.burnDeltaVMs).toBeCloseTo(base.burnDeltaVMs,9);
+  expect(steered.fuelSpentKg).toBeCloseTo(base.fuelSpentKg,9);
+  expect(steered.state.velocity).not.toEqual(base.state.velocity);
+  expect(Math.hypot(steered.state.velocity.x,steered.state.velocity.y))
+   .toBeCloseTo(Math.hypot(base.state.velocity.x,base.state.velocity.y),8);
+  expect(()=>planEscapeInjection(home,target,opportunity,vehicle,opportunity.departureS,Math.PI)).toThrow();
+ });
  it('cannot inject with insufficient propellant',()=>{
   expect(planEscapeInjection(home,target,opportunity,{...vehicle,fuelKg:0},opportunity.departureS)).toBeNull();
  });
