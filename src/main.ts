@@ -146,6 +146,46 @@ function renderMissionPanel():void{
   const toggle=document.createElement('button');toggle.type='button';toggle.textContent='Encerrar acompanhamento';toggle.addEventListener('click',()=>{trackedMissionId=null;});
   hud.replaceChildren(heading,primary,orbit,secondary,target,toggle);
  }
+ const probeTimeline=civilization.interplanetaryTimelines?.find(t=>t.missionId===trackedMissionId);
+ if(probeTimeline&&!observatory.ambient){
+  const view=interplanetaryMissionView(probeTimeline);
+  const physical=interplanetaryProbeSymbols(civilization,clock.time).find(s=>s.missionId===trackedMissionId);
+  const destination=world.bodies.find(b=>b.id===view.targetId);
+  const heading=document.createElement('div');heading.className='mission-hud-heading';
+  const title=document.createElement('strong');title.textContent=view.missionId+' · '+({
+   scheduled:'Programada',coasting:'Em transferência',corrected:'Trajetória corrigida',
+   encountered:'Sobrevoo realizado',complete:'Transferência concluída'
+  } as const)[view.phase];
+  const subtitle=document.createElement('small');
+  subtitle.textContent=(destination?.name??view.targetId)+' · referencial heliocêntrico';
+  heading.append(title,subtitle);
+  const primary=document.createElement('div');primary.className='mission-hud-primary';
+  const metrics:[string,string][]=[
+   ['VELOCIDADE',physical?(Math.hypot(physical.state.velocity.x,physical.state.velocity.y)/1000).toFixed(2)+' km/s':'N/D'],
+   ['PROPELENTE',view.phase==='scheduled'?'N/D':view.fuelRemainingKg.toFixed(1)+' kg'],
+   ['DISTÂNCIA AO ALVO','N/D']
+  ];
+  if(physical&&destination?.orbit){
+   const center=positionsAt(world,clock.time).get(view.targetId);
+   if(center)metrics[2][1]=(Math.hypot(physical.position.x-center.x,physical.position.y-center.y)/1000).toFixed(0)+' km';
+  }
+  for(const [label,value] of metrics){
+   const item=document.createElement('div');item.className='mission-hud-instrument';
+   const name=document.createElement('small');name.className='mission-hud-label';name.textContent=label;
+   const number=document.createElement('strong');number.className='mission-hud-value';number.textContent=value;
+   item.append(name,number);primary.append(item);
+  }
+  const secondary=document.createElement('div');secondary.className='mission-hud-secondary';
+  secondary.textContent='Manobra confirmada: '+(view.correctionDeltaVMs>0?view.correctionDeltaVMs.toFixed(1)+' m/s':'Pendente')+
+   ' · Resultado: '+(view.outcome==='pending'?'Aguardando aproximação':view.outcome)+
+   ' · Marcos restantes: '+view.remainingMilestones;
+  const footnote=document.createElement('div');footnote.className='mission-hud-footnote';
+  footnote.textContent=physical?'Telemetria física do trecho pós-correção.':'Posição instantânea indisponível antes da correção ou após a chegada.';
+  const toggle=document.createElement('button');toggle.type='button';toggle.textContent='Encerrar acompanhamento';
+  toggle.addEventListener('click',()=>{trackedMissionId=null;});
+  hud.replaceChildren(heading,primary,secondary,footnote,toggle);
+  hud.hidden=false;
+ }
  const upcoming=civilization.missions.filter(m=>m.status==='preparing'&&m.launchAt>=clock.time).sort((a,b)=>a.launchAt-b.launchAt||a.id.localeCompare(b.id)).slice(0,5);
  agenda.hidden=observatory.ambient||upcoming.length===0;
  if(!agenda.hidden){
