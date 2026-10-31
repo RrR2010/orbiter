@@ -30,3 +30,31 @@ export function searchInterplanetaryAim(
  }
  return best;
 }
+
+/** Refine the best coarse heading with a bounded local grid.
+ * Coarse candidates remain eligible, so refinement cannot worsen the measured
+ * closest approach. Numerical failures only invalidate the candidate being tried.
+ */
+export function refineInterplanetaryAim(
+ world:World,plan:TransferOpportunity,vehicle:VehicleCapability,steps=16,refinements=8,
+):AimSolution|null{
+ if(!Number.isSafeInteger(refinements)||refinements<1||refinements>32)
+  throw new Error('Invalid aim refinement budget');
+ const coarse=searchInterplanetaryAim(world,plan,vehicle,steps);
+ if(!coarse)return null;
+ let best=coarse;
+ const width=Math.PI/steps;
+ for(let i=1;i<=refinements;i++){
+  const angleRad=Math.max(-Math.PI/2,Math.min(Math.PI/2,
+   coarse.angleRad-width+2*width*i/(refinements+1)));
+  let transfer:ContinuousTransfer|null;
+  try{transfer=simulateContinuousTransfer(world,plan,vehicle,angleRad);}
+  catch(error){
+   if(!(error instanceof Error)||!error.message.includes('Coast solver'))throw error;
+   continue;
+  }
+  if(transfer&&transfer.closestDistanceM<best.transfer.closestDistanceM)
+   best={angleRad,transfer,attempts:steps+1+refinements};
+ }
+ return {...best,attempts:steps+1+refinements};
+}
