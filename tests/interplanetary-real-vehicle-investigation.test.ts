@@ -23,6 +23,8 @@ describe('real vehicle interplanetary feasibility investigation',()=>{
    const adjusted=plan?findLambertLaunchWindow(world,plan,vehicle):null;
    const manifest=plan?prepareInterplanetaryMission(world,plan.originId,plan.targetId,
     plan.departureS,plan.arrivalS,vehicle):null;
+   const adjustedManifest=adjusted?prepareInterplanetaryMission(world,plan!.originId,plan!.targetId,
+    adjusted.departureS,adjusted.arrivalS,vehicle):null;
    const diagnostic={
     seed,homeId:home.id,technologyStage:c.stage,vehicleIspS:vehicle.ispS,
     vehicleDeltaVMs:vehicle.deltaVMs,vehicleFuelKg:vehicle.fuelKg,
@@ -35,6 +37,10 @@ describe('real vehicle interplanetary feasibility investigation',()=>{
     adjustedOffsetS:adjusted?.offsetS??null,
     adjustedLambertBurnDeltaVMs:adjusted?.plan.burnDeltaVMs??null,
     physicalManifestAvailable:manifest!==null,
+    adjustedManifestAvailable:adjustedManifest!==null,
+    adjustedPhysicalOutcome:adjustedManifest?.outcome??null,
+    adjustedClosestAltitudeM:adjustedManifest?.closestAltitudeM??null,
+    adjustedRemainingFuelKg:adjustedManifest?.remainingFuelKg??null,
     physicalOutcome:manifest?.outcome??null,
     remainingFuelKg:manifest?.remainingFuelKg??null,
    };
