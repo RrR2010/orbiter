@@ -42,7 +42,7 @@ export function parseMissionTimeline(raw:string):MissionTimeline{
   t.manifest.milestones.some((m,i)=>!m||!Number.isFinite(m.timeS)||
    m.timeS<t.manifest.departureS||m.timeS>t.manifest.arrivalS||
    i>0&&m.timeS<t.manifest.milestones[i-1].timeS||
-   (i<t.cursor?m.timeS>t.timeS:m.timeS<=t.timeS)))
+   (i<t.cursor?m.timeS>t.timeS:m.timeS<=t.timeS&&!(t.cursor===0&&t.timeS===t.manifest.departureS))))
   throw new Error('Invalid persisted timeline');
  return t;
 }
