@@ -12,9 +12,10 @@ export type EscapeInjection=Readonly<{state:FlightState;burnDeltaVMs:number;fuel
  * This is not a launch vehicle or ascent simulation. The rocket equation conserves
  * dry mass and consumes real propellant for the specified ideal impulse.
  */
-export function planEscapeInjection(home:Body,target:Body,opportunity:TransferOpportunity,vehicle:VehicleCapability,timeS:number):EscapeInjection|null{
+export function planEscapeInjection(home:Body,target:Body,opportunity:TransferOpportunity,vehicle:VehicleCapability,timeS:number,aimOffsetRad=0):EscapeInjection|null{
  if(home.kind!=='planet'||target.kind!=='planet'||!home.orbit||!target.orbit||
-  home.id!==opportunity.originId||target.id!==opportunity.targetId||!Number.isFinite(timeS))throw new Error('Invalid escape injection');
+  home.id!==opportunity.originId||target.id!==opportunity.targetId||!Number.isFinite(timeS)||
+  !Number.isFinite(aimOffsetRad)||Math.abs(aimOffsetRad)>Math.PI/2)throw new Error('Invalid escape injection');
  const mu=gravityForRadius(home.radius).muM3S2;
  const parkingRadius=home.radius+Math.max(120000,home.radius*.025);
  const parkingSpeed=Math.sqrt(mu/parkingRadius);
@@ -34,7 +35,9 @@ export function planEscapeInjection(home:Body,target:Body,opportunity:TransferOp
  const before=orbitalPosition(home.orbit,timeS-step),after=orbitalPosition(home.orbit,timeS+step);
  const dx=after.x-before.x,dy=after.y-before.y,norm=Math.hypot(dx,dy);
  if(!(norm>0&&Number.isFinite(norm)))throw new Error('Invalid planetary departure velocity');
- const sign=outward?1:-1,ux=sign*dx/norm,uy=sign*dy/norm;
+ const sign=outward?1:-1,baseX=sign*dx/norm,baseY=sign*dy/norm;
+ const cosine=Math.cos(aimOffsetRad),sine=Math.sin(aimOffsetRad);
+ const ux=baseX*cosine-baseY*sine,uy=baseX*sine+baseY*cosine;
  // A tangent parking state has zero initial radial velocity but positive energy.
  const state:FlightState={position:{x:uy*parkingRadius,y:-ux*parkingRadius},
   velocity:{x:ux*injectionSpeed,y:uy*injectionSpeed},
