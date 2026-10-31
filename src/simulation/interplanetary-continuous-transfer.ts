@@ -14,11 +14,11 @@ export type ContinuousTransfer=Readonly<{injection:EscapeInjection;escape:Escape
  * Departure and escape states keep physical mass, fuel and absolute time. The
  * closest-distance check reports geometry only, never declares scientific success.
  */
-export function simulateContinuousTransfer(world:World,plan:TransferOpportunity,vehicle:VehicleCapability):ContinuousTransfer|null{
+export function simulateContinuousTransfer(world:World,plan:TransferOpportunity,vehicle:VehicleCapability,aimOffsetRad=0):ContinuousTransfer|null{
  const home=world.bodies.find(body=>body.id===plan.originId);
  const target=world.bodies.find(body=>body.id===plan.targetId);
  if(!home||!target||target.kind!=='planet'||!target.orbit)return null;
- const injection=planEscapeInjection(home,target,plan,vehicle,plan.departureS);
+ const injection=planEscapeInjection(home,target,plan,vehicle,plan.departureS,aimOffsetRad);
  if(!injection)return null;
  const escape=propagatePlanetaryEscape(world,home.id,injection.state);
  if(!escape||escape.heliocentric.timeS>=plan.arrivalS)return null;
