@@ -62,12 +62,13 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
    for(const id of delivered.deliveredIds)record(c,time,'research','Scientific observation received: '+id);
   }
   for(const timeline of c.interplanetaryTimelines??[]){
+   if(time<timeline.timeS)continue;
    const result=advanceMissionTimeline(timeline,time);
    const index=c.interplanetaryTimelines!.indexOf(timeline);
    c.interplanetaryTimelines![index]=result.timeline;
    for(const milestone of result.emitted)
     record(c,milestone.timeS,milestone.kind==='course-correction'?'launch':
-     milestone.kind==='closest-approach'?'success':'preparation',
+     milestone.kind==='closest-approach'?(timeline.manifest.outcome==='flyby'?'success':'failure'):'preparation',
      'Interplanetary '+milestone.kind+': '+milestone.detail,timeline.missionId);
   }
   if(time<c.nextAt)continue;
@@ -134,7 +135,7 @@ export function parseCivilization(raw:string|null,world:World,time:number):Civil
   if(!Array.isArray(v.interplanetaryTimelines)||v.interplanetaryTimelines.length>60)throw Error();
   v.interplanetaryTimelines=v.interplanetaryTimelines.map(t=>parseMissionTimeline(JSON.stringify(t)));
   if(new Set(v.interplanetaryTimelines.map(t=>t.missionId)).size!==v.interplanetaryTimelines.length||
-   v.interplanetaryTimelines.some(t=>t.timeS>v.time))throw Error();
+   v.interplanetaryTimelines.some(t=>t.manifest.departureS<0))throw Error();
   return v;
  }catch{return createCivilization(world,time);}
 }
