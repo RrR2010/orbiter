@@ -19,8 +19,10 @@ export type MidcourseCorrection=Readonly<{
 
 export function correctLambertMidcourse(
  world:World,originId:string,targetId:string,departureS:number,arrivalS:number,
- vehicle:VehicleCapability,checkpointFraction=.5,
+ vehicle:VehicleCapability,checkpointFraction=.5,aimOffsetRadii=0,
 ):MidcourseCorrection|null{
+ if(!Number.isFinite(aimOffsetRadii)||aimOffsetRadii<0||aimOffsetRadii>10)
+  throw new Error('Invalid flyby aim offset');
  if(!Number.isFinite(checkpointFraction)||checkpointFraction<=0||checkpointFraction>=1)
   throw new Error('Invalid checkpoint fraction');
  const transfer=simulateLambertPhysicalTransfer(world,originId,targetId,departureS,arrivalS,vehicle);
@@ -30,7 +32,12 @@ export function correctLambertMidcourse(
  const checkpointS=start.timeS+(arrivalS-start.timeS)*checkpointFraction;
  const gravity={radiusM:1,muM3S2:SOLAR_MU};
  const checkpointBefore=propagateCoast(start,gravity,checkpointS-start.timeS);
- const destination=orbitalPosition(target.orbit,arrivalS);
+ const center=orbitalPosition(target.orbit,arrivalS);
+ // Offset the intended endpoint sideways to obtain a non-impacting flyby.
+ // The true planet position remains unchanged for geometric assessment.
+ const length=Math.hypot(center.x,center.y);
+ const destination={x:center.x-center.y/length*target.radius*aimOffsetRadii,
+  y:center.y+center.x/length*target.radius*aimOffsetRadii};
  const solution=solveLambert2D(checkpointBefore.position,destination,arrivalS-checkpointS,SOLAR_MU);
  if(!solution)return null;
  const deltaVMs=Math.hypot(
