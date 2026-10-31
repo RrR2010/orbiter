@@ -3,13 +3,14 @@ import {gravityForRadius} from './spaceflight/gravity';
 import {seededRandom} from '../core/random';
 import {initialScientificRecord,type ScientificRecord} from './scientific-knowledge';
 import type {World} from './world';
+import {advanceMissionTimeline,parseMissionTimeline,type MissionTimeline} from './interplanetary-mission-timeline';
 import {MAX_PENDING_SCIENCE,drainScience,type ScienceInbox} from './interplanetary-science-inbox';
 
 export type Technology='astronomy'|'rocketry'|'orbitalFlight'|'satellites';
 export type MissionStatus='preparing'|'ascending'|'success'|'failure';
 export type Mission={id:string;originId:string;targetId:string;startedAt:number;launchAt:number;resolvedAt:number;status:MissionStatus;success:boolean|null;vehicleId:string;flight?:AutonomousFlightResultV2};
 export type SpaceEvent={id:string;time:number;kind:'research'|'preparation'|'launch'|'success'|'failure';missionId:string|null;detail:string};
-export type Civilization={version:2;id:string;homeId:string;seed:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number;science?:ScientificRecord;scienceInbox?:ScienceInbox};
+export type Civilization={version:2;id:string;homeId:string;seed:string;time:number;accruedAt:number;stage:number;knowledge:number;resources:number;nextAt:number;missionSerial:number;missions:Mission[];events:SpaceEvent[];successes:number;failures:number;science?:ScientificRecord;scienceInbox?:ScienceInbox;interplanetaryTimelines?:MissionTimeline[]};
 const TECH:readonly Technology[]=['astronomy','rocketry','orbitalFlight','satellites'];
 const RESEARCH_COST=[30,60,100,150];
 const RESEARCH_SECONDS=[900,1800,3600,7200];
@@ -24,21 +25,32 @@ export function createCivilization(world:World,time=0):Civilization{
  const planets=world.bodies.filter(b=>b.kind==='planet');
  const home=planets[Math.floor(probability(world.seed,'home')*planets.length)];
  if(!home||!Number.isFinite(time)||time<0)throw new Error('Invalid civilization origin');
- return {version:2,id:'civilization-0',homeId:home.id,seed:world.seed,time,accruedAt:time,stage:0,knowledge:0,resources:80,nextAt:time+RESEARCH_SECONDS[0],missionSerial:0,missions:[],events:[],successes:0,failures:0,science:initialScientificRecord(world),scienceInbox:{pending:[]}};
+ return {version:2,id:'civilization-0',homeId:home.id,seed:world.seed,time,accruedAt:time,stage:0,knowledge:0,resources:80,nextAt:time+RESEARCH_SECONDS[0],missionSerial:0,missions:[],events:[],successes:0,failures:0,science:initialScientificRecord(world),scienceInbox:{pending:[]},interplanetaryTimelines:[]};
 }
 function record(c:Civilization,time:number,kind:SpaceEvent['kind'],detail:string,missionId:string|null=null):void{
  c.events.push({id:'event-'+time+'-'+kind+'-'+c.missionSerial,time,kind,detail,missionId});
  if(c.events.length>MAX_EVENTS)c.events.splice(0,c.events.length-MAX_EVENTS);
 }
 export function technology(c:Readonly<Civilization>):readonly Technology[]{return TECH.slice(0,c.stage);}
+/** Register a physically prepared mission without emitting historical events. */
+export function registerInterplanetaryTimeline(c:Civilization,timeline:MissionTimeline):void{
+ const checked=parseMissionTimeline(JSON.stringify(timeline));
+ if(checked.timeS<c.time||c.interplanetaryTimelines?.some(t=>t.missionId===checked.missionId))
+  throw new Error('Invalid interplanetary mission registration');
+ c.interplanetaryTimelines??=[];
+ c.interplanetaryTimelines.push(checked);
+}
+
 /** Event-driven integration. The exact same event order is processed for any time partition. */
 export function advanceCivilization(c:Civilization,world:World,target:number,budget=256,stopOnPreparation=false):number{
  if(!Number.isFinite(target)||target<c.time)throw new Error('Invalid target time');
  if(!Number.isSafeInteger(budget)||budget<1)throw new Error('Invalid event budget');
  let processed=0;
- while(Math.min(c.nextAt,c.scienceInbox?.pending[0]?.transmission.receivedAtS??Infinity)<=target&&processed<budget){
+ const nextMilestone=():number=>Math.min(Infinity,...(c.interplanetaryTimelines??[]).map(t=>
+  t.manifest.milestones[t.cursor]?.timeS??Infinity));
+ while(Math.min(c.nextAt,c.scienceInbox?.pending[0]?.transmission.receivedAtS??Infinity,nextMilestone())<=target&&processed<budget){
   const reception=c.scienceInbox?.pending[0]?.transmission.receivedAtS;
-  const time=reception!==undefined?Math.min(c.nextAt,Math.max(c.time,reception)):c.nextAt;
+  const time=Math.min(c.nextAt,reception===undefined?Infinity:Math.max(c.time,reception),nextMilestone());
   processed++;
   // Accrue resources and knowledge at deterministic event boundaries.
   accrue(c,time);
@@ -48,6 +60,15 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
    const delivered=drainScience(c.scienceInbox,c.science,time);
    c.scienceInbox=delivered.inbox;c.science=delivered.record;
    for(const id of delivered.deliveredIds)record(c,time,'research','Scientific observation received: '+id);
+  }
+  for(const timeline of c.interplanetaryTimelines??[]){
+   const result=advanceMissionTimeline(timeline,time);
+   const index=c.interplanetaryTimelines!.indexOf(timeline);
+   c.interplanetaryTimelines![index]=result.timeline;
+   for(const milestone of result.emitted)
+    record(c,milestone.timeS,milestone.kind==='course-correction'?'launch':
+     milestone.kind==='closest-approach'?'success':'preparation',
+     'Interplanetary '+milestone.kind+': '+milestone.detail,timeline.missionId);
   }
   if(time<c.nextAt)continue;
   const mission=c.missions.find(m=>m.status==='preparing'||m.status==='ascending');
@@ -84,7 +105,7 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
   }else c.nextAt=time+RECOVERY_SECONDS;
  }
  // Work cap never discards simulation debt; caller must resume before drawing an advanced timeline.
- if(Math.min(c.nextAt,c.scienceInbox?.pending[0]?.transmission.receivedAtS??Infinity)>target){
+ if(Math.min(c.nextAt,c.scienceInbox?.pending[0]?.transmission.receivedAtS??Infinity,nextMilestone())>target){
   accrue(c,target);
   c.time=target;
  }
@@ -109,6 +130,11 @@ export function parseCivilization(raw:string|null,world:World,time:number):Civil
   else if(!isValidScientificRecord(v.science,world))throw Error('Invalid scientific record');
   if(v.scienceInbox===undefined)v.scienceInbox={pending:[]};
   else if(!isValidScienceInbox(v.scienceInbox,world,v.homeId,v.science))throw Error('Invalid science inbox');
+  if(v.interplanetaryTimelines===undefined)v.interplanetaryTimelines=[];
+  if(!Array.isArray(v.interplanetaryTimelines)||v.interplanetaryTimelines.length>60)throw Error();
+  v.interplanetaryTimelines=v.interplanetaryTimelines.map(t=>parseMissionTimeline(JSON.stringify(t)));
+  if(new Set(v.interplanetaryTimelines.map(t=>t.missionId)).size!==v.interplanetaryTimelines.length||
+   v.interplanetaryTimelines.some(t=>t.timeS>v.time))throw Error();
   return v;
  }catch{return createCivilization(world,time);}
 }
