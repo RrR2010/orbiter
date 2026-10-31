@@ -2,6 +2,7 @@ import {createAutonomousFlightV2,resolveAutonomousFlightV2,type AutonomousFlight
 import {gravityForRadius} from './spaceflight/gravity';
 import {seededRandom} from '../core/random';
 import {scheduleScienceTransmission} from './interplanetary-communications';
+import {canTransmitProbeScience} from './interplanetary-radio-link';
 import {enqueueScience} from './interplanetary-science-inbox';
 import {initialScientificRecord,type ScientificRecord} from './scientific-knowledge';
 import type {World} from './world';
@@ -81,7 +82,9 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
        measuredGravity,relativeError,transmitted:true};
       const transmission=scheduleScienceTransmission(world,timeline.manifest.originId,
        body.id,timeline.manifest.closestPosition,milestone.timeS);
-      c.scienceInbox=enqueueScience(c.scienceInbox,{observation,transmission});
+      if(canTransmitProbeScience(transmission.distanceM,c.stage))
+       c.scienceInbox=enqueueScience(c.scienceInbox,{observation,transmission});
+      else record(c,milestone.timeS,'failure','Interplanetary radio link out of range',timeline.missionId);
      }
     }
     record(c,milestone.timeS,milestone.kind==='course-correction'?'launch':
