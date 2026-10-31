@@ -22,6 +22,18 @@ describe('physical probe observatory projection',()=>{
   expect(symbols[0].position).toEqual(manifest.correctedCoastStart.position);
   expect(symbols[0].state.fuelKg).toBeCloseTo(manifest.remainingFuelKg,6);
  });
+ it('shows only physically modeled pre-correction solar coast',()=>{
+  const c=start(),manifest=c.interplanetaryTimelines![0].manifest;
+  const escape=manifest.preCorrectionCoastStart!;
+  expect(escape.timeS).toBeGreaterThan(manifest.departureS);
+  advanceCivilization(c,world,escape.timeS-1,10000);
+  expect(interplanetaryProbeSymbols(c,c.time)).toEqual([]);
+  advanceCivilization(c,world,escape.timeS,10000);
+  const symbol=interplanetaryProbeSymbols(c,c.time)[0];
+  expect(symbol.phase).toBe('coasting');
+  expect(symbol.position).toEqual(escape.position);
+  expect(symbol.state.fuelKg).toBeCloseTo(escape.fuelKg,6);
+ });
  it('projects immutable, deterministic solar states after save/load',()=>{
   const c=start(),manifest=c.interplanetaryTimelines![0].manifest;
   const time=manifest.correctedCoastStart.timeS+3600;
