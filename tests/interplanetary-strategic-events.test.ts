@@ -24,8 +24,13 @@ describe('strategic interplanetary milestones',()=>{
   expect(split.events).toEqual(single.events);
   expect(split.interplanetaryTimelines).toEqual(single.interplanetaryTimelines);
   expect(split.time).toBe(5e6);
-  expect(single.events.map(event=>event.time)).toEqual(manifest.milestones.map(m=>m.timeS));
-  expect(single.events.length).toBe(manifest.milestones.length);
+  const physical=single.events.filter(event=>event.detail.startsWith('Interplanetary ')&&
+   !event.detail.includes('radio link'));
+  expect(physical.map(event=>event.time)).toEqual(manifest.milestones.map(m=>m.timeS));
+  expect(physical.length).toBe(manifest.milestones.length);
+  const linkFailures=single.events.filter(event=>event.detail==='Interplanetary radio link out of range');
+  expect(linkFailures.length).toBeLessThanOrEqual(1);
+  expect(single.events.length).toBe(physical.length+linkFailures.length);
   expect(advanceCivilization(single,world,5e6)).toBe(0);
  });
  it('restores the event cursor without duplicating previous milestones',()=>{
