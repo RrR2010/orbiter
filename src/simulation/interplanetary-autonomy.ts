@@ -15,7 +15,10 @@ import type {World} from './world';
 export function authorizeInterplanetaryLaunch(c:Civilization,world:World):MissionTimeline|null{
  if(c.stage<4||c.resources<LAUNCH_RESOURCE_COST||
   c.interplanetaryTimelines?.some(t=>t.cursor<t.manifest.milestones.length))return null;
- const intent=proposeInterplanetaryLaunch(c,world,c.time);
+ // Normalize sub-minute scheduler timestamps so equivalent strategic decisions
+ // evaluate the same orbital launch windows without changing the real clock.
+ const planningEpoch=Math.floor(c.time/60)*60;
+ const intent=proposeInterplanetaryLaunch(c,world,planningEpoch);
  if(!intent)return null;
  const home=world.bodies.find(b=>b.id===c.homeId);
  if(!home||home.kind!=='planet')return null;
