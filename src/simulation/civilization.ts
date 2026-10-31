@@ -3,6 +3,7 @@ import {gravityForRadius} from './spaceflight/gravity';
 import {seededRandom} from '../core/random';
 import {initialScientificRecord,type ScientificRecord} from './scientific-knowledge';
 import type {World} from './world';
+import {authorizeInterplanetaryLaunch} from './interplanetary-autonomy';
 import {advanceMissionTimeline,parseMissionTimeline,type MissionTimeline} from './interplanetary-mission-timeline';
 import {MAX_PENDING_SCIENCE,drainScience,type ScienceInbox} from './interplanetary-science-inbox';
 
@@ -98,6 +99,15 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
     c.nextAt=time+(RESEARCH_SECONDS[c.stage]??RECOVERY_SECONDS);
    }else c.nextAt=time+RESEARCH_SECONDS[c.stage];
   }else if(c.resources>=LAUNCH_RESOURCE_COST){
+   // Prefer a proven physical interplanetary flyby; otherwise preserve the
+   // existing local mission path without charging for failed proposals.
+   const probe=authorizeInterplanetaryLaunch(c,world);
+   if(probe){
+    record(c,time,'preparation','Interplanetary probe authorized for '+probe.manifest.targetId,probe.missionId);
+    c.nextAt=time+RECOVERY_SECONDS;
+    if(stopOnPreparation)break;
+    continue;
+   }
    c.resources=round(c.resources-LAUNCH_RESOURCE_COST);
    const id='mission-'+(++c.missionSerial);
    c.missions.push({id,originId:c.homeId,targetId:c.homeId,startedAt:time,launchAt:time+PREP_SECONDS,resolvedAt:0,status:'preparing',success:null,vehicleId:'vehicle-'+c.missionSerial});
