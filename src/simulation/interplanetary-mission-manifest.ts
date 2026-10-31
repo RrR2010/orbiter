@@ -1,6 +1,7 @@
 import type {World} from './world';
 import type {VehicleCapability} from './spaceflight/vehicle-capability';
 import {correctLambertMidcourse} from './interplanetary-midcourse-correction';
+import {propagateCoast} from './spaceflight/coast';
 import {measureClosestApproach} from './interplanetary-closest-approach';
 
 export type InterplanetaryMissionMilestone=Readonly<{
@@ -10,7 +11,7 @@ export type InterplanetaryMissionMilestone=Readonly<{
 export type InterplanetaryMissionManifest=Readonly<{
  originId:string;targetId:string;departureS:number;arrivalS:number;
  outcome:'flyby'|'impact-risk'|'distant-miss';closestDistanceM:number;
- closestAltitudeM:number;courseCorrectionDeltaVMs:number;
+ closestAltitudeM:number;closestPosition:{x:number;y:number};courseCorrectionDeltaVMs:number;
  courseCorrectionFuelKg:number;remainingFuelKg:number;
  milestones:readonly InterplanetaryMissionMilestone[];
 }>;
@@ -29,6 +30,9 @@ export function prepareInterplanetaryMission(
   world,originId,targetId,departureS,arrivalS,vehicle,.5,aimOffsetRadii);
  if(!corrected)return null;
  const approach=measureClosestApproach(corrected.checkpointAfter,target.orbit,target.radius,arrivalS);
+ const closestPosition=propagateCoast(corrected.checkpointAfter,
+  {radiusM:1,muM3S2:1.32712440018e20},
+  approach.timeS-corrected.checkpointAfter.timeS).position;
  const outcome=approach.altitudeM<=0?'impact-risk':
   approach.distanceM<=10*target.radius?'flyby':'distant-miss';
  const milestones:InterplanetaryMissionMilestone[]=[
@@ -40,7 +44,7 @@ export function prepareInterplanetaryMission(
  ];
  milestones.sort((a,b)=>a.timeS-b.timeS);
  return {originId,targetId,departureS,arrivalS,outcome,
-  closestDistanceM:approach.distanceM,closestAltitudeM:approach.altitudeM,
+  closestDistanceM:approach.distanceM,closestAltitudeM:approach.altitudeM,closestPosition,
   courseCorrectionDeltaVMs:corrected.deltaVMs,
   courseCorrectionFuelKg:corrected.fuelSpentKg,
   remainingFuelKg:corrected.arrival.fuelKg,milestones};
