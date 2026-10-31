@@ -61,3 +61,13 @@ Uma civilização e um sistema, sondas flyby, física determinística 2D, sem co
 ## Governança
 
 Este acordo não modifica o brief base nem autoriza a Fase 6. Caso seja necessária ampliação funcional relevante para além do flyby com aprendizado limitado, escalar antes de fazê-la. 
+
+## Extensão de navegação — checkpoints e controle condicionado à tecnologia (2026-10-31)
+
+O PO aprovou a ideia de que a execução de uma manobra não precisa reproduzir perfeitamente a trajetória nominal; a missão pode observar a diferença prevista × realizada e executar correções em checkpoints. Esse refinamento complementa a decisão por Lambert da ADR-0018 e segue a ADR-0019.
+
+- **MVP Fase 5:** sonda robótica com programa inicial e, apenas quando necessário ao gate de flyby, até uma correção intermediária fisicamente contabilizada. Pode existir missão sem correção por limite de combustível, desconhecimento ou comunicação.
+- **Tecnologia futura:** evolução de autonomia embarcada, alcance do comunicador, latência, qualidade de sensores, resolução de orientação/empuxo e precisão do estimador; sem alterar artificialmente a precisão do motor de física.
+- **Modos futuros:** sem enlace, executar apenas plano embarcado/autonomia instalada; com enlace, correções comandadas após telemetria/atraso; tripulada, decisões locais contínuas limitadas pelos recursos. Tripuladas, manobras de captura e rendezvous permanecem fora do escopo desta fase.
+- **Observabilidade:** HUD e histórico deverão distinguir órbita/rota prevista antes da manobra, nova previsão, manobra programada, resultado medido e Δv restante, sem mostrar informação verdadeira como se a civilização a conhecesse.
+- **Aceite adicional se implementada correção:** nenhum teleporte; consumir combustível; erros determinísticos; enlace/latência respeitados; save/load e warp não executam duas vezes o mesmo checkpoint.
