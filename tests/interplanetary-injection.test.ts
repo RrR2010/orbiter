@@ -5,6 +5,7 @@ import {planEscapeInjection} from '../src/simulation/interplanetary-injection';
 import {propagatePlanetaryEscape} from '../src/simulation/interplanetary-escape';
 import {designVehicle} from '../src/simulation/spaceflight/vehicle-capability';
 import {gravityForRadius} from '../src/simulation/spaceflight/gravity';
+import {orbitalPosition} from '../src/simulation/orbits';
 
 describe('escape injection from established parking orbit',()=>{
  const world=generateWorld('phase-five-injection');
@@ -24,6 +25,17 @@ describe('escape injection from established parking orbit',()=>{
   expect(escape).not.toBeNull();
   expect(escape!.heliocentric.fuelKg).toBeCloseTo(injection!.fuelRemainingKg,6);
   expect(escape!.heliocentric.timeS).toBeGreaterThan(injection!.state.timeS);
+ });
+ it('aligns the hyperbolic impulse with actual planetary prograde direction',()=>{
+  const injection=planEscapeInjection(home,target,opportunity,vehicle,opportunity.departureS)!;
+  const step=10;
+  const a=orbitalPosition(home.orbit!,opportunity.departureS-step);
+  const b=orbitalPosition(home.orbit!,opportunity.departureS+step);
+  const velocity=injection.state.velocity;
+  const dot=velocity.x*(b.x-a.x)+velocity.y*(b.y-a.y);
+  expect(dot).toBeGreaterThan(0);
+  const radial=injection.state.position.x*velocity.x+injection.state.position.y*velocity.y;
+  expect(Math.abs(radial)).toBeLessThan(1e-3);
  });
  it('cannot inject with insufficient propellant',()=>{
   expect(planEscapeInjection(home,target,opportunity,{...vehicle,fuelKg:0},opportunity.departureS)).toBeNull();
