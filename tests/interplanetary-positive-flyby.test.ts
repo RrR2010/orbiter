@@ -1,12 +1,10 @@
 import {describe,expect,it} from 'vitest';
 import {generateWorld} from '../src/simulation/world';
 import {orbitalPosition} from '../src/simulation/orbits';
-import {propagateCoast} from '../src/simulation/spaceflight/coast';
+import {measureClosestApproach} from '../src/simulation/interplanetary-closest-approach';
 import {designVehicle} from '../src/simulation/spaceflight/vehicle-capability';
 import {gravityForRadius} from '../src/simulation/spaceflight/gravity';
 import {correctLambertMidcourse} from '../src/simulation/interplanetary-midcourse-correction';
-
-const SOLAR_MU=1.32712440018e20;
 
 describe('controlled non-impacting physical Lambert flyby',()=>{
  const world=generateWorld('phase-five-injection');
@@ -21,15 +19,12 @@ describe('controlled non-impacting physical Lambert flyby',()=>{
   const distance=Math.hypot(arrival.position.x-atArrival.x,arrival.position.y-atArrival.y);
   expect(distance/target.radius).toBeGreaterThan(1);
   expect(distance/target.radius).toBeLessThan(10);
-  let minimum=Infinity;
-  for(let i=0;i<=128;i++){
-   const time=checkpointAfter.timeS+(arrivalS-checkpointAfter.timeS)*i/128;
-   const state=propagateCoast(checkpointAfter,{radiusM:1,muM3S2:SOLAR_MU},time-checkpointAfter.timeS);
-   const position=orbitalPosition(target.orbit!,time);
-   minimum=Math.min(minimum,Math.hypot(state.position.x-position.x,state.position.y-position.y));
-  }
-  expect(minimum).toBeGreaterThan(target.radius);
-  expect(minimum).toBeLessThan(target.radius*10);
+  const approach=measureClosestApproach(checkpointAfter,target.orbit!,target.radius,arrivalS);
+  expect(approach.distanceM).toBeGreaterThan(target.radius);
+  expect(approach.distanceM).toBeLessThan(target.radius*10);
+  expect(approach.altitudeM).toBeGreaterThan(0);
+  expect(approach.timeS).toBeGreaterThanOrEqual(checkpointAfter.timeS);
+  expect(approach.timeS).toBeLessThanOrEqual(arrivalS);
   expect(correction!.fuelSpentKg).toBeGreaterThan(0);
   expect(arrival.massKg).toBeLessThan(correction!.checkpointBefore.massKg);
  });
