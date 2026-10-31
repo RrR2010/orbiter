@@ -1,3 +1,4 @@
+import type {FlightState} from './spaceflight/types';
 import type {World} from './world';
 import type {VehicleCapability} from './spaceflight/vehicle-capability';
 import {correctLambertMidcourse} from './interplanetary-midcourse-correction';
@@ -13,6 +14,7 @@ export type InterplanetaryMissionManifest=Readonly<{
  outcome:'flyby'|'impact-risk'|'distant-miss';closestDistanceM:number;
  closestAltitudeM:number;closestPosition:{x:number;y:number};courseCorrectionDeltaVMs:number;
  courseCorrectionFuelKg:number;remainingFuelKg:number;
+ correctedCoastStart:FlightState;
  milestones:readonly InterplanetaryMissionMilestone[];
 }>;
 
@@ -47,5 +49,6 @@ export function prepareInterplanetaryMission(
   closestDistanceM:approach.distanceM,closestAltitudeM:approach.altitudeM,closestPosition,
   courseCorrectionDeltaVMs:corrected.deltaVMs,
   courseCorrectionFuelKg:corrected.fuelSpentKg,
-  remainingFuelKg:corrected.arrival.fuelKg,milestones};
+  remainingFuelKg:corrected.arrival.fuelKg,
+  correctedCoastStart:corrected.checkpointAfter,milestones};
 }
