@@ -1,6 +1,8 @@
 import {createAutonomousFlightV2,resolveAutonomousFlightV2,type AutonomousFlightResultV2} from './spaceflight/flight-v2';
 import {gravityForRadius} from './spaceflight/gravity';
 import {seededRandom} from '../core/random';
+import {scheduleScienceTransmission} from './interplanetary-communications';
+import {enqueueScience} from './interplanetary-science-inbox';
 import {initialScientificRecord,type ScientificRecord} from './scientific-knowledge';
 import type {World} from './world';
 import {authorizeInterplanetaryLaunch} from './interplanetary-autonomy';
@@ -67,10 +69,25 @@ export function advanceCivilization(c:Civilization,world:World,target:number,bud
    const result=advanceMissionTimeline(timeline,time);
    const index=c.interplanetaryTimelines!.indexOf(timeline);
    c.interplanetaryTimelines![index]=result.timeline;
-   for(const milestone of result.emitted)
+   for(const milestone of result.emitted){
+    if(milestone.kind==='closest-approach'&&timeline.manifest.outcome==='flyby'&&c.scienceInbox){
+     const body=world.bodies.find(b=>b.id===timeline.manifest.targetId);
+     if(body?.kind==='planet'){
+      const random=seededRandom('orbiter:flyby:sensor:v1:'+world.seed+':'+timeline.missionId+':'+body.id);
+      const relativeError=.05+random()*.10;
+      const gravity=gravityForRadius(body.radius).muM3S2/(body.radius*body.radius);
+      const measuredGravity=gravity*(1+(random()*2-1)*relativeError);
+      const observation={bodyId:body.id,observationId:timeline.missionId+':gravity:'+body.id,
+       measuredGravity,relativeError,transmitted:true};
+      const transmission=scheduleScienceTransmission(world,timeline.manifest.originId,
+       body.id,timeline.manifest.closestPosition,milestone.timeS);
+      c.scienceInbox=enqueueScience(c.scienceInbox,{observation,transmission});
+     }
+    }
     record(c,milestone.timeS,milestone.kind==='course-correction'?'launch':
      milestone.kind==='closest-approach'?(timeline.manifest.outcome==='flyby'?'success':'failure'):'preparation',
      'Interplanetary '+milestone.kind+': '+milestone.detail,timeline.missionId);
+   } 
   }
   if(time<c.nextAt)continue;
   const mission=c.missions.find(m=>m.status==='preparing'||m.status==='ascending');
