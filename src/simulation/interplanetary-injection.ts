@@ -3,6 +3,7 @@ import type {FlightState} from './spaceflight/types';
 import type {VehicleCapability} from './spaceflight/vehicle-capability';
 import {gravityForRadius} from './spaceflight/gravity';
 import type {TransferOpportunity} from './interplanetary-planner';
+import {orbitalPosition} from './orbits';
 
 const G0=9.80665;
 export type EscapeInjection=Readonly<{state:FlightState;burnDeltaVMs:number;fuelSpentKg:number;fuelRemainingKg:number}>;
@@ -27,8 +28,16 @@ export function planEscapeInjection(home:Body,target:Body,opportunity:TransferOp
  const fuelSpentKg=initialMass-finalMass;
  if(fuelSpentKg>vehicle.fuelKg||!Number.isFinite(fuelSpentKg))return null;
  const outward=target.orbit.semiMajorAxis>home.orbit.semiMajorAxis;
- // Tangential velocity at parking radius: physical hyperbolic escape after the impulse.
- const state:FlightState={position:{x:parkingRadius,y:0},velocity:{x:0,y:injectionSpeed*(outward?1:-1)},
+ // Orient the parking-orbit impulse in the real heliocentric prograde/retrograde
+ // direction at departure, rather than a fixed world-axis direction.
+ const step=Math.min(10,home.orbit.period/1e6);
+ const before=orbitalPosition(home.orbit,timeS-step),after=orbitalPosition(home.orbit,timeS+step);
+ const dx=after.x-before.x,dy=after.y-before.y,norm=Math.hypot(dx,dy);
+ if(!(norm>0&&Number.isFinite(norm)))throw new Error('Invalid planetary departure velocity');
+ const sign=outward?1:-1,ux=sign*dx/norm,uy=sign*dy/norm;
+ // A tangent parking state has zero initial radial velocity but positive energy.
+ const state:FlightState={position:{x:uy*parkingRadius,y:-ux*parkingRadius},
+  velocity:{x:ux*injectionSpeed,y:uy*injectionSpeed},
   timeS,massKg:finalMass,fuelKg:vehicle.fuelKg-fuelSpentKg};
  return {state,burnDeltaVMs,fuelSpentKg,fuelRemainingKg:state.fuelKg};
 }
