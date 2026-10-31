@@ -2,7 +2,8 @@ import type {Civilization} from './civilization';
 import {registerInterplanetaryTimeline,LAUNCH_RESOURCE_COST} from './civilization';
 import {createMissionTimeline,type MissionTimeline} from './interplanetary-mission-timeline';
 import {prepareInterplanetaryMission} from './interplanetary-mission-manifest';
-import {proposeInterplanetaryLaunch} from './interplanetary-schedule';
+import {proposeInterplanetaryLaunch,INTERPLANETARY_PREPARATION_S,INTERPLANETARY_MIN_LEAD_S} from './interplanetary-schedule';
+import {findLambertLaunchWindow} from './interplanetary-lambert-window';
 import {designVehicle} from './spaceflight/vehicle-capability';
 import {gravityForRadius} from './spaceflight/gravity';
 import type {World} from './world';
@@ -19,7 +20,10 @@ export function authorizeInterplanetaryLaunch(c:Civilization,world:World):Missio
  const home=world.bodies.find(b=>b.id===c.homeId);
  if(!home||home.kind!=='planet')return null;
  const vehicle=designVehicle(gravityForRadius(home.radius),c.stage,c.knowledge,.5);
- const {originId,targetId,departureS,arrivalS}=intent.candidate.opportunity;
+ const {originId,targetId}=intent.candidate.opportunity;
+ const adjusted=findLambertLaunchWindow(world,intent.candidate.opportunity,vehicle);
+ if(!adjusted||adjusted.departureS<c.time+INTERPLANETARY_PREPARATION_S+INTERPLANETARY_MIN_LEAD_S)return null;
+ const {departureS,arrivalS}=adjusted;
  // Do not promote ideal Hohmann budgeting into a real mission: physically
  // propagate the proposed rocket before charging or recording anything.
  const manifest=prepareInterplanetaryMission(
