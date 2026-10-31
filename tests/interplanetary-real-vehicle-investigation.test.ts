@@ -2,6 +2,7 @@ import {describe,expect,it} from 'vitest';
 import {generateWorld} from '../src/simulation/world';
 import {createCivilization} from '../src/simulation/civilization';
 import {proposeInterplanetaryLaunch} from '../src/simulation/interplanetary-schedule';
+import {findLambertLaunchWindow} from '../src/simulation/interplanetary-lambert-window';
 import {planLambertDeparture} from '../src/simulation/interplanetary-lambert-departure';
 import {prepareInterplanetaryMission} from '../src/simulation/interplanetary-mission-manifest';
 import {designVehicle} from '../src/simulation/spaceflight/vehicle-capability';
@@ -19,6 +20,7 @@ describe('real vehicle interplanetary feasibility investigation',()=>{
    const plan=intent?.candidate.opportunity;
    const departure=plan?planLambertDeparture(world,plan.originId,plan.targetId,
     plan.departureS,plan.arrivalS,vehicle):null;
+   const adjusted=plan?findLambertLaunchWindow(world,plan,vehicle):null;
    const manifest=plan?prepareInterplanetaryMission(world,plan.originId,plan.targetId,
     plan.departureS,plan.arrivalS,vehicle):null;
    const diagnostic={
@@ -29,6 +31,9 @@ describe('real vehicle interplanetary feasibility investigation',()=>{
     lambertFeasible:departure?.feasible??false,
     lambertBurnDeltaVMs:departure?.burnDeltaVMs??null,
     lambertFuelRequiredKg:departure?.requiredFuelKg??null,
+    adjustedLambertAvailable:adjusted!==null,
+    adjustedOffsetS:adjusted?.offsetS??null,
+    adjustedLambertBurnDeltaVMs:adjusted?.plan.burnDeltaVMs??null,
     physicalManifestAvailable:manifest!==null,
     physicalOutcome:manifest?.outcome??null,
     remainingFuelKg:manifest?.remainingFuelKg??null,
