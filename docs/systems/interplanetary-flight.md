@@ -219,3 +219,7 @@ Após alcançar a tecnologia máxima e dispor de recursos de lançamento, `advan
 ## Compatibilidade com progressão e observatório local (correção 5C)
 
 A primeira integração autônoma causou regressões nos testes de preparação e visualização de voos locais: a civilização substituía sua primeira missão orbital por uma sonda interplanetária e invalidava os contratos anteriores. O scheduler agora só tenta exploração após **ao menos uma missão local concluída com sucesso**, conhecimento acumulado de 3000 e ausência de exploração interplanetária anterior. O gate não altera `authorizeInterplanetaryLaunch` explicitamente; protege apenas a política de decisão automática. Sem essa prontidão, segue o ciclo local original. O teste do scheduler estabelece a pré-condição com um voo local histórico concluído; a verificação de aquisição natural dessa condição no fluxo completo ainda é necessária. Os critérios de warp e save/load permanecem sob validação local.
+
+## Estabilidade da época de planejamento no scheduler
+
+Na decisão automática, a busca estratégica de oportunidades usa uma época truncada ao minuto (`Math.floor(c.time/60)*60`), pois variações subminuto mudavam a janela discreta de seleção e podiam impedir autorização de um flyby já demonstrado no mesmo intervalo temporal. O relógio estratégico real **não é alterado**, e a verificação de antecedência do voo continua confrontando a partida com `c.time` real. Este ajuste estabiliza decisões quase simultâneas; não substitui uma política futura de varredura de várias oportunidades/épocas.
