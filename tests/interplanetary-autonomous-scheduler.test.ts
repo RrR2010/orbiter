@@ -7,6 +7,8 @@ describe('autonomous interplanetary scheduler',()=>{
  const ready=()=>{
   const c=createCivilization(world);
   c.stage=4;c.knowledge=3000;c.resources=300;c.nextAt=1;
+  c.missions.push({id:'completed-local-flight',originId:c.homeId,targetId:c.homeId,
+   startedAt:0,launchAt:0,resolvedAt:0,status:'success',success:true,vehicleId:'historical-local'});
   return c;
  };
  it('schedules a physically valid probe instead of a local flight',()=>{
@@ -17,7 +19,8 @@ describe('autonomous interplanetary scheduler',()=>{
   expect(probe.manifest.outcome).toBe('flyby');
   expect(probe.manifest.departureS).toBeGreaterThan(c.time);
   expect(c.resources).toBe(230);
-  expect(c.missions).toHaveLength(0);
+  expect(c.missions).toHaveLength(1);
+  expect(c.missions[0].status).toBe('success');
   expect(c.events.filter(e=>e.missionId===probe.missionId)).toHaveLength(1);
   expect(c.events.at(-1)?.kind).toBe('preparation');
  });
