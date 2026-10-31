@@ -180,7 +180,7 @@ function renderMissionPanel():void{
    ' · Resultado: '+(view.outcome==='pending'?'Aguardando aproximação':view.outcome)+
    ' · Marcos restantes: '+view.remainingMilestones;
   const footnote=document.createElement('div');footnote.className='mission-hud-footnote';
-  footnote.textContent=physical?'Telemetria física do trecho pós-correção.':'Posição instantânea indisponível antes da correção ou após a chegada.';
+  footnote.textContent=physical?'Telemetria física heliocêntrica, com propagação pré/pós-correção.':'Posição instantânea indisponível durante escape planetário ou após a chegada.';
   const toggle=document.createElement('button');toggle.type='button';toggle.textContent='Encerrar acompanhamento';
   toggle.addEventListener('click',()=>{trackedMissionId=null;});
   hud.replaceChildren(heading,primary,secondary,footnote,toggle);
