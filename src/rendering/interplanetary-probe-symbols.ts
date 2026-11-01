@@ -20,7 +20,7 @@ export function interplanetaryProbeSymbols(c:Readonly<Civilization>,timeS:number
  if(!Number.isFinite(timeS)||timeS<0)throw new Error('Invalid probe display time');
  return (c.interplanetaryTimelines??[]).flatMap(timeline=>{
   const {manifest}=timeline,corrected=manifest.correctedCoastStart;
-  if(!corrected||timeS>manifest.arrivalS||timeline.cursor===0)return [];
+  if(!corrected||timeline.cursor===0)return [];
   const view=interplanetaryMissionView(timeline);
   if(view.phase==='scheduled')return [];
   const escape=manifest.planetaryEscapeStart,solar=manifest.preCorrectionCoastStart;
