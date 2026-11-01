@@ -10,7 +10,8 @@
     "test": "vitest run",
     "lint": "eslint .",
     "validate": "node scripts/validate.mjs",
-    "benchmark:orbits": "node scripts/benchmark-orbits.mjs"
+    "benchmark:orbits": "node scripts/benchmark-orbits.mjs",
+    "benchmark:phase5": "node scripts/benchmark-phase5.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
