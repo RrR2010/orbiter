@@ -34,3 +34,8 @@ A sequência abaixo é a **ordem desejada**, não autorização para iniciar tod
 ## Planejamento progressivo
 
 Apenas a fase ativa recebe especificação operacional detalhada. Fases futuras são intenções de produto, refinadas uma de cada vez com evidências da fase anterior. Nunca estimar prazo como requisito de aceite.
+
+
+## Sequência técnica sugerida pela auditoria Fase 6 (não autorizada)
+
+M0 golden fixtures e baseline/benchmarks → M1 estado temporal e referenciais → M2 state/observation providers → M3 eventos e operações adaptados → M4 executor compartilhado → M5 solvers/autonomia/knowledge por composição → M6 observabilidade universal → M7 remoção dos caminhos legados. Gate crítico: **mesmo executor físico-operacional para missão local e interplanetária sem regressões e sem teleporte**. O desdobramento de 7+ em fases exige decisão futura da orquestradora; detalhes em [plano](architecture/MIGRATION_PLAN.md).

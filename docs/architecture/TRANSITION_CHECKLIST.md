@@ -1,14 +1,14 @@
 # Checklist de transição para engine composável
 
-**Uso:** checklist vivo, baseline inicialmente **NÃO VERIFICADO**. Auditoria transforma itens em diagnóstico com evidência (arquivo/teste), classifica cada um: existente/reutilizável, parcial/refatorar, ausente/criar, descartar. Não marcar como entregue sem integração e testes. Link à [visão-alvo](TARGET_VISION.md).
+**Uso:** checklist vivo. Diagnóstico documental da Fase 6 concluído em 2026-10-31; **implementação To-Be continua pendente**. Auditoria transforma itens em diagnóstico com evidência (arquivo/teste), classifica cada um: existente/reutilizável, parcial/refatorar, ausente/criar, descartar. Não marcar como entregue sem integração e testes. Link à [visão-alvo](TARGET_VISION.md).
 
 ## A. Compreender o estado atual
 
-- [ ] Mapear módulos de voo local e interplanetário, com dependências e pontos de duplicação.
-- [ ] Inventariar estados, unidades, referenciais, transformações e algoritmos existentes.
-- [ ] Mapear contratos atuais de missão/veículo, solvers, scheduler, knowledge, comunicação e persistência.
-- [ ] Inventariar inspector, HUD, seleção, câmera, trilhas e renderers separados.
-- [ ] Mapear suites de teste, seeds de referência, limites de benchmark e compatibilidade dos saves.
+- [x] **Auditoria documental:** mapear voo local/interplanetário, dependências e duplicações — [As-Is](AS_IS_AUDIT.md) e [matriz](COMPOSABILITY_GAP_MATRIX.md).
+- [x] **Auditoria documental:** estados/unidades/frames/transformações — [As-Is](AS_IS_AUDIT.md); padronização física ainda pendente.
+- [x] **Auditoria documental:** contratos de missão/veículo/solver/scheduler/knowledge/comunicação/save — [As-Is](AS_IS_AUDIT.md).
+- [x] **Auditoria documental:** inspector, HUD, seleção, câmera, trilhas e renderers — [matriz](COMPOSABILITY_GAP_MATRIX.md).
+- [x] **Auditoria documental:** inventário dos testes, scripts benchmark, saves e riscos; fixtures universais e medições ainda pendentes — [plano](MIGRATION_PLAN.md).
 - [ ] Medir custo real em navegador (FPS, render, memória) antes de propor troca de renderer.
 
 ## B. Contratos universais
@@ -45,12 +45,18 @@
 
 ## E. Avaliação de tecnologia
 
-- [ ] Separar decisão de engine física da de renderização.
-- [ ] Avaliar manter Canvas vs PixiJS vs Phaser vs Godot, com protótipo/bench se houver benefício e custo claro.
-- [ ] Avaliar bibliotecas numéricas/astrodinâmicas JS/TS ou WASM, solvers e licenças/manutenção.
-- [ ] Avaliar Python apenas para referência numérica, não como runtime sem justificativa.
-- [ ] Definir critério e ponto de decisão para possível migração gráfica, sem misturá-la ao refactor físico.
-- [ ] Registrar decisão com matriz evidenciada, riscos de lock-in, desempenho e custo de integração.
+- [x] **Decisão de arquitetura documental:** física e backend gráfico são decisões independentes — [avaliação](TECHNOLOGY_EVALUATION.md).
+- [x] **Pesquisa comparativa documental:** Canvas/PixiJS/Phaser/Godot — [matriz](TECHNOLOGY_EVALUATION.md). Prova/benchmark **não executados**.
+- [x] **Pesquisa documental:** opções numéricas, WASM, licenças, manutenção — [matriz](TECHNOLOGY_EVALUATION.md).
+- [x] **Pesquisa documental:** SciPy como oráculo offline; poliastro arquivado — [matriz](TECHNOLOGY_EVALUATION.md).
+- [x] **Proposta de gate:** prova gráfica após profiling e consolidação de frames — [plano](MIGRATION_PLAN.md).
+- [x] **Proposta documental:** matriz e ADR-0020; adoção de dependência **não aprovada/executada**.
+
+## Resultado da auditoria (diagnóstico, não migração)
+
+- [x] Entregar [As-Is](AS_IS_AUDIT.md), [matriz de gaps](COMPOSABILITY_GAP_MATRIX.md), [contratos To-Be](TARGET_CONTRACTS.md), [roadmap incremental](MIGRATION_PLAN.md), [pesquisa tecnológica](TECHNOLOGY_EVALUATION.md).
+- [ ] Obter medições empíricas em navegador, golden fixtures e comparação quantitativa de solvers: trabalho futuro M0.
+- [ ] Demonstrar engine única de operações local/interplanetária: trabalho futuro M3–M4.
 
 ## Regra de gate
 
