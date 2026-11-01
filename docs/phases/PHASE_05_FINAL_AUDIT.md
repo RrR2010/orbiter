@@ -48,3 +48,14 @@ A suíte atual passa, mas os gates A3, A5, A6, A7 e A8 não possuem evidência s
 - **Suite:** PO executou `npm run validate` com 4/4 PASS e 205/205 testes no HEAD do benchmark `0e4b47b`.
 - **Lacunas funcionais explícitas:** Discovery aprovado exige distinguir rota planejada de realizada e oferecer notificação/destaque de encontro **opt-in**, sem impor perda de foco ou warp. A existência de timeline e marcador físico não demonstra esses dois recursos. Sem decisão expressa do PO, não marcar A3/A7 como integralmente aprovados.
 - **As-Built indexado:** `docs/systems/README.md` agora referencia o contrato interplanetário, com ressalva de branch até o merge.
+
+## Exceção funcional expressamente aprovada pelo PO — 2026-10-31
+
+**Decisão literal do PO:** “Aprovo adiar os dois requisitos visuais e registrar a exceção explícita para encerrar a Fase 5.” Esta é uma **aceitação de exceção**, não evidência de funcionalidade entregue, e não autoriza a implementação de fase futura.
+
+1. **Trajetória planejada distinta da efetivamente percorrida:** **NÃO ENTREGUE** como comparação/trilhas visuais explícitas; sonda física, telemetria e acompanhamento funcionam. Exceção aceita; acompanhar em `IDEA-017` no backlog.
+2. **Notificação/spotlight opt-in de encontro interplanetário:** **NÃO ENTREGUE** como experiência específica de chegada; eventos e progresso do scheduler permanecem verificáveis sem automação de câmera/warp. Exceção aceita; acompanhar em `IDEA-018`.
+
+**Resultado dos gates:** A1 aprovado pelo Discovery; A2 flyby positivo e miss negativo demonstrados por testes; A3 seleção/follow, origem, destino, telemetria e outcome demonstrados no smoke, **com exceção de rota visual**; A4 eventos e continuidade testados, **com exceção de spotlight**; A5 saves e regressões na suíte; A6 benchmark de 1.400 dias realizado nas três seeds; A7 `npm ci`, `npm audit` 0, `npm run validate` 4/4 (205/205), smoke e docs, sujeito à última confirmação no HEAD documental; A8 **CI manual, revisão PR e squash merge ainda pendentes**; A9 Fase 6 não iniciada.
+
+**Critério de fechamento:** após confirmar o HEAD final e CI manual com `success`, merge por squash e fechamento da issue; nunca indicar que os requisitos excepcionados foram implementados.
