@@ -149,7 +149,7 @@ function renderMissionPanel():void{
  const probeTimeline=civilization.interplanetaryTimelines?.find(t=>t.missionId===trackedMissionId);
  if(probeTimeline&&!observatory.ambient){
   const view=interplanetaryMissionView(probeTimeline);
-  const physical=interplanetaryProbeSymbols(civilization,clock.time).find(s=>s.missionId===trackedMissionId);
+  const physical=interplanetaryProbeSymbols(civilization,clock.time,world).find(s=>s.missionId===trackedMissionId);
   const destination=world.bodies.find(b=>b.id===view.targetId);
   const heading=document.createElement('div');heading.className='mission-hud-heading';
   const title=document.createElement('strong');title.textContent=view.missionId+' · '+({
@@ -220,7 +220,7 @@ function inspectCivilization():void{const section=el<HTMLElement>('space-program
  if(spotlightUntil&&now>=spotlightUntil){el<HTMLElement>('flight-spotlight').hidden=true;spotlightUntil=0;}updateFollow(camera,observatory,world,clock.time,elapsed);if(trackedMissionId){
  const mission=civilization.missions.find(m=>m.id===trackedMissionId);
  const marker=missionSymbols(world,civilization,clock.time).find(s=>s.mission.id===trackedMissionId);
- const interplanetary=interplanetaryProbeSymbols(civilization,clock.time).find(s=>s.missionId===trackedMissionId);
+ const interplanetary=interplanetaryProbeSymbols(civilization,clock.time,world).find(s=>s.missionId===trackedMissionId);
  const target=mission?.status==='preparing'?launchPadPosition(world,mission,clock.time):marker?.position;
  if(target){camera.x=target.x+missionFollowOffset.x;camera.y=target.y+missionFollowOffset.y;}
  else if(interplanetary){camera.x=interplanetary.position.x+missionFollowOffset.x;camera.y=interplanetary.position.y+missionFollowOffset.y;}
