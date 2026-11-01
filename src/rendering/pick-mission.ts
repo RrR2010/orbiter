@@ -13,7 +13,7 @@ export function pickMission(world:World,c:Civilization,time:number,camera:Readon
   const d=Math.hypot(x-p.x,y-p.y);
   if(d<best){best=d;selected=symbol.mission.id;}
  }
- for(const probe of interplanetaryProbeSymbols(c,time)){
+ for(const probe of interplanetaryProbeSymbols(c,time,world)){
   const p=projectPoint(probe.position,camera,width,height);
   const distance=Math.hypot(x-p.x,y-p.y);
   if(distance<best){best=distance;selected=probe.missionId;}
