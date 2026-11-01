@@ -30,3 +30,13 @@
 ## Conclusão
 
 A suíte atual passa, mas os gates A3, A5, A6, A7 e A8 não possuem evidência suficiente para conclusão e merge. Não iniciar Fase 6; não declarar aprovação funcional humana nem CI que não ocorreu.
+
+## Atualização de evidências — 2026-10-31, lockfile 196614b
+
+- **A2/A3:** smoke real do PO com seed `orbiter-002`, sonda `interplanetary-125`: lançamento T+1057 dias, correção, flyby com medição científica recebida, encerramento T+1336 dias; localização e follow pós-chegada confirmados em captura posterior. A experiência ainda possui limitações visuais e não há trilha planejada versus percorrida demonstrada.
+- **A4/A5:** suite local `npm run validate` **4/4 PASS (205/205)** no HEAD anterior à modificação de dependências. Testes de replay, ciência e trajetória; smoke do PO confirma acompanhamento, porém não deve substituir testes explícitos de reinício sob warp alto.
+- **A7 segurança:** PO regenerou `package-lock.json` usando `npm install --package-lock-only --ignore-scripts`; `npm ci` OK, `npm ls minimatch` = **11.0.3** nos dependentes do lint, `npm audit` = **0 vulnerabilidades**, `npm run validate` = **4/4 PASS (205/205)**. Commit `196614b` publicado na branch e lock conferido. ESLint 9 deprecated e esbuild allowScripts continuam avisos não equivalentes a vulnerabilidade.
+- **A6 desempenho:** `npm run benchmark:orbits` mede apenas coast sintético de dois corpos, **não** o scheduler interplanetário, nem Canvas/browser. Ensaiar e reportar tempos/memória; além disso verificar avanço real em warp alto e quantidade de eventos/entidades sem bloquear interface. Não declarar este gate aprovado somente pelo benchmark sintético.
+- **A8:** GitHub Actions final e merge ainda **não realizados**.
+
+**Observação:** registros anteriores acima são históricos do pré-merge e não devem substituir as evidências mais recentes desta atualização.
