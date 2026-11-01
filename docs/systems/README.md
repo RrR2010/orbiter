@@ -63,3 +63,10 @@ Novo comportamento ou contrato alterado => atualizar a documentação As-Built *
 ## Desenvolvimento da Fase 4 (não integrado)
 
 Na branch `phase/04-visual-hud-ux`, o HUD observatório e telemetria de missão estendem os contratos [câmera e observatório](camera-and-observer.md), [voo](spaceflight.md) e [missões](missions.md). Render de glifos e setas orbitares está em `src/rendering/{vehicle-glyph,canvas,mission-trajectory}.ts`, com contrato visual em [docs/design](../design/README.md). **Estes itens não são contrato da main até merge validado.**
+
+## Desenvolvimento da Fase 5 — branch de exploração (ainda não integrada)
+
+- [Voo interplanetário](interplanetary-flight.md) — oportunidades e janelas, SOI, transferência física, missões autônomas, ciência e comunicação, visualização de sondas, acompanhamento e HUD. Consulte o documento e os testes atuais para diferenciar capacidades integradas na branch de módulos experimentais legados. **Não é contrato da main até o merge da Fase 5.**
+- [Auditoria pré-merge](../phases/PHASE_05_FINAL_AUDIT.md) — evidências realmente verificadas e gates ainda abertos, com resultados de benchmark e limitações.
+
+O índice deverá ser atualizado novamente para retirar a ressalva de branch somente após integração.

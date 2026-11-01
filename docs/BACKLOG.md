@@ -65,3 +65,15 @@ Se for correção de bug que bloqueia critério da fase atual, registrar na issu
 - **Risco/dependências:** atlas original, política de escala e fallback vetorial, consistência de picking e performance.
 - **Triagem:** later
 - **Status:** capturada; sprites definitivos não implementados neste refinamento.
+
+### IDEA-017 — Trilhas planejada e percorrida de sondas interplanetárias
+- **Origem:** Discovery Fase 5; exceção explícita do PO em 2026-10-31.
+- **Experiência desejada:** distinguir visualmente rota prevista, rota efetivamente percorrida e revisões após correções, sem sugerir teleporte ou vazamento de conhecimento físico.
+- **Triagem:** later; candidata ao ciclo futuro de refinamento visual, **não autorizada para implementação agora**.
+- **Status:** adiada expressamente no aceite da Fase 5.
+
+### IDEA-018 — Destaque opt-in de encontros interplanetários
+- **Origem:** Discovery Fase 5; exceção explícita do PO em 2026-10-31.
+- **Experiência desejada:** notificação discreta e opção de acompanhar encontros importantes, sem sequestrar câmera nem alterar warp sem consentimento.
+- **Triagem:** later; candidata ao ciclo futuro de refinamento visual, **não autorizada para implementação agora**.
+- **Status:** adiada expressamente no aceite da Fase 5.
