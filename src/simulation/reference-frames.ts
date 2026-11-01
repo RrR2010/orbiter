@@ -1,5 +1,4 @@
 import {orbitalPosition,type Vec2} from './orbits';
-import {planetaryVelocityAt} from './interplanetary-handoff';
 import type {FlightState} from './spaceflight/types';
 import type {Body,World} from './world';
 
@@ -28,7 +27,7 @@ export function frameOrigin(world:World,frameId:FrameId,epochS:EpochS):Readonly<
  if(body.kind==='star')return {positionM:{x:0,y:0},velocityMs:{x:0,y:0}};
  if(!body.orbit||!body.parentId)throw new Error('Invalid body ephemeris');
  const parent=frameOrigin(world,bodyFrame(body.parentId),epochS);
- const velocity=body.kind==='planet'?planetaryVelocityAt(body,epochS):orbitalVelocity(body,epochS);
+ const velocity=orbitalVelocity(body,epochS);
  return {positionM:add(parent.positionM,orbitalPosition(body.orbit,epochS)),velocityMs:add(parent.velocityMs,velocity)};
 }
 function orbitalVelocity(body:Body,epochS:number):Vec2{
