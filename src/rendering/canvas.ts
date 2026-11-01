@@ -36,7 +36,7 @@ if(selected){
  };
  if(forecast.apoapsisM!==null)drawApsis(forecast.apoapsisPoint,'AP',forecast.apoapsisM);
  if(forecast.periapsisPoint)drawApsis(forecast.periapsisPoint,'PE',forecast.periapsisM);
-}}}}if(civilization)for(const symbol of missionSymbols(world,civilization,time)){const p=project(symbol.position),active=symbol.state==='ascent'||symbol.state==='circularization',x=p.x,y=p.y;ctx.strokeStyle=symbol.state==='circularization'?'#ffdc83':active?'#ffbd77':'#74d7ec';ctx.fillStyle=ctx.strokeStyle;drawVehicleGlyph(ctx,x,y,active?18:16,active?'rocket':'satellite',symbol.flightState?.velocity??null,symbol.mission.id===selectedMissionId);if(active){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-9,y+5);ctx.stroke();}}if(civilization)for(const probe of interplanetaryProbeSymbols(civilization,time)){
+}}}}if(civilization)for(const symbol of missionSymbols(world,civilization,time)){const p=project(symbol.position),active=symbol.state==='ascent'||symbol.state==='circularization',x=p.x,y=p.y;ctx.strokeStyle=symbol.state==='circularization'?'#ffdc83':active?'#ffbd77':'#74d7ec';ctx.fillStyle=ctx.strokeStyle;drawVehicleGlyph(ctx,x,y,active?18:16,active?'rocket':'satellite',symbol.flightState?.velocity??null,symbol.mission.id===selectedMissionId);if(active){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-9,y+5);ctx.stroke();}}if(civilization)for(const probe of interplanetaryProbeSymbols(civilization,time,world)){
  const p=project(probe.position);
  if(p.x<-24||p.x>w+24||p.y<-24||p.y>h+24)continue;
  drawVehicleGlyph(ctx,p.x,p.y,17,'satellite',probe.state.velocity,probe.missionId===selectedMissionId);
