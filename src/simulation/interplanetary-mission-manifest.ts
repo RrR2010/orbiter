@@ -15,6 +15,7 @@ export type InterplanetaryMissionManifest=Readonly<{
  closestAltitudeM:number;closestPosition:{x:number;y:number};courseCorrectionDeltaVMs:number;
  courseCorrectionFuelKg:number;remainingFuelKg:number;
  correctedCoastStart:FlightState;preCorrectionCoastStart?:FlightState;
+ planetaryEscapeStart?:FlightState;
  milestones:readonly InterplanetaryMissionMilestone[];
 }>;
 
@@ -51,5 +52,6 @@ export function prepareInterplanetaryMission(
   courseCorrectionFuelKg:corrected.fuelSpentKg,
   remainingFuelKg:corrected.arrival.fuelKg,
   correctedCoastStart:corrected.checkpointAfter,
-  preCorrectionCoastStart:corrected.heliocentricEscape,milestones};
+  preCorrectionCoastStart:corrected.heliocentricEscape,
+  planetaryEscapeStart:corrected.planetaryEscapeStart,milestones};
 }
