@@ -91,6 +91,21 @@ describe('physical probe observatory projection',()=>{
    expect(expected).toHaveLength(1);
   }
  });
+ it('keeps a post-flyby probe observable without teleporting it home',()=>{
+  const c=start(),manifest=c.interplanetaryTimelines![0].manifest;
+  const later=manifest.arrivalS+7*86400;
+  advanceCivilization(c,world,later,10000);
+  const before=serializeCivilization(c);
+  const visible=interplanetaryProbeSymbols(c,later,world);
+  expect(visible).toHaveLength(1);
+  expect(visible[0].phase).toBe('complete');
+  expect(visible[0].state.timeS).toBe(later);
+  const atArrival=interplanetaryProbeSymbols(c,manifest.arrivalS,world)[0];
+  expect(visible[0].position).not.toEqual(atArrival.position);
+  const restored=parseCivilization(before,world,later);
+  expect(interplanetaryProbeSymbols(restored,later,world)).toEqual(visible);
+  expect(serializeCivilization(c)).toBe(before);
+ });
  it('projects immutable, deterministic solar states after save/load',()=>{
   const c=start(),manifest=c.interplanetaryTimelines![0].manifest;
   const time=manifest.correctedCoastStart.timeS+3600;
