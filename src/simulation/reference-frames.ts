@@ -45,6 +45,8 @@ function validate(state:StateVector):void{
 /** Translate both position and velocity at the same epoch; never propagate or burn. */
 export function transformState(world:World,state:StateVector,target:FrameId):StateVector{
  validate(state);
+ // Identity transforms must preserve exact local precision; still verify the frame exists.
+ if(state.frameId===target){frameOrigin(world,target,state.epochS);return state;}
  const from=frameOrigin(world,state.frameId,state.epochS),to=frameOrigin(world,target,state.epochS);
  return {...state,frameId:target,positionM:sub(add(state.positionM,from.positionM),to.positionM),
   velocityMs:sub(add(state.velocityMs,from.velocityMs),to.velocityMs)};
