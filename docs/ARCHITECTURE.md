@@ -82,3 +82,7 @@ Simulação não importa Canvas, DOM, `Date.now()`, timers ou componentes UI. UI
 ## Fonte de verdade da implementação (As-Built)
 
 Este documento contém princípios e arquitetura de referência; não substitui descrições operacionais atualizadas. Consulte [o catálogo de subsistemas](systems/README.md) para os contratos As-Built verificados contra código e testes reais. Os documentos de fases são requisitos históricos/planejados; decisões estão no ADR; relatórios de handoff guardam evidências. Quando a implementação divergir da arquitetura de referência, documentar a divergência e propor revisão de ADR em vez de declarar comportamento inexistente.
+
+## Visão-alvo versus sistema existente
+
+A arquitetura de referência deste arquivo não é uma descrição completa do estado real. Contratos vigentes: `docs/systems/README.md`. Evolução proposta: [visão-alvo de engine composável](architecture/TARGET_VISION.md) e [checklist de transição](architecture/TRANSITION_CHECKLIST.md). Qualquer substituição de sistemas deve ocorrer por migração incremental orientada por testes; não confundir alvo com funcionalidade já entregue.
