@@ -76,3 +76,7 @@ GitHub Actions é um recurso de validação **final**, não de desenvolvimento. 
 ## Linguagem visual e Discovery funcional
 
 Antes de desenvolver uma fase com impacto importante em UX, o agente deve entrevistar brevemente o Product Owner para refinar o comportamento desejado (não pedir decisões técnicas). Consolidar as escolhas em documentação versionada e implementar dentro do escopo autorizado. Propor alternativas e trade-offs visuais. Para adicionar UI ou telemetria, consultar `docs/design/README.md` e padrões aplicáveis (assim que forem criados na Fase 4); atualizá-los quando alterar comportamento visual. Toda nova feature deve integrar simulação, view model, UI e testes sem inventar valores ou fatos; manter modo ambiente não intrusivo.
+
+## Direção composável do produto (obrigatória)
+
+Ler `docs/architecture/TARGET_VISION.md` e `docs/architecture/TRANSITION_CHECKLIST.md` antes de criar ou ampliar subsistemas. São visão de destino, não As-Built. Antes de nova funcionalidade, avaliar **reutilizar → generalizar/refatorar → compor capacidade → paralelizar somente com ADR**. Não implementar separadamente câmera, telemetria, análise orbital ou engine de voo só porque muda objeto/missão. Verificar responsabilidades no catálogo As-Built e testes. O executor deverá explicar no PR quais contratos reutilizou/refinou e atualizar checklist somente com evidência. Fase 6 é auditoria **documental** e não autoriza reescrita ou migração de stack.
