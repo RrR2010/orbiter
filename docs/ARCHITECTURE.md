@@ -86,3 +86,8 @@ Este documento contém princípios e arquitetura de referência; não substitui 
 ## Visão-alvo versus sistema existente
 
 A arquitetura de referência deste arquivo não é uma descrição completa do estado real. Contratos vigentes: `docs/systems/README.md`. Evolução proposta: [visão-alvo de engine composável](architecture/TARGET_VISION.md) e [checklist de transição](architecture/TRANSITION_CHECKLIST.md). Qualquer substituição de sistemas deve ocorrer por migração incremental orientada por testes; não confundir alvo com funcionalidade já entregue.
+
+
+## Auditoria e transição propostas — Fase 6
+
+A inspeção estática documentada em [As-Is](architecture/AS_IS_AUDIT.md) identifica núcleos já compartilhados e orquestrações paralelas entre voo local/interplanetário; a [matriz](architecture/COMPOSABILITY_GAP_MATRIX.md) separa duplicação de especialização legítima. [Contratos](architecture/TARGET_CONTRACTS.md) e [migração](architecture/MIGRATION_PLAN.md) são **propostas**, não interfaces integradas. A [avaliação tecnológica](architecture/TECHNOLOGY_EVALUATION.md) recomenda preservar Canvas/TS até medições objetivas. Para saves de desenvolvimento, ADR-0017 prevalece sobre a exigência genérica histórica de migração mencionada acima.
