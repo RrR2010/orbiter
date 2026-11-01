@@ -10,9 +10,9 @@ A sequência abaixo é a **ordem desejada**, não autorização para iniciar tod
 | 3 | Primeira era espacial | Civilização inicial, tecnologias básicas, lançamentos/satélites e falhas | Progressão autônoma testável e consequência visível |
 | 4 | Linguagem visual, HUD e UX de missões | Discovery com PO, instrumentação, iconografia vetorial, trilhas corretas e design system | Voos legíveis, sem telemetria inventada; padrões documentados |
 | 5 | Missões interplanetárias | Transferências, sondas, encontros e pousos simplificados | Missões têm causa, risco e resultados reproduzíveis |
-| 6 | História e direção narrativa | Timeline, resumos, protagonistas e câmera de eventos | Destaques ancorados em eventos reais |
-| 7 | Infraestrutura e economia | Estações, mineração, logística e recursos | Infraestrutura surge por necessidades reais |
-| 8 | Ecossistema de longa duração | Otimização, estabilidade, crises e legado | Simulação longa e retomada confiáveis |
+| 6 | Auditoria e arquitetura composável | As-Is/To-Be, mapa de duplicações, plano de migração e avaliação de bibliotecas | Diagnóstico verificável e fases técnicas propostas, sem reescrita |
+| 7+ | Consolidação incremental da engine | Contratos de estado, frames, operações, conhecimento e observação universais | Migrações graduais com testes de referência e saves seguros |
+| Futuro | História, infraestrutura, longevidade, produção audiovisual | Expansão apoiada na engine unificada | Cada feature reutiliza contratos antes de especializar |
 
 ## Regras de fase
 
