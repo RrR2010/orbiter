@@ -60,13 +60,13 @@ Documentar exclusivamente fatos verificados no código; sinalizar lacunas e dive
 Novo comportamento ou contrato alterado => atualizar a documentação As-Built **no mesmo PR** de implementação. No handoff, listar os documentos atualizados. Documentos legados de fase/handoff são históricos; As-Built é a síntese vigente.
 
 
-## Desenvolvimento da Fase 4 (não integrado)
+## Fase 4 integrada (catálogo histórico a reconciliar)
 
-Na branch `phase/04-visual-hud-ux`, o HUD observatório e telemetria de missão estendem os contratos [câmera e observatório](camera-and-observer.md), [voo](spaceflight.md) e [missões](missions.md). Render de glifos e setas orbitares está em `src/rendering/{vehicle-glyph,canvas,mission-trajectory}.ts`, com contrato visual em [docs/design](../design/README.md). **Estes itens não são contrato da main até merge validado.**
+Na `main` após PR #9, o HUD observatório e telemetria de missão estendem os contratos [câmera e observatório](camera-and-observer.md), [voo](spaceflight.md) e [missões](missions.md). Render de glifos e setas orbitares está em `src/rendering/{vehicle-glyph,canvas,mission-trajectory}.ts`, com contrato visual em [docs/design](../design/README.md). **Código integrado na main; conferir os módulos para contrato atual.**
 
-## Desenvolvimento da Fase 5 — branch de exploração (ainda não integrada)
+## Fase 5 integrada (catálogo histórico a reconciliar)
 
-- [Voo interplanetário](interplanetary-flight.md) — oportunidades e janelas, SOI, transferência física, missões autônomas, ciência e comunicação, visualização de sondas, acompanhamento e HUD. Consulte o documento e os testes atuais para diferenciar capacidades integradas na branch de módulos experimentais legados. **Não é contrato da main até o merge da Fase 5.**
+- [Voo interplanetário](interplanetary-flight.md) — oportunidades e janelas, SOI, transferência física, missões autônomas, ciência e comunicação, visualização de sondas, acompanhamento e HUD. Consulte o documento e os testes atuais para diferenciar capacidades integradas na branch de módulos experimentais legados. **Está na main após PR #11.**
 - [Auditoria pré-merge](../phases/PHASE_05_FINAL_AUDIT.md) — evidências realmente verificadas e gates ainda abertos, com resultados de benchmark e limitações.
 
-O índice deverá ser atualizado novamente para retirar a ressalva de branch somente após integração.
+A auditoria da Fase 6 registrou o descompasso histórico e o corrigiu neste índice. Ver [As-Is](../architecture/AS_IS_AUDIT.md) e [matriz](../architecture/COMPOSABILITY_GAP_MATRIX.md); os contratos detalhados devem ser lidos em conjunto com código/testes.
