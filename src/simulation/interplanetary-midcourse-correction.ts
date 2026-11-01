@@ -13,7 +13,7 @@ const SOLAR_MU=1.32712440018e20,G0=9.80665;
  * intended orbit. The same arrival epoch and real target ephemeris are used.
  */
 export type MidcourseCorrection=Readonly<{
- heliocentricEscape:FlightState;checkpointBefore:FlightState;checkpointAfter:FlightState;arrival:FlightState;
+ planetaryEscapeStart:FlightState;heliocentricEscape:FlightState;checkpointBefore:FlightState;checkpointAfter:FlightState;arrival:FlightState;
  deltaVMs:number;fuelSpentKg:number;missBeforeM:number;missAfterM:number;
 }>;
 
@@ -52,6 +52,6 @@ export function correctLambertMidcourse(
   fuelKg:checkpointBefore.fuelKg-fuelSpentKg};
  const arrival=propagateCoast(checkpointAfter,gravity,arrivalS-checkpointS);
  const missAfterM=Math.hypot(arrival.position.x-destination.x,arrival.position.y-destination.y);
- return {heliocentricEscape:start,checkpointBefore,checkpointAfter,arrival,deltaVMs,fuelSpentKg,
+ return {planetaryEscapeStart:transfer.escape.initial,heliocentricEscape:start,checkpointBefore,checkpointAfter,arrival,deltaVMs,fuelSpentKg,
   missBeforeM:transfer.arrivalMissM,missAfterM};
 }
