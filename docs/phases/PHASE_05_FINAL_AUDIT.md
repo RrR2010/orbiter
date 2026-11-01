@@ -40,3 +40,11 @@ A suíte atual passa, mas os gates A3, A5, A6, A7 e A8 não possuem evidência s
 - **A8:** GitHub Actions final e merge ainda **não realizados**.
 
 **Observação:** registros anteriores acima são históricos do pré-merge e não devem substituir as evidências mais recentes desta atualização.
+
+## Revisão documental e benchmark estratégico — 2026-10-31
+
+- **A1 confirmado:** `PHASE_05_DISCOVERY.md` registra aprovação explícita da alternativa B e especifica destaque cinematográfico **opt-in** e separação de trajetória planejada × realizada.
+- **A6 evidência real:** PO executou `npm run benchmark:phase5` com 1.400 dias e três seeds. `phase-five-real-vehicle`: 156,27 ms, 1.431 eventos, 114 amostras de sonda, save 789.428 bytes, heap final 15,2 MB; `orbiter-002`: 142,14 ms, 1.430 eventos, 111 amostras, save 811.189 bytes, heap 30,1 MB; `phase-five-injection`: 130,39 ms, 1.433 eventos, 114 amostras, save 768.465 bytes, heap 47 MB. Em todas, máximo de 60 missões e 120 eventos, conforme caps, uma timeline interplanetária; roundtrip de save sem erro. Heap de três testes sequenciais não demonstra por si só leak; não inclui FPS/DOM/Canvas. A6 estratégico aprovado nesse alcance, faltando observação de FPS se o gate exigir.
+- **Suite:** PO executou `npm run validate` com 4/4 PASS e 205/205 testes no HEAD do benchmark `0e4b47b`.
+- **Lacunas funcionais explícitas:** Discovery aprovado exige distinguir rota planejada de realizada e oferecer notificação/destaque de encontro **opt-in**, sem impor perda de foco ou warp. A existência de timeline e marcador físico não demonstra esses dois recursos. Sem decisão expressa do PO, não marcar A3/A7 como integralmente aprovados.
+- **As-Built indexado:** `docs/systems/README.md` agora referencia o contrato interplanetário, com ressalva de branch até o merge.
