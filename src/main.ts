@@ -177,16 +177,31 @@ function renderMissionPanel():void{
    const number=document.createElement('strong');number.className='mission-hud-value';number.textContent=value;
    item.append(name,number);primary.append(item);
   }
+  const details=document.createElement('div');details.className='mission-hud-orbit';
+  const detailHeading=document.createElement('small');detailHeading.className='mission-hud-section-title';
+  detailHeading.textContent='CRONOLOGIA DA SONDA';
+  const dates=document.createElement('div');dates.className='mission-hud-apsides';
+  const dateCell=(label:string,value:string):HTMLElement=>{
+   const item=document.createElement('div');item.className='mission-hud-instrument';
+   const name=document.createElement('small');name.className='mission-hud-label';name.textContent=label;
+   const number=document.createElement('strong');number.className='mission-hud-value';number.textContent=value;
+   item.append(name,number);return item;
+  };
+  dates.append(dateCell('PARTIDA',schedule.departure),dateCell('CHEGADA PREVISTA',schedule.arrival));
+  details.append(detailHeading,dates);
   const secondary=document.createElement('div');secondary.className='mission-hud-secondary';
-  secondary.textContent='Partida: '+schedule.departure+' ('+schedule.countdown+')'+
-   ' · Chegada prevista: '+schedule.arrival+' · Duração: '+schedule.travel+' · Manobra confirmada: '+(view.correctionDeltaVMs>0?view.correctionDeltaVMs.toFixed(1)+' m/s':'Pendente')+
-   ' · Resultado: '+(view.outcome==='pending'?'Aguardando aproximação':view.outcome)+
-   ' · Marcos restantes: '+view.remainingMilestones;
+  const status=document.createElement('div');status.className='mission-hud-footnote';
+  status.textContent=view.phase==='scheduled'?schedule.countdown+' · Viagem '+schedule.travel:
+   view.phase==='complete'?'Sobrevoo encerrado · Sonda em trajetória solar':
+   'Manobra: '+(view.correctionDeltaVMs>0?view.correctionDeltaVMs.toFixed(1)+' m/s':'Pendente')+
+   ' · Próximos eventos: '+view.remainingMilestones;
+  secondary.textContent='Resultado: '+(view.outcome==='pending'?'Aguardando aproximação':view.outcome);
   const footnote=document.createElement('div');footnote.className='mission-hud-footnote';
-  footnote.textContent=physical?'Telemetria física heliocêntrica, com propagação pré/pós-correção.':'Posição instantânea indisponível durante escape planetário ou após a chegada.';
+  footnote.textContent=physical?'Posição e velocidade heliocêntricas calculadas.':
+   'Sonda ainda não lançada; acompanhamento no planeta de origem.';
   const toggle=document.createElement('button');toggle.type='button';toggle.textContent='Encerrar acompanhamento';
   toggle.addEventListener('click',()=>{trackedMissionId=null;});
-  hud.replaceChildren(heading,primary,secondary,footnote,toggle);
+  hud.replaceChildren(heading,primary,details,status,secondary,footnote,toggle);
   hud.hidden=false;
  }
  const upcoming=civilization.missions.filter(m=>m.status==='preparing'&&m.launchAt>=clock.time).sort((a,b)=>a.launchAt-b.launchAt||a.id.localeCompare(b.id)).slice(0,5);
