@@ -11,7 +11,8 @@ A sequência abaixo é a **ordem desejada**, não autorização para iniciar tod
 | 4 | Linguagem visual, HUD e UX de missões | Discovery com PO, instrumentação, iconografia vetorial, trilhas corretas e design system | Voos legíveis, sem telemetria inventada; padrões documentados |
 | 5 | Missões interplanetárias | Transferências, sondas, encontros e pousos simplificados | Missões têm causa, risco e resultados reproduzíveis |
 | 6 | Auditoria e arquitetura composável | As-Is/To-Be, mapa de duplicações, plano de migração e avaliação de bibliotecas | Diagnóstico verificável e fases técnicas propostas, sem reescrita |
-| 7+ | Consolidação incremental da engine | Contratos de estado, frames, operações, conhecimento e observação universais | Migrações graduais com testes de referência e saves seguros |
+| 7 | Golden fixtures e referenciais universais (M0–M1) | Cenários protegidos, StateVector e frames comuns com adaptadores | Equivalência física e saves preservados |
+| 8+ | Consolidação incremental da engine (M2–M7) | Contratos de estado, frames, operações, conhecimento e observação universais | Migrações graduais com testes de referência e saves seguros |
 | Futuro | História, infraestrutura, longevidade, produção audiovisual | Expansão apoiada na engine unificada | Cada feature reutiliza contratos antes de especializar |
 
 ## Regras de fase
