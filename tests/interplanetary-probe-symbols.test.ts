@@ -55,6 +55,42 @@ describe('physical probe observatory projection',()=>{
   expect(serializeCivilization(c)).not.toBe(before);
   expect(interplanetaryProbeSymbols(c,midpoint,world)).toEqual(middle);
  });
+ it('preserves position, velocity and fuel across the SOI frame handoff',()=>{
+  const c=start(),manifest=c.interplanetaryTimelines![0].manifest;
+  const boundary=manifest.preCorrectionCoastStart!;
+  const epsilon=Math.min(0.01,(boundary.timeS-manifest.departureS)/1000);
+  advanceCivilization(c,world,boundary.timeS,10000);
+  const before=interplanetaryProbeSymbols(c,boundary.timeS-epsilon,world)[0];
+  const at=interplanetaryProbeSymbols(c,boundary.timeS,world)[0];
+  expect(before).toBeDefined();
+  expect(at).toBeDefined();
+  // Small temporal separation should not introduce a coordinate jump at SOI.
+  expect(Math.hypot(before.position.x-at.position.x,before.position.y-at.position.y))
+   .toBeLessThan(Math.hypot(at.state.velocity.x,at.state.velocity.y)*epsilon*10+100);
+  expect(Math.hypot(before.state.velocity.x-at.state.velocity.x,
+   before.state.velocity.y-at.state.velocity.y)).toBeLessThan(10);
+  expect(before.state.fuelKg).toBeCloseTo(at.state.fuelKg,6);
+  expect(at.position).toEqual(boundary.position);
+  expect(at.state.timeS).toBe(boundary.timeS);
+ });
+ it('replays escape and correction samples after save/load without mutation',()=>{
+  const c=start(),manifest=c.interplanetaryTimelines![0].manifest;
+  const times=[
+   (manifest.departureS+manifest.preCorrectionCoastStart!.timeS)/2,
+   (manifest.preCorrectionCoastStart!.timeS+manifest.correctedCoastStart.timeS)/2,
+   manifest.correctedCoastStart.timeS,
+   manifest.correctedCoastStart.timeS+3600
+  ];
+  for(const time of times){
+   advanceCivilization(c,world,time,10000);
+   const snapshot=serializeCivilization(c);
+   const expected=interplanetaryProbeSymbols(c,time,world);
+   const restored=parseCivilization(snapshot,world,time);
+   expect(interplanetaryProbeSymbols(restored,time,world)).toEqual(expected);
+   expect(serializeCivilization(c)).toBe(snapshot);
+   expect(expected).toHaveLength(1);
+  }
+ });
  it('projects immutable, deterministic solar states after save/load',()=>{
   const c=start(),manifest=c.interplanetaryTimelines![0].manifest;
   const time=manifest.correctedCoastStart.timeS+3600;
