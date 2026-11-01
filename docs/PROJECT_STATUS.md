@@ -179,3 +179,6 @@ Added apsidal positions to existing predicted Kepler conic geometry and highligh
 **Fase 3:** PR #7 integrado e documentação As-Built consolidada no catálogo `docs/systems/README.md`. Textos anteriores de progresso abaixo são históricos e não representam pendências atuais.
 **Fase 4 AUTORIZADA:** Linguagem Visual, HUD e UX de Missões; ver `docs/phases/PHASE_04.md` e [Issue #8](https://github.com/RrR2010/orbiter/issues/8). Começar por Discovery funcional com o humano, depois executar autonomamente até merge sob os gates. **Fase 5:** exploração interplanetária, NÃO autorizada.
 **CI:** apenas `workflow_dispatch` final, depois de testes e smoke tests locais. Não acionar Actions por commit.
+
+
+> **ATUALIZAÇÃO PRÉ-MERGE — 2026-10-31:** Fase 5 implementada na branch `phase/05-interplanetary-exploration`, **ainda não integrada à main**. PO validou `npm ci`, `npm audit` (0 vulnerabilidades), `npm run validate` (4/4, 205/205), smoke completo de flyby e acompanhamento pós-chegada; benchmark estratégico de 1.400 dias em três seeds foi executado. PO **aprovou explicitamente adiar** duas experiências visuais: rota planejada versus percorrida (`IDEA-017`) e spotlight/alerta opt-in de encontro (`IDEA-018`). Ver [auditoria da Fase 5](phases/PHASE_05_FINAL_AUDIT.md). Permanecem PR/revisão e CI manual no HEAD final antes do squash merge. **Fase 6 não autorizada**.
