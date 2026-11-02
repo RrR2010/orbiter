@@ -8,9 +8,10 @@ Branch: `phase-07-m0-m1-universal-frames`. All measurements below were supplied 
 - `phase7-m0-regression.test.ts`: 4/4 pass (Lambert, midcourse fuel, delayed science/save, resolved mission reload).
 - `phase7-m0-outcomes.test.ts`: 3/3 pass (failed insertion impact, physical transfer miss/no fuel, radio boundary).
 - `phase7-m0-temporal.test.ts`: 2/2 pass (single vs partitioned vs budget=1, warp/pause).
-- Total: **11/11** tests passed. Each test fixes its own seed and epoch; numeric tolerances are expressed in the assertions.
+- `phase7-m0-boundaries.test.ts`: 3/3 pass (stable circular orbit classification, flyby/miss/impact-risk geometric boundaries, valid/malformed/incomplete/obsolete V2 saves).
+- Total: **14/14** M0 tests passed. Each test fixes its own seed and epoch; numeric tolerances are expressed in the assertions.
 
-These tests are regression *invariants*, not yet a full numerical golden snapshot for every required scenario. Remaining coverage includes positive/negative flyby outcomes, successful circular insertion, incomplete/malformed V2 saves and a complete quantitative output fixture. Do not mark M0 fully accepted until these gaps are addressed.
+These tests are regression *invariants*, not yet a full numerical golden snapshot for every required scenario. The added boundary tests cover **classification** of circular orbits and positive/negative flyby geometry, but do not simulate a complete successful insertion or positive flyby end-to-end. A complete numerical golden-output fixture remains open. Do not describe these invariant tests as full numerical golden snapshots or mark the original M0 acceptance criterion fully satisfied.
 
 ## Pre-M1 strategic benchmark
 
@@ -27,3 +28,17 @@ CPU and heap are environment-dependent; event counts, projections, mission count
 ## Functional decision
 
 The PO explicitly approved incompatible changes to old saves where necessary for a clean architecture. Never automatically delete browser storage. The current M0 fixtures still protect existing V2 behavior as historical regression evidence.
+
+## Post-M1 compatibility checkpoint (2026-11-01)
+
+After the shared frame layer and SOI adapter were integrated, local `npm run validate` passed lint, typecheck, tests and build: **224/224 tests, 4/4 gates**. The dedicated M1 frame suite passed **5/5** tests, including round-trip and continuity against the legacy SOI handoff. No intentional physics or save-schema change occurred.
+
+Post-integration strategic benchmark, same three seeds and 1,400-day horizon:
+
+| Seed | elapsedMs | events | probeTimelines | projections | maxMissions | maxEvents | saveBytes | heapUsedMB |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| phase-five-real-vehicle | 140.79 | 1431 | 1 | 114 | 60 | 120 | 789428 | 14.8 |
+| orbiter-002 | 163.27 | 1430 | 1 | 111 | 60 | 120 | 811189 | 24.6 |
+| phase-five-injection | 133.03 | 1433 | 1 | 114 | 60 | 120 | 768465 | 26.5 |
+
+Functional counters and serialized save sizes match the baseline. Single-run elapsed-time increases are observations, **not** a statistically established performance regression. Browser smoke and final CI remain pending.
