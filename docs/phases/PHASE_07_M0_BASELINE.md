@@ -42,3 +42,11 @@ Post-integration strategic benchmark, same three seeds and 1,400-day horizon:
 | phase-five-injection | 133.03 | 1433 | 1 | 114 | 60 | 120 | 768465 | 26.5 |
 
 Functional counters and serialized save sizes match the baseline. Single-run elapsed-time increases are observations, **not** a statistically established performance regression. Browser smoke and final CI remain pending.
+
+## Physical golden discovery checkpoint (2026-11-02)
+
+Local validation before adding the positive-flyby fixture: **229/229 tests, 4/4 gates**. The completed powered orbital insertion (`phase7-discovery-1`, seed `phase-five-injection`) achieved its goal with terminal fuel 472.93820321595604 kg at 2705.2783419502125 s. `tests/phase7-m0-orbital-golden.test.ts` freezes this result and validates orbital geometry and frame round-trip.
+
+The 48-window Lambert physical-transfer search produced **27 propagated transfers**, **16 infeasible windows** and **5 coast solver nonconvergence errors**. One genuine positive-altitude flyby was found: departure 500000 s, arrival 2500000 s, closest distance 85800547.14968894 m, closest altitude 73084420.15089561 m. `tests/phase7-m0-flyby-golden.test.ts` freezes this result; it still requires local validation. The exploratory test deliberately records nonconvergence separately from physical misses; no production solver behavior was changed.
+
+The five reproducible nonconvergence windows (departure/arrival, seconds) are 1000000/3000000, 1500000/4000000, 1500000/4500000, 2000000/4500000 and 2000000/5500000. This is a **known numerical limitation** of the current coast propagator, not evidence of a frame regression. A complete M0 scenario matrix, browser smoke, final CI and merge remain open.
