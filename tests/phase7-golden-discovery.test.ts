@@ -26,21 +26,32 @@ describe('phase 7 golden candidate discovery',()=>{
   const vehicle={...standard,ispS:1e7};
   const transfers=[] as Array<{departureS:number;arrivalS:number;outcome:string;closestDistanceM:number;closestAltitudeM:number}>;
   // Search multiple departure epochs and flight durations; report viable and null windows.
+  const solverFailures=[] as Array<{departureS:number;arrivalS:number;message:string}>;
+  let infeasibleWindows=0;
   for(let i=0;i<48;i++){
    const departureS=5e5+Math.floor(i/12)*5e5,arrivalS=departureS+2e6+(i%12)*5e5;
-   const result=simulateLambertPhysicalTransfer(world,origin.id,target.id,departureS,arrivalS,vehicle);
-   if(!result)continue;
+   let result:ReturnType<typeof simulateLambertPhysicalTransfer>;
+   try{
+    result=simulateLambertPhysicalTransfer(world,origin.id,target.id,departureS,arrivalS,vehicle);
+   }catch(error){
+    // Record solver failures separately; they are not physical misses or successful encounters.
+    if(!(error instanceof Error)||!/^Coast solver (did not converge|diverged)$/.test(error.message))throw error;
+    solverFailures.push({departureS,arrivalS,message:error.message});
+    continue;
+   }
+   if(!result){infeasibleWindows++;continue;}
    const geometry={closestDistanceM:result.closestDistanceM,
     closestAltitudeM:result.closestAltitudeM,closestRelativeSpeedMs:2500} as Parameters<typeof assessPlanetaryApproach>[0];
    transfers.push({departureS,arrivalS,outcome:assessPlanetaryApproach(geometry,target).outcome,
     closestDistanceM:result.closestDistanceM,closestAltitudeM:result.closestAltitudeM});
   }
-  const summary={seed:world.seed,windowsChecked:48,viableTransfers:transfers.length,orbital:flights.filter(f=>f.orbital),
+  const summary={seed:world.seed,windowsChecked:48,viableTransfers:transfers.length,infeasibleWindows,solverFailures,orbital:flights.filter(f=>f.orbital),
    achieved:flights.filter(f=>f.goalAchieved),
    flightOutcomes:flights.reduce<Record<string,number>>((counts,f)=>(counts[f.outcome]=(counts[f.outcome]??0)+1,counts),{}),
    flybys:transfers.filter(t=>t.outcome==='flyby'),transfers};
   console.log('PHASE7_GOLDEN_DISCOVERY '+JSON.stringify(summary));
   expect(flights).toHaveLength(24);
+  expect(transfers.length+infeasibleWindows+solverFailures.length).toBe(48);
   expect(transfers.length).toBeGreaterThan(0);
  });
 });
