@@ -29,7 +29,9 @@ describe('phase 7 physical transfer frame regression',()=>{
   expect(restored.massKg).toBe(handoff.massKg);
   expect(restored.fuelKg).toBe(handoff.fuelKg);
   expect(restored.epochS).toBe(handoff.timeS);
-  const geometry={...result,closestRelativeSpeedMs:2500};
+  // The classifier reads encounter geometry, not the full transfer execution record.
+  const geometry={closestDistanceM:result.closestDistanceM,
+   closestAltitudeM:result.closestAltitudeM,closestRelativeSpeedMs:2500} as Parameters<typeof assessPlanetaryApproach>[0];
   const assessment=assessPlanetaryApproach(geometry,target);
   const expected=result.closestAltitudeM<=0?'impact-risk':
    result.closestDistanceM<=target.radius*10?'flyby':'distant-miss';
