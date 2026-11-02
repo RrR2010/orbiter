@@ -25,8 +25,9 @@ describe('phase 7 golden candidate discovery',()=>{
   const standard=designVehicle(gravity,4,3000,.5);
   const vehicle={...standard,ispS:1e7};
   const transfers=[] as Array<{departureS:number;arrivalS:number;outcome:string;closestDistanceM:number;closestAltitudeM:number}>;
-  for(let i=0;i<8;i++){
-   const departureS=1e6,arrivalS=4e6+i*5e5;
+  // Search multiple departure epochs and flight durations; report viable and null windows.
+  for(let i=0;i<48;i++){
+   const departureS=5e5+Math.floor(i/12)*5e5,arrivalS=departureS+2e6+(i%12)*5e5;
    const result=simulateLambertPhysicalTransfer(world,origin.id,target.id,departureS,arrivalS,vehicle);
    if(!result)continue;
    const geometry={closestDistanceM:result.closestDistanceM,
@@ -34,7 +35,7 @@ describe('phase 7 golden candidate discovery',()=>{
    transfers.push({departureS,arrivalS,outcome:assessPlanetaryApproach(geometry,target).outcome,
     closestDistanceM:result.closestDistanceM,closestAltitudeM:result.closestAltitudeM});
   }
-  const summary={seed:world.seed,orbital:flights.filter(f=>f.orbital),
+  const summary={seed:world.seed,windowsChecked:48,viableTransfers:transfers.length,orbital:flights.filter(f=>f.orbital),
    achieved:flights.filter(f=>f.goalAchieved),
    flightOutcomes:flights.reduce<Record<string,number>>((counts,f)=>(counts[f.outcome]=(counts[f.outcome]??0)+1,counts),{}),
    flybys:transfers.filter(t=>t.outcome==='flyby'),transfers};
