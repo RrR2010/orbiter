@@ -74,3 +74,7 @@ A auditoria da Fase 6 registrou o descompasso histórico e o corrigiu neste índ
 ## Phase 7 M1 — universal reference frames (branch, pending merge)
 
 - [Reference frames](reference-frames.md) — common SI state, epoch-aware solar/body transforms, local-flight/probe/celestial adapters and SOI handoff integration. This contract is implemented on the Phase 7 branch; it is **not yet in main**. M2–M7 remain out of scope.
+
+## Phase 8 M2 — work in progress (unvalidated branch)
+
+- [Universal observation state](state-observation.md) — partial read-only provider, prefixed observation identity, adapters for celestial/local/probe, current call-site migration matrix, and outstanding acceptance gates. **Not merged or validated**.
