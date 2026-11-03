@@ -62,12 +62,15 @@ export function localOperationRecord(c:Readonly<Civilization>,mission:Readonly<M
      source:'local-flight-v2',status:'physical-observation'});
   });
  }
- drafts.push({id:endId,epochS:mission.resolvedAt||flight?.terminal.timeS||mission.launchAt,kind:'assessment',
+ const assessmentAt=mission.resolvedAt>0?mission.resolvedAt:flight?.terminal.timeS;
+ if(assessmentAt!==undefined)drafts.push({id:endId,epochS:assessmentAt,kind:'assessment',
   parameters:{kind:'assessment',targetId:mission.targetId}});
  const events:DomainEvent[]=[];
  for(const event of c.events){
   if(event.missionId!==id||event.time>untilS)continue;
   const operationId=event.kind==='preparation'||event.kind==='launch'?launchId:endId;
+  if(operationId===endId&&!drafts.some(d=>d.id===endId))drafts.push({id:endId,epochS:event.time,kind:'assessment',
+   parameters:{kind:'assessment',targetId:mission.targetId}});
   const kind:DomainEvent['kind']=event.kind==='preparation'?'preparation':event.kind==='launch'?'ignition':
    event.kind==='success'?'completion':'failure';
   if(event.kind!=='preparation'&&event.kind!=='launch'&&event.kind!=='success'&&event.kind!=='failure')continue;
