@@ -123,7 +123,6 @@ export function interplanetaryOperationRecord(c:Readonly<Civilization>,timeline:
  if(correctionConfirmed)add('correction',manifest.correctedCoastStart,
   `operation/${entityId}/milestone/${correctionIndex}`);
  const encounterIndex=manifest.milestones.findIndex(m=>m.kind==='closest-approach');
- const observationOp=`operation/${entityId}/milestone/${encounterIndex}`;
  for(const event of c.events){
   if(event.time>untilS)continue;
   if(event.kind==='research'&&event.detail.startsWith('Scientific observation received: ')){
@@ -134,7 +133,10 @@ export function interplanetaryOperationRecord(c:Readonly<Civilization>,timeline:
     parameters:{kind:'transmit',observationId}});
    events.push(strategicEvent(id,opId,event,'science-received'));
   }else if(event.missionId===id&&event.kind==='failure'&&event.detail.startsWith('Interplanetary radio link out of range')){
-   events.push(strategicEvent(id,observationOp,event,'radio-failure'));
+   const opId=`operation/${entityId}/transmit/radio-failure/${event.id}`;
+   drafts.push({id:opId,epochS:manifest.milestones[encounterIndex].timeS,kind:'transmit',
+    parameters:{kind:'transmit',observationId:null}});
+   events.push(strategicEvent(id,opId,event,'radio-failure'));
   }
  }
  for(const item of c.scienceInbox?.pending??[]){
