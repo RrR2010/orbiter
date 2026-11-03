@@ -2,7 +2,7 @@ import type {Civilization,Mission,SpaceEvent} from './civilization';
 import type {MissionTimeline} from './interplanetary-mission-timeline';
 import {bodyFrame,fromHeliocentricProbe,fromLocalFlight,solarFrame} from './reference-frames';
 import type {FlightState} from './spaceflight/types';
-import type {DomainEvent,MissionOperation,MissionOperationRecord,OperationKind,OperationParameters,PhysicalCheckpoint} from './mission-operations';
+import type {DomainEvent,MissionOperation,MissionOperationRecord,OperationKind,OperationParameters,OperationStatus,PhysicalCheckpoint} from './mission-operations';
 import {validateMissionOperationRecord} from './mission-operations';
 
 type Draft=Readonly<{id:string;epochS:number;kind:OperationKind;parameters:OperationParameters}>;
@@ -14,7 +14,7 @@ const mark=(ops:MissionOperation[],checkpoints:readonly PhysicalCheckpoint[],eve
  const byOperation=(id:string)=>events.filter(e=>e.operationId===id).sort(compare);
  return ops.map(op=>{
   const lastEvent=byOperation(op.id).at(-1);
-  if(lastEvent&&!(op.kind==='launch'&&lastEvent.kind==='preparation'))return {...op,status:lastEvent.outcome==='failure'?'failed':'confirmed',
+  if(lastEvent&&!(op.kind==='launch'&&lastEvent.kind==='preparation'))return {...op,status:(lastEvent.outcome==='failure'?'failed':'confirmed') as OperationStatus,
    result:lastEvent.outcome==='failure'?{kind:'failed' as const,eventId:lastEvent.id}:{kind:'confirmed' as const,eventId:lastEvent.id}};
   const checkpoint=checkpoints.filter(cp=>cp.operationId===op.id).sort(compare).at(-1);
   return checkpoint?{...op,status:'observed' as const,result:{kind:'observed' as const,checkpointId:checkpoint.id}}:op;
@@ -22,9 +22,10 @@ const mark=(ops:MissionOperation[],checkpoints:readonly PhysicalCheckpoint[],eve
 };
 function assemble(missionId:string,ownerId:string,entityId:string,pipeline:MissionOperationRecord['pipeline'],untilS:number,
  drafts:readonly Draft[],checkpoints:readonly PhysicalCheckpoint[],events:readonly DomainEvent[]):MissionOperationRecord{
- const sorted=[...drafts].sort(compare);
+ const sorted=drafts.map((draft,index)=>({...draft,index})).sort((a,b)=>a.epochS-b.epochS||a.index-b.index);
  const operations:MissionOperation[]=sorted.map((draft,i)=>({
-  ...draft,missionId,ownerId,entityId,sequence:i,
+  id:draft.id,epochS:draft.epochS,kind:draft.kind,parameters:draft.parameters,
+  missionId,ownerId,entityId,sequence:i,
   preconditions:i?[sorted[i-1].id]:[],status:'planned',result:{kind:'pending'}
  }));
  const record:MissionOperationRecord={missionId,ownerId,entityId,pipeline,observedUntilS:untilS,
@@ -118,10 +119,7 @@ export function interplanetaryOperationRecord(c:Readonly<Civilization>,timeline:
    parameters:{kind:'handoff',fromFrameId:bodyFrame(manifest.originId),toFrameId:solarFrame}});
   add('handoff',handoff,handoffId);
  }
- if(departureConfirmed&&manifest.planetaryEscapeStart){
-  // Local escape is not already heliocentric; its untransformed state is never mislabeled solar.
-  // The existing manifest keeps it available for M4, without inventing a confirmed solar checkpoint.
- }
+ // Planetary escape has a local state; never label it solar without a frame transform.
  if(correctionConfirmed)add('correction',manifest.correctedCoastStart,
   `operation/${entityId}/milestone/${correctionIndex}`);
  const encounterIndex=manifest.milestones.findIndex(m=>m.kind==='closest-approach');
