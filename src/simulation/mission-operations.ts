@@ -65,7 +65,7 @@ export function validateMissionOperationRecord(record:MissionOperationRecord):vo
    op.entityId!==record.entityId||!Number.isFinite(op.epochS)||op.epochS<0||
    op.epochS<last||op.sequence!==ops.size||op.parameters.kind!==op.kind)throw new Error('Invalid operation order');
   seen.add(op.id);ops.set(op.id,op);last=op.epochS;
-  if(op.preconditions.some(id=>!ops.has(id)))throw new Error('Invalid operation predecessor');
+  if(op.preconditions.some(id=>id===op.id||!ops.has(id)))throw new Error('Invalid operation predecessor');
  }
  let prev=-Infinity;
  for(const cp of record.checkpoints){
