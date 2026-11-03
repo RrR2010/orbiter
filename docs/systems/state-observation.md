@@ -1,4 +1,4 @@
-# Estado consultável e observação — M2 (branch de implementação, não validado)
+# Estado consultável e observação — M2 (implementado na branch, CI final pendente)
 
 ## Contrato parcial implementado
 
@@ -23,6 +23,8 @@ O adaptador de corpos usa `celestialState`; o local reutiliza `flightViewAt` e `
 
 ## Teste e limitações
 
-`tests/phase8-m2-state-provider.test.ts` exercita corpo, voo local e sonda por um mesmo entrypoint, frames e indisponibilidade, com snapshots imutáveis. O usuário executou `npm run validate` em HEAD anterior à última alteração do HUD com **4/4 gates e 234/234 testes**, além de `npm audit` (zero vulnerabilidades), `benchmark:orbits` (10.000 objetos em 6,23 ms) e `benchmark:phase5` (seeds com 1400 dias em 95,23/86,20/72,61 ms). **Após a alteração do HUD, estes resultados não validam o novo HEAD**. Ainda faltam novo validate, benchmark atualizado quando pertinente, smoke humano, audit final e CI final manual; **M2 não pode ser integrado**.
+`tests/phase8-m2-state-provider.test.ts` exercita corpo, voo local e sonda por um mesmo entrypoint, frames e indisponibilidade, com snapshots imutáveis. O Product Owner executou `npm run validate` após o refino do HUD, relatando **4/4 gates e 234/234 testes**, e aprovou os sete cenários de smoke funcional (seleção, follow/pan/zoom, lançamento, sonda, warp e reload). Também relatou `npm audit` sem vulnerabilidades, `benchmark:orbits` (10.000 objetos em 6,23 ms) e `benchmark:phase5` (1400 dias em 95,23/86,20/72,61 ms). O relatório textual não contém SHA; conferir HEAD no gate de CI. Benchmarks são sintéticos/estratégicos e não medem Canvas/FPS. **CI final manual ainda pendente; não integrar até o check do HEAD aprovado**.
+
+A integração conserva um fallback ilustrativo legado apenas para missões sem estado físico, fora do provider. Picking ainda usa listas específicas de símbolos para geometria de hit; o provider fornece coordenadas reais, não desenha entidades. O vínculo transitório de samplers ao rendering e custo de consultas repetidas são riscos documentados na ADR-0022.
 
 A semântica da amostragem interplanetária continua dependente de cursor de eventos; não expor snapshots futuros como observações presentes. A transformação de velocidade da sonda é baseada no estado efetivamente apresentado pelo sampler legado. Valores de `null` são indisponíveis, não uma medida zero.
