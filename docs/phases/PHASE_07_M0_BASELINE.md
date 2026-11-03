@@ -50,3 +50,21 @@ Local validation before adding the positive-flyby fixture: **229/229 tests, 4/4 
 The 48-window Lambert physical-transfer search produced **27 propagated transfers**, **16 infeasible windows** and **5 coast solver nonconvergence errors**. One genuine positive-altitude flyby was found: departure 500000 s, arrival 2500000 s, closest distance 85800547.14968894 m, closest altitude 73084420.15089561 m. `tests/phase7-m0-flyby-golden.test.ts` freezes this result; it still requires local validation. The exploratory test deliberately records nonconvergence separately from physical misses; no production solver behavior was changed.
 
 The five reproducible nonconvergence windows (departure/arrival, seconds) are 1000000/3000000, 1500000/4000000, 1500000/4500000, 2000000/4500000 and 2000000/5500000. This is a **known numerical limitation** of the current coast propagator, not evidence of a frame regression. A complete M0 scenario matrix, browser smoke, final CI and merge remain open.
+
+## Final M0 coverage review (pending local revalidation)
+
+| Required scenario | Reproducible evidence | Type of assertion |
+|---|---|---|
+| Suborbital/nonorbital objective | `phase7-m0-orbital-golden.test.ts`, discovery ID 11 | Recorded outcome, fuel and epoch |
+| Impact / failed insertion | `phase7-m0-outcomes.test.ts`, `failed-insertion-descent.test.ts` | Surface boundary and time invariants |
+| Successful orbital insertion | `phase7-m0-orbital-golden.test.ts`, discovery ID 1 | Recorded outcome, fuel, epoch, physical orbit |
+| Escape and SOI | `phase7-m0-baseline.test.ts`, `phase7-m1-physical-transfer.test.ts` | Position, velocity, mass, epoch |
+| Lambert and transfer | `phase7-m0-regression.test.ts`, `phase7-m1-physical-transfer.test.ts` | Solver arrival tolerance and physical propagation |
+| Positive flyby | `phase7-m0-flyby-golden.test.ts` | Recorded closest distance and altitude |
+| Distant miss | `phase7-m0-outcomes.test.ts` | Recorded closest distance and altitude |
+| Midcourse correction | `phase7-m0-regression.test.ts` | Deterministic burn, mass/fuel, reduced miss |
+| Science transmission and reception | `phase7-m0-regression.test.ts`, `phase7-m0-outcomes.test.ts` | Delayed inbox, delivery at due epoch, radio range |
+| Save/reload and invalid V2 | `phase7-m0-regression.test.ts`, `phase7-m0-boundaries.test.ts` | Equality and rejection boundaries |
+| Partitioning, scheduler, warp and pause | `phase7-m0-temporal.test.ts` | Equality and clock invariants |
+
+**Evidence distinction:** recorded numerical goldens now cover the physical orbital, nonorbital, flyby and miss cases; the remaining scenarios use deterministic quantitative or exact invariants rather than brittle full-object snapshots. Five coast solver nonconvergence windows remain documented as an existing limitation. The matrix is proposed as adequate M0 regression protection, **subject to the next local validation**; no exception or CI approval is implied.
