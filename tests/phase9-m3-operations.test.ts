@@ -35,6 +35,20 @@ describe('phase 9 M3 operational projections',()=>{
   expect(serializeCivilization(c)).toBe(before);
   expect(()=>validateMissionOperationRecord({...record,events:[...record.events,...record.events]})).toThrow();
  });
+ it('distinguishes scheduled preparation from a confirmed ignition',()=>{
+  const world=generateWorld('m3-local-preparation'),c=createCivilization(world);
+  c.stage=4;c.resources=300;c.nextAt=1;
+  advanceCivilization(c,world,1,10000,true);
+  const mission=c.missions[0],planned=localOperationRecord(c,mission);
+  expect(planned.events.some(e=>e.kind==='preparation')).toBe(true);
+  expect(planned.events.some(e=>e.kind==='ignition')).toBe(false);
+  expect(planned.operations.find(op=>op.kind==='launch')?.status).toBe('planned');
+  expect(planned.checkpoints).toEqual([]);
+  advanceCivilization(c,world,mission.launchAt,10000);
+  const launched=localOperationRecord(c,mission);
+  expect(launched.events.some(e=>e.kind==='ignition')).toBe(true);
+  expect(launched.operations.find(op=>op.kind==='launch')?.status).toBe('confirmed');
+ });
  it('never confirms future probe milestones or reveals pre-correction burn costs',()=>{
   const {world,c,timeline}=authorizedProbe(),before=serializeCivilization(c);
   expect(timeline).toBeDefined();
