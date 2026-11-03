@@ -56,7 +56,7 @@ export function validateMissionOperationRecord(record:MissionOperationRecord):vo
  }
  let prev=-Infinity;
  for(const cp of record.checkpoints){
-  if(seen.has(cp.id)||!validTime(cp.epochS)||cp.epochS<prev||!ops.has(cp.operationId)||
+  if(seen.has(cp.id)||!validTime(cp.epochS)||cp.epochS<prev||!ops.has(cp.operationId)||cp.epochS<ops.get(cp.operationId)!.epochS||
    cp.missionId!==record.missionId||cp.state.entityId!==record.entityId||
    cp.state.epochS!==cp.epochS||cp.frameId!==cp.state.frameId)throw new Error('Invalid physical checkpoint');
   seen.add(cp.id);prev=cp.epochS;
@@ -64,12 +64,16 @@ export function validateMissionOperationRecord(record:MissionOperationRecord):vo
  prev=-Infinity;
  for(const event of record.events){
   if(seen.has(event.id)||!validTime(event.epochS)||event.epochS<prev||
-   !ops.has(event.operationId)||event.missionId!==record.missionId)
+   !ops.has(event.operationId)||event.epochS<ops.get(event.operationId)!.epochS||event.missionId!==record.missionId)
    throw new Error('Invalid domain event');
   seen.add(event.id);prev=event.epochS;
  }
  const cpIds=new Set(record.checkpoints.map(cp=>cp.id)),eventIds=new Set(record.events.map(e=>e.id));
  for(const op of record.operations){
+  if((op.result.kind==='pending')!==(op.status==='planned')||
+   (op.result.kind==='observed')!==(op.status==='observed')||
+   (op.result.kind==='failed')!==(op.status==='failed')||
+   (op.result.kind==='confirmed')!==(op.status==='confirmed'))throw new Error('Inconsistent operation status');
   if(op.result.kind==='observed'&&!cpIds.has(op.result.checkpointId)||
    (op.result.kind==='confirmed'||op.result.kind==='failed')&&!eventIds.has(op.result.eventId))
    throw new Error('Unresolved operation result');
