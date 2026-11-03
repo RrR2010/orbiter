@@ -23,6 +23,8 @@ describe('phase 9 M3 operational projections',()=>{
   const {c,mission}=completedLocal(),before=serializeCivilization(c);
   const record=localOperationRecord(c,mission);
   expect(record.pipeline).toBe('local');
+  if(mission.status==='success'||mission.status==='failure')expect(record.outcome).toMatchObject({kind:'local',physical:mission.flight!.outcome});
+  else expect(record.outcome.kind).toBe('pending');
   expect(record.ownerId).toBe(c.id);
   expect(record.operations.some(op=>op.kind==='launch')).toBe(true);
   expect(record.checkpoints.length).toBe(mission.flight!.checkpoints.filter(cp=>cp.timeS<=c.time).length);
@@ -44,6 +46,7 @@ describe('phase 9 M3 operational projections',()=>{
   expect(planned.events.some(e=>e.kind==='ignition')).toBe(false);
   expect(planned.operations.find(op=>op.kind==='launch')?.status).toBe('planned');
   expect(planned.checkpoints).toEqual([]);
+  expect(planned.outcome.kind).toBe('pending');
   advanceCivilization(c,world,mission.launchAt,10000);
   const launched=localOperationRecord(c,mission);
   expect(launched.events.some(e=>e.kind==='ignition')).toBe(true);
@@ -55,6 +58,7 @@ describe('phase 9 M3 operational projections',()=>{
   const scheduled=interplanetaryOperationRecord(c,timeline);
   expect(scheduled.pipeline).toBe('interplanetary');
   expect(scheduled.events).toEqual([]);
+  expect(scheduled.outcome.kind).toBe('pending');
   expect(scheduled.checkpoints).toEqual([]);
   const correction=scheduled.operations.find(op=>op.kind==='correction')!;
   expect(correction.parameters).toMatchObject({kind:'correction',deltaVMs:null,fuelSpentKg:null});
@@ -64,6 +68,7 @@ describe('phase 9 M3 operational projections',()=>{
   const underway=interplanetaryOperationRecord(c,c.interplanetaryTimelines![0]);
   expect(underway.events.some(e=>e.kind==='departure')).toBe(true);
   expect(underway.events.some(e=>e.kind==='correction')).toBe(false);
+  expect(underway.outcome.kind).toBe('pending');
   expect(underway.events.every(e=>e.epochS<=c.time)).toBe(true);
   expect(serializeCivilization(c)).not.toBe(before);
   const coast=timeline.manifest.correctedCoastStart.timeS;
@@ -86,6 +91,7 @@ describe('phase 9 M3 operational projections',()=>{
   const encounterOperation=projection.operations.find(op=>op.kind==='observation')!;
   const radioOperation=projection.operations.find(op=>op.kind==='transmit'&&op.status==='failed')!;
   expect(encounterOperation.status).toBe('confirmed');
+  expect(projection.outcome).toEqual({kind:'interplanetary',resolvedAtS:encounter.timeS,result:timeline.manifest.outcome});
   expect(radioOperation.status).toBe('failed');
   expect(projection.events.some(e=>e.kind==='radio-failure'&&e.operationId===radioOperation.id)).toBe(true);
  });
