@@ -32,9 +32,15 @@ export type DomainEvent=Readonly<{
  source:'strategic-event'|'timeline-milestone';sourceId:string;
  outcome:'success'|'failure'|'recorded';detail:string;
 }>;
+/** A resolved outcome is authoritative even if its bounded event log was trimmed. */
+export type MissionOutcome=
+ |Readonly<{kind:'pending'}>
+ |Readonly<{kind:'local';resolvedAtS:number;strategic:'success'|'failure';
+   physical:'achieved'|'partial'|'failed'|null;reason:string|null}>
+ |Readonly<{kind:'interplanetary';resolvedAtS:number;result:'flyby'|'impact-risk'|'distant-miss'}>;
 export type MissionOperationRecord=Readonly<{
  missionId:string;ownerId:EntityId;entityId:EntityId;
- pipeline:'local'|'interplanetary';observedUntilS:number;
+ pipeline:'local'|'interplanetary';observedUntilS:number;outcome:MissionOutcome;
  operations:readonly MissionOperation[];
  checkpoints:readonly PhysicalCheckpoint[];
  events:readonly DomainEvent[];
@@ -46,6 +52,9 @@ export function validateMissionOperationRecord(record:MissionOperationRecord):vo
  const validTime=(time:number):boolean=>Number.isFinite(time)&&time>=0&&time<=record.observedUntilS;
  if(!record.missionId||!record.ownerId||!record.entityId||!Number.isFinite(record.observedUntilS)||record.observedUntilS<0)
   throw new Error('Invalid operation record identity or clock');
+ if(record.outcome.kind!=='pending'&&(!validTime(record.outcome.resolvedAtS)||
+  record.pipeline!==(record.outcome.kind==='local'?'local':'interplanetary')))
+  throw new Error('Invalid authoritative mission outcome');
  let last=-Infinity;
  for(const op of record.operations){
   if(seen.has(op.id)||!op.id||op.missionId!==record.missionId||op.ownerId!==record.ownerId||
