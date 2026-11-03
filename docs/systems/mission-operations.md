@@ -1,4 +1,4 @@
-# Operações, checkpoints e eventos universais — M3 (branch, gates pendentes)
+# Operações, checkpoints e eventos universais — M3 (validação local aprovada; CI final pendente)
 
 ## Escopo e autoridade
 
@@ -42,4 +42,4 @@ Testes M3: `tests/phase9-m3-operations.test.ts` (voo físico local, sonda planej
 
 M4 poderá aceitar um `MissionOperation` como intenção, consultar `StateProvider.at` da M2 (somente observação), processar as `preconditions` e produzir `PhysicalCheckpoint` e `DomainEvent` com IDs de causa. **Isso não autoriza M4 a reexecutar os dados históricos do manifesto** nem a criar scheduler concorrente; a fonte de verdade deverá migrar com uma ADR e provas numéricas separadas.
 
-**Estado:** implementação sob teste na PR da Fase 9; sem evidência local/CI neste ambiente no momento da escrita. Não integrar antes de `npm ci`, `npm run validate`, audit, benchmarks, smoke se necessário, CI manual no HEAD e squash merge.
+**Evidência local fornecida pelo Product Owner (2026-11-03):** `npm ci` concluiu com 0 vulnerabilidades; `npm run validate` aprovou lint, tipos, testes e build (4/4; 240/240 testes); `benchmark:orbits`, `benchmark:phase5` e `benchmark:m3` concluídos. Em 1.400 dias, a Fase 5 preservou os mesmos contadores de eventos (1431/1430/1433), projeções (114/111/114) e bytes de save (789428/811189/768465). A projeção M3 retornou 61 registros por seed, 206/210/207 operações, 2327/2403/2245 checkpoints, 124 eventos confirmados e custo pontual de 17,81/4,13/3,10 ms. Variações de tempo entre processos não são evidência isolada de regressão. Sem alterações visuais, smoke navegador M2 já aprovado e código de UI intocado; smoke extra M3 não é requerido. A instalação comprovou 0 vulnerabilidades; o CI final executará novamente `npm audit`. **CI manual no HEAD da PR #20 e squash merge ainda pendentes.**
