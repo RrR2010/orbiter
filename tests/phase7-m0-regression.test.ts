@@ -6,7 +6,7 @@ import {designVehicle} from '../src/simulation/spaceflight/vehicle-capability';
 import {gravityForRadius} from '../src/simulation/spaceflight/gravity';
 import {correctLambertMidcourse} from '../src/simulation/interplanetary-midcourse-correction';
 import {createCivilization,advanceCivilization,parseCivilization,serializeCivilization} from '../src/simulation/civilization';
-import {enqueueScience} from '../src/simulation/interplanetary-science-inbox';
+import {drainScience,enqueueScience} from '../src/simulation/interplanetary-science-inbox';
 
 /** M0 regression probes execute against the unmodified physical pipelines. */
 describe('phase 7 M0 cross-system regression',()=>{
@@ -27,6 +27,11 @@ describe('phase 7 M0 cross-system regression',()=>{
   expect(result.checkpointAfter.position).toEqual(result.checkpointBefore.position);
   expect(result.checkpointBefore.fuelKg-result.checkpointAfter.fuelKg).toBeCloseTo(result.fuelSpentKg,8);
   expect(result.missAfterM).toBeLessThan(result.missBeforeM);
+  expect(result.fuelSpentKg).toBeGreaterThan(0);
+  expect(result.checkpointAfter.massKg).toBeCloseTo(result.checkpointBefore.massKg-result.fuelSpentKg,8);
+  expect(result.checkpointAfter.fuelKg).toBeGreaterThanOrEqual(0);
+  expect(result.checkpointAfter.timeS).toBe(result.checkpointBefore.timeS);
+  expect(result.checkpointAfter.velocity).not.toEqual(result.checkpointBefore.velocity);
   expect(run()).toEqual(result);
  });
  it('roundtrips civilization state and delayed science without early reception',()=>{
@@ -39,6 +44,14 @@ describe('phase 7 M0 cross-system regression',()=>{
   const restored=parseCivilization(serializeCivilization(civilization),world,0);
   expect(restored).toEqual(civilization);
   expect(restored.science!.knowledge[target.id].gravity.observations).toBe(0);
+  const before=drainScience(restored.scienceInbox!,restored.science!,99);
+  expect(before.deliveredIds).toEqual([]);
+  expect(before.inbox.pending).toHaveLength(1);
+  const atReception=drainScience(before.inbox,before.record,100);
+  expect(atReception.deliveredIds).toEqual(['probe-one:gravity']);
+  expect(atReception.inbox.pending).toHaveLength(0);
+  expect(atReception.record.knowledge[target.id].gravity.observations).toBe(1);
+  expect(drainScience(atReception.inbox,atReception.record,100).deliveredIds).toEqual([]);
  });
  it('retains resolved flight checkpoints through strategic save and reload',()=>{
   const world=generateWorld('v2-save-reset'),civilization=createCivilization(world);
