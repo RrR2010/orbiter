@@ -40,6 +40,9 @@ describe('phase 9 M3 operational projections',()=>{
   expect(localOperationRecord(c,mission)).toEqual(record);
   expect(serializeCivilization(c)).toBe(before);
   expect(()=>validateMissionOperationRecord({...record,events:[...record.events,...record.events]})).toThrow();
+  const checkpoint=record.checkpoints[0];
+  expect(()=>validateMissionOperationRecord({...record,checkpoints:[{...checkpoint,operationId:'missing'},...record.checkpoints.slice(1)]})).toThrow();
+  expect(()=>validateMissionOperationRecord({...record,checkpoints:[{...checkpoint,epochS:c.time+1},...record.checkpoints.slice(1)]})).toThrow();
  });
  it('distinguishes scheduled preparation from a confirmed ignition',()=>{
   const world=generateWorld('m3-local-preparation'),c=createCivilization(world);
