@@ -17,9 +17,9 @@ export type StateTelemetry=Readonly<{
 }>;
 
 /** Distinct observer identities avoid changing legacy mission and save identifiers. */
-export const bodyEntityId=(id:string):EntityId=`body/${id}`;
-export const localVehicleEntityId=(id:string):EntityId=`local/${id}`;
-export const probeEntityId=(id:string):EntityId=`probe/${id}`;
+export const bodyEntityId=(id:string):EntityId=>`body/${id}`;
+export const localVehicleEntityId=(id:string):EntityId=>`local/${id}`;
+export const probeEntityId=(id:string):EntityId=>`probe/${id}`;
 
 /** A read-only facade over existing physical samplers and M1 frame transformations. */
 export function createStateProvider(world:World,civilization?:Readonly<Civilization>):StateProvider{
