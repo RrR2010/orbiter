@@ -13,13 +13,16 @@ export type OperationParameters=
  |Readonly<{kind:'transmit';observationId:string|null}>
  |Readonly<{kind:'assessment';targetId:EntityId}>;
 
+export type OperationProgress=
+ |Readonly<{status:'planned';result:Readonly<{kind:'pending'}>}>
+ |Readonly<{status:'observed';result:Readonly<{kind:'observed';checkpointId:string}>}>
+ |Readonly<{status:'confirmed';result:Readonly<{kind:'confirmed';eventId:string}>}>
+ |Readonly<{status:'failed';result:Readonly<{kind:'failed';eventId:string}>}>;
 export type MissionOperation=Readonly<{
  id:string;missionId:string;ownerId:EntityId;entityId:EntityId;
  sequence:number;epochS:number;kind:OperationKind;parameters:OperationParameters;
- preconditions:readonly string[];status:OperationStatus;
- result:Readonly<{kind:'pending'}>|Readonly<{kind:'observed';checkpointId:string}>|
-  Readonly<{kind:'confirmed';eventId:string}>|Readonly<{kind:'failed';eventId:string}>;
-}>;
+ preconditions:readonly string[];
+}> & OperationProgress;
 export type PhysicalCheckpoint=Readonly<{
  id:string;missionId:string;operationId:string;epochS:number;frameId:FrameId;
  checkpointKind:'coast'|'burn-start'|'burn-progress'|'burn-end'|'impact'|'goal'|'partial'|'abort'|'handoff'|'correction';
