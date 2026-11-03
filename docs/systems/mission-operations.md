@@ -2,7 +2,7 @@
 
 ## Escopo e autoridade
 
-`src/simulation/mission-operations.ts` define `MissionOperation`, `OperationParameters` discriminado por `kind`, `PhysicalCheckpoint`, `DomainEvent`, `MissionOperationRecord` e `validateMissionOperationRecord`. `src/simulation/mission-operation-projection.ts` expõe `localOperationRecord`, `interplanetaryOperationRecord` e `missionOperationRecords(c)`. A projeção é **derivada, síncrona e read-only**; não avança missões e não altera a persistência JSON V2.
+`src/simulation/mission-operations.ts` define `MissionOperation`, `OperationParameters` discriminado por `kind`, `PhysicalCheckpoint`, `DomainEvent`, `MissionOperationRecord`, `MissionOutcome` e `validateMissionOperationRecord`. `src/simulation/mission-operation-projection.ts` expõe `localOperationRecord`, `interplanetaryOperationRecord` e `missionOperationRecords(c)`. A projeção é **derivada, síncrona e read-only**; não avança missões e não altera a persistência JSON V2.
 
 `advanceCivilization` continua autoridade dos eventos estratégicos, lançamento, término e recepção de ciência. `resolveAutonomousFlightV2` continua executor físico local; `prepareInterplanetaryMission` conserva o manifesto pré-calculado e `advanceMissionTimeline` continua único consumidor dos milestones via cursor. M3 não instala segunda fila, não dispara eventos nem acrescenta decisões de guidance.
 
@@ -26,7 +26,7 @@ M3 **não move** essa ordem, não consome eventos, não insere operações em `c
 
 ## Semântica e causalidade
 
-- Cada operação tem `id`, `missionId`, `ownerId`, `entityId`, `sequence`, `epochS`, `kind` e `parameters` discriminados; `preconditions` ligam operação anterior dentro do mesmo registro. Os quatro estados são `planned`, `observed`, `confirmed`, `failed`; resultado é união tipada de pendente, checkpoint observado e evento confirmado/falhou.
+- Cada operação tem `id`, `missionId`, `ownerId`, `entityId`, `sequence`, `epochS`, `kind` e `parameters` discriminados; `preconditions` ligam operação anterior dentro do mesmo registro. Os quatro estados são `planned`, `observed`, `confirmed`, `failed`; resultado da operação é união tipada de pendente, checkpoint observado e evento confirmado/falhou. **O desfecho da missão** está separado em `MissionOutcome`: pendente, local (resultado estratégico e físico com `reason`) ou interplanetário (outcome do encontro efetivamente consumido). O desfecho é derivado de `Mission.status`/voo ou cursor do encontro, mesmo quando o log `SpaceEvent` já foi aparado — não se inventa evento ausente.
 - Checkpoint significa **estado físico calculado** e só é exposto quando `epochS <= civilization.time` e a respectiva fase foi iniciada. Não é o mesmo que um evento de scheduler. Milestone interplanetário só confirma quando `index < cursor`; tentativa, plano e resultado previsto nunca são por si eventos confirmados.
 - `DomainEvent` sempre traz `operationId` causal, `sourceId` persistido ou índice de milestone, `source`, época e desfecho. A ordenação é por tempo absoluto e, em empates, ID. IDs são derivados da fonte persistente, não de ordem de renderização ou número de chamadas.
 - Correção projetada ainda não confirmada apresenta `deltaVMs=null` e `fuelSpentKg=null`, evitando expor informação futura; os valores físicos aparecem depois do cursor. Ciência recebida só vira evento se log estratégico e `receivedIds` confirmarem a entrega. Eventos removidos pelo histórico limitado **não são sintetizados**.
