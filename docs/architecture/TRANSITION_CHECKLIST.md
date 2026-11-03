@@ -26,9 +26,9 @@
 
 ## C. Observação e produto
 
-- [ ] Seleção/câmera/follow/inspector aplicáveis a qualquer entidade relevante.
+- [ ] Seleção/câmera/follow/inspector aplicáveis a qualquer entidade relevante — M2 na PR #17: provider comum de estado e migração parcial de corpo/veículo/sonda em focus/follow/picking; inspector especializado e smoke ainda pendentes.
 - [ ] Trajetórias previstas, planejadas, osculantes e percorridas claramente diferenciadas.
-- [ ] HUD/telemetria compartilhada por provedor de dados, com N/D onde necessário.
+- [ ] HUD/telemetria compartilhada por provedor de dados, com N/D onde necessário — M2 na PR #17: métricas físicas básicas dos HUDs migradas para `stateTelemetry`; apsides, objetivos e cronologia permanecem especializados; aguarda validate do HEAD e smoke.
 - [ ] Missões e conquistas observáveis por feed, diretor de eventos e eventualmente PiP.
 - [ ] Warp com presets ajustados, suavização de apresentação e segurança do scheduler.
 - [ ] Sprites/efeitos/áudio desacoplados da física.
