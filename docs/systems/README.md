@@ -81,4 +81,4 @@ A auditoria da Fase 6 registrou o descompasso histórico e o corrigiu neste índ
 
 ## Fase 9 M3 — implementação em validação
 
-- [Operações, checkpoints e eventos universais](mission-operations.md) — contratos de domínio tipados e adaptadores read-only de missão local/interplanetária, projeção causal, eventos confirmados e ciência recebida. Não substitui o executor e ainda aguarda gates locais/CI.
+- [Operações, checkpoints e eventos universais](mission-operations.md) — contratos de domínio tipados e adaptadores read-only de missão local/interplanetária, projeção causal, eventos confirmados e ciência recebida. Não substitui o executor; validação local 240/240 e benchmarks concluídos, CI final manual e merge pendentes.
