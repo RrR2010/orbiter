@@ -29,6 +29,10 @@ describe('phase 9 M3 operational projections',()=>{
   expect(record.operations.some(op=>op.kind==='launch')).toBe(true);
   expect(record.checkpoints.length).toBe(mission.flight!.checkpoints.filter(cp=>cp.timeS<=c.time).length);
   expect(record.checkpoints.every(cp=>cp.state.frameId===`body:${mission.originId}`)).toBe(true);
+  expect(record.checkpoints.map(cp=>cp.checkpointKind)).toEqual(
+   mission.flight!.checkpoints.filter(cp=>cp.timeS<=c.time).map(cp=>cp.kind));
+  expect(record.operations.length).toBeLessThan(mission.flight!.checkpoints.length+2);
+  expect(record.checkpoints.some(cp=>record.checkpoints.filter(other=>other.operationId===cp.operationId).length>1)).toBe(true);
   expect(record.checkpoints.map(cp=>cp.state.fuelKg)).toEqual(
    mission.flight!.checkpoints.filter(cp=>cp.timeS<=c.time).map(cp=>cp.state.fuelKg));
   expect(record.operations.every((op,i)=>op.sequence===i)).toBe(true);
