@@ -12,7 +12,7 @@ const probeId=(id:string):string=>`probe/${id}`;
 const eventId=(id:string):string=>`source/${id}`;
 const mark=(ops:MissionOperation[],checkpoints:readonly PhysicalCheckpoint[],events:readonly DomainEvent[]):MissionOperation[]=>{
  const byOperation=(id:string)=>events.filter(e=>e.operationId===id).sort(compare);
- return ops.map(op=>{
+ return ops.map((op):MissionOperation=>{
   const lastEvent=byOperation(op.id).at(-1);
   if(lastEvent&&!(op.kind==='launch'&&lastEvent.kind==='preparation'))return {...op,status:(lastEvent.outcome==='failure'?'failed':'confirmed') as OperationStatus,
    result:lastEvent.outcome==='failure'?{kind:'failed' as const,eventId:lastEvent.id}:{kind:'confirmed' as const,eventId:lastEvent.id}};
@@ -23,7 +23,7 @@ const mark=(ops:MissionOperation[],checkpoints:readonly PhysicalCheckpoint[],eve
 function assemble(missionId:string,ownerId:string,entityId:string,pipeline:MissionOperationRecord['pipeline'],untilS:number,
  drafts:readonly Draft[],checkpoints:readonly PhysicalCheckpoint[],events:readonly DomainEvent[]):MissionOperationRecord{
  const sorted=drafts.map((draft,index)=>({...draft,index})).sort((a,b)=>a.epochS-b.epochS||a.index-b.index);
- const operations:MissionOperation[]=sorted.map((draft,i)=>({
+ const operations:MissionOperation[]=sorted.map((draft,i):MissionOperation=>({
   id:draft.id,epochS:draft.epochS,kind:draft.kind,parameters:draft.parameters,
   missionId,ownerId,entityId,sequence:i,
   preconditions:i?[sorted[i-1].id]:[],status:'planned',result:{kind:'pending'}
