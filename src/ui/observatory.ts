@@ -1,4 +1,7 @@
-import {AU,positionsAt,type Body,type World} from '../simulation/world';
+import {AU,type Body,type World} from '../simulation/world';
+import {bodyEntityId,createStateProvider} from './state-provider';
+import {solarFrame} from '../simulation/reference-frames';
+const bodyPosition=(world:World,id:string,time:number)=>createStateProvider(world).at(bodyEntityId(id),time,solarFrame)?.positionM??null;
 import {orbitalPosition} from '../simulation/orbits';
 import type {Camera} from '../rendering/canvas';
 
@@ -32,8 +35,8 @@ export function selectBody(state:ObservatoryState,world:World,id:string|null):vo
 export function focusBody(camera:Camera,state:ObservatoryState,world:World,time:number,id:string):boolean{
   const body=world.bodies.find(b=>b.id===id);
   if(!body)return false;
-  if(!positionsAt(world,time).has(id))return false;
-  const target=positionsAt(world,time).get(id)!;
+  const target=bodyPosition(world,id,time);
+  if(!target)return false;
   const reference=body.orbit?.semiMajorAxis;
   const zoomTarget=body.kind==='planet'?5:body.kind==='moon'&&reference?Math.max(.035,Math.min(20000,8*AU/reference)):1;
   transitions.delete(state);
@@ -43,7 +46,7 @@ export function focusBody(camera:Camera,state:ObservatoryState,world:World,time:
 }
 export function updateFollow(camera:Camera,state:ObservatoryState,world:World,time:number,elapsed=1):void{
   if(!state.follow||!state.selectedId)return;
-  const target=positionsAt(world,time).get(state.selectedId);
+  const target=bodyPosition(world,state.selectedId,time);
   if(!target){state.follow=false;return;}
   const transition=transitions.get(state);
   if(!transition){const o=followOffsets.get(state);camera.x=target.x+(o?.x??0);camera.y=target.y+(o?.y??0);return;}
@@ -67,7 +70,7 @@ export function orbitalSpeed(body:Body,time:number):number|null{
   return Math.sqrt(mu*(2/r-1/o.semiMajorAxis));
 }
 export function bodyTelemetry(body:Body,world:World,time:number){
-  const p=positionsAt(world,time),absolute=p.get(body.id),parent=body.parentId?p.get(body.parentId):undefined;
+  const absolute=bodyPosition(world,body.id,time),parent=body.parentId?bodyPosition(world,body.parentId,time):null;
   const distance=absolute&&parent?Math.hypot(absolute.x-parent.x,absolute.y-parent.y):null;
   return {radius:body.radius,semiMajorAxis:body.orbit?.semiMajorAxis??null,eccentricity:body.orbit?.eccentricity??null,period:body.orbit?.period??null,distance,speed:orbitalSpeed(body,time)};
 }
