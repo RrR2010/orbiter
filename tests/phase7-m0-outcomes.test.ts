@@ -25,6 +25,9 @@ describe('phase 7 M0 physical outcomes',()=>{
   expect(result).not.toBeNull();
   expect(result.arrival.timeS).toBe(5e6);
   expect(result.closestDistanceM).toBeLessThanOrEqual(result.arrivalMissM);
+  // Recorded physical miss from the deterministic pre-M1 transfer window.
+  expect(result.closestDistanceM).toBeCloseTo(756056017.9902873,2);
+  expect(result.closestAltitudeM).toBeCloseTo(743339890.9914939,2);
   expect(simulateLambertPhysicalTransfer(world,home.id,target.id,1e6,5e6,{...standard,fuelKg:0})).toBeNull();
  });
  it('maintains communication range boundary exactly',()=>{
