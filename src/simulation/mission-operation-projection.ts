@@ -2,7 +2,7 @@ import type {Civilization,Mission,SpaceEvent} from './civilization';
 import type {MissionTimeline} from './interplanetary-mission-timeline';
 import {bodyFrame,fromHeliocentricProbe,fromLocalFlight,solarFrame} from './reference-frames';
 import type {FlightState} from './spaceflight/types';
-import type {DomainEvent,MissionOperation,MissionOperationRecord,OperationKind,OperationParameters,OperationStatus,PhysicalCheckpoint} from './mission-operations';
+import type {DomainEvent,MissionOperation,MissionOperationRecord,OperationKind,OperationParameters,OperationStatus,MissionOutcome,PhysicalCheckpoint} from './mission-operations';
 import {validateMissionOperationRecord} from './mission-operations';
 
 type Draft=Readonly<{id:string;epochS:number;kind:OperationKind;parameters:OperationParameters}>;
@@ -21,7 +21,7 @@ const mark=(ops:MissionOperation[],checkpoints:readonly PhysicalCheckpoint[],eve
  });
 };
 function assemble(missionId:string,ownerId:string,entityId:string,pipeline:MissionOperationRecord['pipeline'],untilS:number,
- drafts:readonly Draft[],checkpoints:readonly PhysicalCheckpoint[],events:readonly DomainEvent[]):MissionOperationRecord{
+ drafts:readonly Draft[],checkpoints:readonly PhysicalCheckpoint[],events:readonly DomainEvent[],outcome:MissionOutcome):MissionOperationRecord{
  const sorted=drafts.map((draft,index)=>({...draft,index})).sort((a,b)=>a.epochS-b.epochS||a.index-b.index);
  const operations:MissionOperation[]=sorted.map((draft,i):MissionOperation=>({
   id:draft.id,epochS:draft.epochS,kind:draft.kind,parameters:draft.parameters,
@@ -29,7 +29,7 @@ function assemble(missionId:string,ownerId:string,entityId:string,pipeline:Missi
   preconditions:i?[sorted[i-1].id]:[],status:'planned',result:{kind:'pending'}
  }));
  const record:MissionOperationRecord={missionId,ownerId,entityId,pipeline,observedUntilS:untilS,
-  operations:mark(operations,checkpoints,events),checkpoints:[...checkpoints].sort(compare),events:[...events].sort(compare)};
+  operations:mark(operations,checkpoints,events),checkpoints:[...checkpoints].sort(compare),events:[...events].sort(compare),outcome};
  validateMissionOperationRecord(record);
  return record;
 }
@@ -75,7 +75,11 @@ export function localOperationRecord(c:Readonly<Civilization>,mission:Readonly<M
    event.kind==='success'?'completion':'failure';
   events.push(strategicEvent(id,operationId,event,kind));
  }
- return assemble(id,ownerId,entityId,'local',untilS,drafts,cp,events);
+ const resolved=mission.status==='success'||mission.status==='failure';
+ const outcome:MissionOutcome=resolved?{kind:'local',resolvedAtS:mission.resolvedAt,
+  strategic:mission.status==='success'?'success':'failure',physical:flight?.outcome??null,reason:flight?.reason??null}:
+  {kind:'pending'};
+ return assemble(id,ownerId,entityId,'local',untilS,drafts,cp,events,outcome);
 }
 const milestoneKind=(kind:MissionTimeline['manifest']['milestones'][number]['kind']):OperationKind=>
  kind==='departure'?'launch':kind==='course-correction'?'correction':kind==='closest-approach'?'observation':'assessment';
@@ -147,7 +151,10 @@ export function interplanetaryOperationRecord(c:Readonly<Civilization>,timeline:
   if(!drafts.some(d=>d.id===opId))drafts.push({id:opId,epochS:item.transmission.observationAtS,kind:'transmit',
    parameters:{kind:'transmit',observationId}});
  }
- return assemble(id,ownerId,entityId,'interplanetary',untilS,drafts,cp,events);
+ const encounterConfirmed=encounterIndex>=0&&encounterIndex<timeline.cursor;
+ const outcome:MissionOutcome=encounterConfirmed?{kind:'interplanetary',
+  resolvedAtS:manifest.milestones[encounterIndex].timeS,result:manifest.outcome}:{kind:'pending'};
+ return assemble(id,ownerId,entityId,'interplanetary',untilS,drafts,cp,events,outcome);
 }
 
 /** Single public read entrypoint; never changes scheduler, persisted cursors or flight outcomes. */
