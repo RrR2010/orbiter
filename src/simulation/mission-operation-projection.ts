@@ -47,24 +47,39 @@ export function localOperationRecord(c:Readonly<Civilization>,mission:Readonly<M
   parameters:{kind:'launch',originId:mission.originId}}];
  const cp:PhysicalCheckpoint[]=[];
  const flight=mission.flight;
+ const assessmentAt=flight?.checkpoints.find(checkpoint=>
+  checkpoint.kind==='goal'||checkpoint.kind==='partial'||checkpoint.kind==='abort'||checkpoint.kind==='impact')?.timeS;
+ const endEpoch=assessmentAt??(mission.resolvedAt>0?mission.resolvedAt:flight?.terminal.timeS);
+ if(endEpoch!==undefined)drafts.push({id:endId,epochS:endEpoch,kind:'assessment',
+  parameters:{kind:'assessment',targetId:mission.targetId}});
  if(flight){
+  let currentBurn:string|null=null,burnSerial=0,coastSerial=0;
   flight.checkpoints.forEach((checkpoint,i)=>{
-   const kind:OperationKind=checkpoint.kind==='burn-start'||checkpoint.kind==='burn-progress'||checkpoint.kind==='burn-end'?'burn':
-    checkpoint.kind==='coast'?'coast':'assessment';
-   const operationId=`operation/${entityId}/checkpoint/${i}`;
-   drafts.push({id:operationId,epochS:checkpoint.timeS,kind,
-    parameters:kind==='burn'?{kind:'burn',thrustN:flight.plan.thrustN,ispS:flight.plan.ispS}:
-     kind==='coast'?{kind:'coast',centralBodyId:mission.originId}:
-      {kind:'assessment',targetId:mission.targetId}});
+   let operationId:string;
+   if(checkpoint.reason==='Physical liftoff'||checkpoint.reason==='Ascent telemetry checkpoint'||
+    checkpoint.reason.startsWith('Ascent ')){
+    operationId=launchId;
+   }else if(checkpoint.kind==='burn-start'){
+    currentBurn=`operation/${entityId}/burn/${burnSerial++}`;
+    operationId=currentBurn;
+    drafts.push({id:operationId,epochS:checkpoint.timeS,kind:'burn',
+     parameters:{kind:'burn',thrustN:flight.plan.thrustN,ispS:flight.plan.ispS}});
+   }else if((checkpoint.kind==='burn-progress'||checkpoint.kind==='burn-end')&&currentBurn){
+    operationId=currentBurn;
+    if(checkpoint.kind==='burn-end')currentBurn=null;
+   }else if(checkpoint.kind==='coast'){
+    operationId=`operation/${entityId}/coast/${coastSerial++}`;
+    drafts.push({id:operationId,epochS:checkpoint.timeS,kind:'coast',
+     parameters:{kind:'coast',centralBodyId:mission.originId}});
+   }else{
+    operationId=endId;
+   }
    if(mission.status!=='preparing'&&checkpoint.timeS<=untilS)
     cp.push({id:`checkpoint/${entityId}/${i}`,missionId:id,operationId,epochS:checkpoint.timeS,
      frameId:bodyFrame(mission.originId),state:fromLocalFlight(entityId,mission.originId,checkpoint.state),
      source:'local-flight-v2',status:'physical-observation'});
   });
  }
- const assessmentAt=mission.resolvedAt>0?mission.resolvedAt:flight?.terminal.timeS;
- if(assessmentAt!==undefined)drafts.push({id:endId,epochS:assessmentAt,kind:'assessment',
-  parameters:{kind:'assessment',targetId:mission.targetId}});
  const events:DomainEvent[]=[];
  for(const event of c.events){
   if(event.missionId!==id||event.time>untilS||!['preparation','launch','success','failure'].includes(event.kind))continue;
