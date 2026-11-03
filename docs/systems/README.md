@@ -75,6 +75,10 @@ A auditoria da Fase 6 registrou o descompasso histórico e o corrigiu neste índ
 
 - [Reference frames](reference-frames.md) — common SI state, epoch-aware solar/body transforms, local-flight/probe/celestial adapters and SOI handoff integration. This contract is integrated via PR #15. The ongoing Phase 8 branch implements M2 only; M3–M7 remain out of scope.
 
-## Phase 8 M2 — validated locally, awaiting final CI and merge
+## Phase 8 M2 — integrada na main
 
-- [Universal observation state](state-observation.md) — read-only provider, prefixed observation identity, adapters for celestial/local/probe, call-site matrix, local tests 234/234, human smoke 7/7, final CI pending. **Not merged yet**.
+- [Universal observation state](state-observation.md) — read-only provider, prefixed observation identity, adapters for celestial/local/probe, call-site matrix, local tests 234/234, human smoke 7/7, final CI verde na PR #17 e handoff via PR #18. **Integrada**.
+
+## Fase 9 M3 — implementação em validação
+
+- [Operações, checkpoints e eventos universais](mission-operations.md) — contratos de domínio tipados e adaptadores read-only de missão local/interplanetária, projeção causal, eventos confirmados e ciência recebida. Não substitui o executor e ainda aguarda gates locais/CI.
