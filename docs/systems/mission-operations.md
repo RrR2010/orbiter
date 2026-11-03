@@ -6,13 +6,13 @@
 
 `advanceCivilization` continua autoridade dos eventos estratégicos, lançamento, término e recepção de ciência. `resolveAutonomousFlightV2` continua executor físico local; `prepareInterplanetaryMission` conserva o manifesto pré-calculado e `advanceMissionTimeline` continua único consumidor dos milestones via cursor. M3 não instala segunda fila, não dispara eventos nem acrescenta decisões de guidance.
 
-IDs de operação usam namespace `operation/local/<missionId>/...` e `operation/probe/<missionId>/...`; checkpoints usam `checkpoint/...` e eventos preservam proveniência por `source/<SpaceEvent.id>` ou `milestone/probe/<missionId>/<index>`. `ownerId` é `Civilization.id`, `entityId` acompanha as identidades observacionais da M2 (`local/` e `probe/`). O tipo `StateVector` da M1 fixa `frameId`, unidades SI (m, m/s, kg) e `epochS` absoluto. Checkpoints físicos locais usam `body:<origin>`; handoff/correção heliocêntricos usam `solar`.
+IDs de operação usam namespace `operation/local/<missionId>/...` e `operation/probe/<missionId>/...`; checkpoints usam `checkpoint/...` e eventos preservam proveniência por `source/<SpaceEvent.id>` ou `milestone/probe/<missionId>/<index>`. `ownerId` é `Civilization.id`, `entityId` acompanha as identidades observacionais da M2 (`local/` e `probe/`). O tipo `StateVector` da M1 fixa `frameId`, unidades SI (m, m/s, kg) e `epochS` absoluto. Checkpoints físicos locais usam `body:<origin>`; handoff/correção heliocêntricos usam `solar`. Checkpoints conservam `checkpointKind` e `detail` da origem, incluindo impactos e limites de queima; no manifesto, o detalhe físico não disponível é `null`.
 
 ## Matriz As-Is → M3
 
 | Origem real | Intenção/planejamento | Evidência física | Confirmação de evento | Mantém autoridade |
 |---|---|---|---|---|
-| `Mission` e `AutonomousFlightResultV2` | `startedAt`, `launchAt`, plano e sequência de checkpoints pré-calculados | `flight.checkpoints` observados até o tempo de civilização, adaptados por `fromLocalFlight` | `SpaceEvent` `preparation`, `launch`, `success` e `failure` | `civilization.ts` e `flight-v2.ts` |
+| `Mission` e `AutonomousFlightResultV2` | `startedAt`, `launchAt`, plano e sequência de checkpoints pré-calculados | `flight.checkpoints` observados até o tempo de civilização, adaptados por `fromLocalFlight` e agrupados em operação de ascensão, queimas reais, coast e avaliação | `SpaceEvent` `preparation`, `launch`, `success` e `failure` | `civilization.ts` e `flight-v2.ts` |
 | `MissionTimeline.manifest.milestones` | milestones completos são **intenção pré-computada**, inclusive correção e encontro | `preCorrectionCoastStart` / `correctedCoastStart` somente quando etapa autorizada pelo cursor e época já decorrida | `milestones.slice(0,cursor)` apenas, com tempo, índice e outcome atingido | `interplanetary-mission-timeline.ts` |
 | `scienceInbox.pending` | envio em trânsito representável, sem recebimento presumido | não fabrica estado cinemático do sinal | `SpaceEvent research` com ID recebido e presença em `science.receivedIds`; falha de rádio somente quando registrada | `interplanetary-science-inbox.ts`, `scientific-knowledge.ts` e scheduler |
 
