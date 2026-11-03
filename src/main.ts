@@ -5,7 +5,6 @@ import {hudIcon,type HudIcon} from './ui/hud-icons';
 import {missionTelemetry,metricText} from './ui/mission-telemetry';
 import {analyzeTrajectory} from './simulation/spaceflight/conics';
 import {gravityForRadius} from './simulation/spaceflight/gravity';
-import {missionSymbols} from './rendering/mission-symbols';
 import {interplanetaryProbeSymbols} from './rendering/interplanetary-probe-symbols';
 import {interplanetaryMissionView} from './simulation/interplanetary-mission-view';
 import {interplanetaryScheduleLabels} from './ui/interplanetary-schedule-labels';
