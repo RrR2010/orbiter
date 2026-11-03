@@ -18,6 +18,12 @@ IDs de operação usam namespace `operation/local/<missionId>/...` e `operation/
 
 A conversão da etapa `planetaryEscapeStart` é **intencionalmente pendente**: esse estado está no referencial planetocêntrico e não pode ser rotulado `solar` sem conversão física/época explícita. M3 registra o handoff heliocêntrico real do manifesto, sem deduzir um marco confirmado apenas porque existe o estado preparado.
 
+## Ordem de execução As-Is e efeitos colaterais (não migrados)
+
+Em `advanceCivilization`, a próxima época é o mínimo entre `c.nextAt`, recepção mais antiga e milestone não consumido. Depois de `accrue` e atualização de `c.time`, a ordem é: (1) `drainScience` atualiza `scienceInbox` e `science.knowledge`, registrando pesquisa por observação entregue; (2) `advanceMissionTimeline` avança `cursor` e registra milestones; no `closest-approach` de `flyby`, pode gerar observação gravítica e enfileirar transmissão quando há alcance de rádio, ou registrar falha da ligação; (3) a etapa estratégica de `nextAt` resolve preparação, ignição do voo V2, encerramento, pesquisa ou proposta de lançamento. O processamento está limitado por `budget`; dívida temporal não é descartada. `SpaceEvent` tem IDs derivados do relógio, tipo e serial, e histórico aparado em 120 entradas; `Mission` mantém até 60 itens. O cursor de `MissionTimeline` e os IDs recebidos da ciência são as fontes persistidas para não repetir efeitos após reload.
+
+M3 **não move** essa ordem, não consome eventos, não insere operações em `c.events`, não chama `advanceMissionTimeline`, não transmite nem aplica combustível. A projeção apenas distingue eventos confirmados da intenção do manifesto; para pesquisas simultâneas, seu ID de observação complementa o ID estratégico na projeção, evitando colisões sem alterar o save.
+
 ## Semântica e causalidade
 
 - Cada operação tem `id`, `missionId`, `ownerId`, `entityId`, `sequence`, `epochS`, `kind` e `parameters` discriminados; `preconditions` ligam operação anterior dentro do mesmo registro. Os quatro estados são `planned`, `observed`, `confirmed`, `failed`; resultado é união tipada de pendente, checkpoint observado e evento confirmado/falhou.
