@@ -2,7 +2,7 @@ import type {Civilization,Mission,SpaceEvent} from './civilization';
 import type {MissionTimeline} from './interplanetary-mission-timeline';
 import {bodyFrame,fromHeliocentricProbe,fromLocalFlight,solarFrame} from './reference-frames';
 import type {FlightState} from './spaceflight/types';
-import type {DomainEvent,MissionOperation,MissionOperationRecord,OperationKind,OperationParameters,OperationStatus,MissionOutcome,PhysicalCheckpoint} from './mission-operations';
+import type {DomainEvent,MissionOperation,MissionOperationRecord,OperationKind,OperationParameters,MissionOutcome,PhysicalCheckpoint} from './mission-operations';
 import {validateMissionOperationRecord} from './mission-operations';
 
 type Draft=Readonly<{id:string;epochS:number;kind:OperationKind;parameters:OperationParameters}>;
@@ -14,8 +14,10 @@ const mark=(ops:MissionOperation[],checkpoints:readonly PhysicalCheckpoint[],eve
  const byOperation=(id:string)=>events.filter(e=>e.operationId===id).sort(compare);
  return ops.map((op):MissionOperation=>{
   const lastEvent=byOperation(op.id).at(-1);
-  if(lastEvent&&!(op.kind==='launch'&&lastEvent.kind==='preparation'))return {...op,status:(lastEvent.outcome==='failure'?'failed':'confirmed') as OperationStatus,
-   result:lastEvent.outcome==='failure'?{kind:'failed' as const,eventId:lastEvent.id}:{kind:'confirmed' as const,eventId:lastEvent.id}};
+  if(lastEvent&&!(op.kind==='launch'&&lastEvent.kind==='preparation')){
+   if(lastEvent.outcome==='failure')return {...op,status:'failed',result:{kind:'failed',eventId:lastEvent.id}};
+   return {...op,status:'confirmed',result:{kind:'confirmed',eventId:lastEvent.id}};
+  }
   const checkpoint=checkpoints.filter(cp=>cp.operationId===op.id).sort(compare).at(-1);
   return checkpoint?{...op,status:'observed' as const,result:{kind:'observed' as const,checkpointId:checkpoint.id}}:op;
  });
