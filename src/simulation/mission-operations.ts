@@ -10,7 +10,7 @@ export type OperationParameters=
  |Readonly<{kind:'handoff';fromFrameId:FrameId;toFrameId:FrameId}>
  |Readonly<{kind:'correction';deltaVMs:number|null;fuelSpentKg:number|null}>
  |Readonly<{kind:'observation';targetId:EntityId}>
- |Readonly<{kind:'transmit';observationId:string}>
+ |Readonly<{kind:'transmit';observationId:string|null}>
  |Readonly<{kind:'assessment';targetId:EntityId}>;
 
 export type MissionOperation=Readonly<{
