@@ -5,6 +5,7 @@ import {hudIcon,type HudIcon} from './ui/hud-icons';
 import {missionTelemetry,metricText} from './ui/mission-telemetry';
 import {analyzeTrajectory} from './simulation/spaceflight/conics';
 import {gravityForRadius} from './simulation/spaceflight/gravity';
+import {missionSymbols} from './rendering/mission-symbols';
 import {interplanetaryProbeSymbols} from './rendering/interplanetary-probe-symbols';
 import {interplanetaryMissionView} from './simulation/interplanetary-mission-view';
 import {interplanetaryScheduleLabels} from './ui/interplanetary-schedule-labels';
@@ -242,7 +243,8 @@ function inspectCivilization():void{const section=el<HTMLElement>('space-program
  const mission=civilization.missions.find(m=>m.id===trackedMissionId);
  const provider=createStateProvider(world,civilization);
  const target=mission?.status==='preparing'?launchPadPosition(world,mission,clock.time):
-  mission?provider.at(localVehicleEntityId(trackedMissionId),clock.time,solarFrame)?.positionM:
+  mission?(provider.at(localVehicleEntityId(trackedMissionId),clock.time,solarFrame)?.positionM??
+   (!mission.flight?missionSymbols(world,civilization,clock.time).find(s=>s.mission.id===trackedMissionId)?.position:undefined)):
   provider.at(probeEntityId(trackedMissionId),clock.time,solarFrame)?.positionM;
  if(target){camera.x=target.x+missionFollowOffset.x;camera.y=target.y+missionFollowOffset.y;}
  else if(civilization.interplanetaryTimelines?.some(t=>t.missionId===trackedMissionId)){
