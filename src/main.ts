@@ -1,4 +1,6 @@
 import {launchPadPosition,launchCameraZoom} from './ui/mission-camera';
+import {createStateProvider,localVehicleEntityId,probeEntityId,bodyEntityId} from './ui/state-provider';
+import {solarFrame} from './simulation/reference-frames';
 import {hudIcon,type HudIcon} from './ui/hud-icons';
 import {missionTelemetry,metricText} from './ui/mission-telemetry';
 import {analyzeTrajectory} from './simulation/spaceflight/conics';
@@ -239,14 +241,14 @@ function inspectCivilization():void{const section=el<HTMLElement>('space-program
  el<HTMLElement>('flight-spotlight').classList.toggle('cinematic',visual.cinematic);
  if(spotlightUntil&&now>=spotlightUntil){el<HTMLElement>('flight-spotlight').hidden=true;spotlightUntil=0;}updateFollow(camera,observatory,world,clock.time,elapsed);if(trackedMissionId){
  const mission=civilization.missions.find(m=>m.id===trackedMissionId);
- const marker=missionSymbols(world,civilization,clock.time).find(s=>s.mission.id===trackedMissionId);
- const interplanetary=interplanetaryProbeSymbols(civilization,clock.time,world).find(s=>s.missionId===trackedMissionId);
- const target=mission?.status==='preparing'?launchPadPosition(world,mission,clock.time):marker?.position;
+ const provider=createStateProvider(world,civilization);
+ const target=mission?.status==='preparing'?launchPadPosition(world,mission,clock.time):
+  mission?provider.at(localVehicleEntityId(trackedMissionId),clock.time,solarFrame)?.positionM:
+  provider.at(probeEntityId(trackedMissionId),clock.time,solarFrame)?.positionM;
  if(target){camera.x=target.x+missionFollowOffset.x;camera.y=target.y+missionFollowOffset.y;}
- else if(interplanetary){camera.x=interplanetary.position.x+missionFollowOffset.x;camera.y=interplanetary.position.y+missionFollowOffset.y;}
  else if(civilization.interplanetaryTimelines?.some(t=>t.missionId===trackedMissionId)){
   const timeline=civilization.interplanetaryTimelines.find(t=>t.missionId===trackedMissionId)!;
-  if(clock.time<timeline.manifest.departureS){const origin=positionsAt(world,clock.time).get(timeline.manifest.originId);
+  if(clock.time<timeline.manifest.departureS){const origin=provider.at(bodyEntityId(timeline.manifest.originId),clock.time,solarFrame)?.positionM;
    if(origin){camera.x=origin.x+missionFollowOffset.x;camera.y=origin.y+missionFollowOffset.y;}}
  }
  else if(!civilization.interplanetaryTimelines?.some(t=>t.missionId===trackedMissionId)&&mission?.status!=='preparing'){trackedMissionId=null;missionFollowOffset={x:0,y:0};}
