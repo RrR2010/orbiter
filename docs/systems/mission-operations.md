@@ -36,7 +36,7 @@ M3 **não move** essa ordem, não consome eventos, não insere operações em `c
 
 A API gera snapshots de consulta a partir de `Civilization`, `Mission` e `MissionTimeline`. Os arrays, cursors, resultados, combustível, recursos, saves, eventos e relógio originais não são modificados. `JSON.stringify(c)` antes/depois deve ser idêntico; reload conserva o registro. O custo da projeção é linear no número de missões, checkpoints e eventos, com ordenação estável; não executá-la em cada frame até haver medição de custo.
 
-Testes M3: `tests/phase9-m3-operations.test.ts` (voo físico local, sonda planejada/confirmada, partition/budget/warp, IDs, ciência e reload). Regressões M0–M2 permanecem na suíte atual. Benchmarks `npm run benchmark:orbits` e `npm run benchmark:phase5` devem confirmar métricas e saveBytes sem mudança.
+Testes M3: `tests/phase9-m3-operations.test.ts` (voo físico local, sonda planejada/confirmada, partition/budget/warp, IDs, ciência e reload). Regressões M0–M2 permanecem na suíte atual. Benchmarks `npm run benchmark:orbits` e `npm run benchmark:phase5` devem confirmar métricas e saveBytes sem mudança. O novo `npm run benchmark:m3` simula os mesmos três seeds e 1.400 dias, consulta a projeção uma vez no estado final e compara serialização, reload, repetição idempotente, contagens de operações/checkpoints/eventos, tempo de projeção e heap. Não altera o scheduler nem mede FPS.
 
 ## Interface para M4 (não implementada)
 
