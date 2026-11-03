@@ -18,11 +18,11 @@ O adaptador de corpos usa `celestialState`; o local reutiliza `flightViewAt` e `
 | Follow de missão | `missionSymbols` e `interplanetaryProbeSymbols` em `main.ts` | provider local/probe e preparação pela base | HUD especial e símbolos visuais mantidos |
 | Picking de missão | duas listas de símbolos em `pick-mission.ts` | provider para estado físico; símbolo legado mantém fallback ilustrativo | hit radius próprio da UI |
 | Telemetria planetária | `positionsAt` e velocidade orbital em `observatory.ts` | provider para distância; velocidade orbital histórica mantida | normalizar proveniência e apresentação |
-| Telemetria local | `missionTelemetry` e `flightViewAt` | API comum `stateTelemetry` disponível | HUD ainda usa `missionTelemetry` para apsides/objetivos |
-| Telemetria interplanetária | `interplanetaryMissionView` e símbolo | API comum `stateTelemetry` disponível | HUD especializado ainda tem rota própria |
+| Telemetria local | `missionTelemetry` e `flightViewAt` | HUD consulta provider para altitude, velocidade e massa | `missionTelemetry` permanece para fases, AP/PE, razão de combustível, ISP e ΔV (específicos) |
+| Telemetria interplanetária | `interplanetaryMissionView` e símbolo | HUD consulta provider para velocidade, propelente e distância física ao alvo | `interplanetaryMissionView` permanece para cronologia/outcome; formatador especializado permanece |
 
 ## Teste e limitações
 
-`tests/phase8-m2-state-provider.test.ts` exercita corpo, voo local e sonda por um mesmo entrypoint, frames e indisponibilidade, com snapshots imutáveis. O teste foi escrito, **mas não executado** neste ambiente. Não há evidência de benchmark, npm audit, browser smoke ou regressão M0/M1 nesta branch; consequentemente, **M2 permanece incompleto e não pode ser integrado**.
+`tests/phase8-m2-state-provider.test.ts` exercita corpo, voo local e sonda por um mesmo entrypoint, frames e indisponibilidade, com snapshots imutáveis. O usuário executou `npm run validate` em HEAD anterior à última alteração do HUD com **4/4 gates e 234/234 testes**, além de `npm audit` (zero vulnerabilidades), `benchmark:orbits` (10.000 objetos em 6,23 ms) e `benchmark:phase5` (seeds com 1400 dias em 95,23/86,20/72,61 ms). **Após a alteração do HUD, estes resultados não validam o novo HEAD**. Ainda faltam novo validate, benchmark atualizado quando pertinente, smoke humano, audit final e CI final manual; **M2 não pode ser integrado**.
 
 A semântica da amostragem interplanetária continua dependente de cursor de eventos; não expor snapshots futuros como observações presentes. A transformação de velocidade da sonda é baseada no estado efetivamente apresentado pelo sampler legado. Valores de `null` são indisponíveis, não uma medida zero.
