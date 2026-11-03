@@ -62,6 +62,19 @@ describe('phase 9 M3 operational projections',()=>{
   });
   expect(interplanetaryOperationRecord(c,c.interplanetaryTimelines![0])).toEqual(corrected);
  });
+ it('does not turn a physical flyby into a failed encounter when radio fails',()=>{
+  const {world,c,timeline}=authorizedProbe();
+  const encounter=timeline.manifest.milestones.find(m=>m.kind==='closest-approach')!;
+  advanceCivilization(c,world,encounter.timeS,10000);
+  c.events.push({id:'test-radio-failure',time:encounter.timeS,kind:'failure',
+   missionId:timeline.missionId,detail:'Interplanetary radio link out of range'});
+  const projection=interplanetaryOperationRecord(c,c.interplanetaryTimelines![0]);
+  const encounterOperation=projection.operations.find(op=>op.kind==='observation')!;
+  const radioOperation=projection.operations.find(op=>op.kind==='transmit'&&op.status==='failed')!;
+  expect(encounterOperation.status).toBe('confirmed');
+  expect(radioOperation.status).toBe('failed');
+  expect(projection.events.some(e=>e.kind==='radio-failure'&&e.operationId===radioOperation.id)).toBe(true);
+ });
  it('keeps identical projections under partitioning, small budgets and save/reload',()=>{
   const world=generateWorld('phase7-m0-scheduler'),target=2e6;
   const single=createCivilization(world),split=createCivilization(world),budgeted=createCivilization(world);
