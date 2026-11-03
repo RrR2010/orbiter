@@ -13,7 +13,8 @@ A sequência abaixo é a **ordem desejada**, não autorização para iniciar tod
 | 6 | Auditoria e arquitetura composável | As-Is/To-Be, mapa de duplicações, plano de migração e avaliação de bibliotecas | Diagnóstico verificável e fases técnicas propostas, sem reescrita |
 | 7 | Golden fixtures e referenciais universais (M0–M1) | Cenários protegidos, StateVector e frames comuns com adaptadores | Equivalência física e saves preservados |
 | 8 | Estado consultável e observação universal (M2) | Estado, seleção e câmera comuns para corpos, voos locais e sondas | Sem regressão física ou de UI |
-| 9+ | Consolidação incremental da engine (M3–M7) | Contratos de estado, frames, operações, conhecimento e observação universais | Migrações graduais com testes de referência e saves seguros |
+| 9 | Operações, checkpoints e eventos universais (M3) | Missões locais/interplanetárias projetadas por contratos comuns sem refazer execução | Idempotência, tempo e resultados preservados |
+| 10+ | Consolidação incremental da engine (M4–M7) | Contratos de estado, frames, operações, conhecimento e observação universais | Migrações graduais com testes de referência e saves seguros |
 | Futuro | História, infraestrutura, longevidade, produção audiovisual | Expansão apoiada na engine unificada | Cada feature reutiliza contratos antes de especializar |
 
 ## Regras de fase
