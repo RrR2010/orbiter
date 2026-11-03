@@ -70,3 +70,7 @@ Na `main` após PR #9, o HUD observatório e telemetria de missão estendem os c
 - [Auditoria pré-merge](../phases/PHASE_05_FINAL_AUDIT.md) — evidências realmente verificadas e gates ainda abertos, com resultados de benchmark e limitações.
 
 A auditoria da Fase 6 registrou o descompasso histórico e o corrigiu neste índice. Ver [As-Is](../architecture/AS_IS_AUDIT.md) e [matriz](../architecture/COMPOSABILITY_GAP_MATRIX.md); os contratos detalhados devem ser lidos em conjunto com código/testes.
+
+## Phase 7 M1 — universal reference frames (branch, pending merge)
+
+- [Reference frames](reference-frames.md) — common SI state, epoch-aware solar/body transforms, local-flight/probe/celestial adapters and SOI handoff integration. This contract is implemented on the Phase 7 branch; it is **not yet in main**. M2–M7 remain out of scope.

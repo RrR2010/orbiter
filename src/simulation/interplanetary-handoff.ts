@@ -1,10 +1,10 @@
 import {orbitalPosition,type Vec2} from './orbits';
+import {fromLocalFlight,solarFrame,toLocalFlight,transformState} from './reference-frames';
 import {gravityForRadius} from './spaceflight/gravity';
 import type {FlightState} from './spaceflight/types';
 import type {Body,World} from './world';
 
 const SOLAR_MU=1.32712440018e20;
-const add=(a:Vec2,b:Vec2):Vec2=>({x:a.x+b.x,y:a.y+b.y});
 
 /** Approximate Laplace sphere-of-influence radius for a planet in SI units. */
 export function planetSphereOfInfluence(body:Body):number{
@@ -32,6 +32,5 @@ export function handoffToHeliocentric(world:World,planetId:string,local:FlightSt
  const radius=Math.hypot(local.position.x,local.position.y);
  if(!Number.isFinite(radius)||radius<soi*(1-1e-8))throw new Error('State has not reached sphere of influence');
  if(![local.velocity.x,local.velocity.y,local.massKg,local.fuelKg].every(Number.isFinite)||local.massKg<=0||local.fuelKg<0||local.fuelKg>=local.massKg)throw new Error('Invalid local flight state');
- return {...local,position:add(orbitalPosition(planet.orbit,local.timeS),local.position),
-  velocity:add(planetaryVelocityAt(planet,local.timeS),local.velocity)};
+ return toLocalFlight(transformState(world,fromLocalFlight('handoff:'+planetId,planetId,local),solarFrame));
 }

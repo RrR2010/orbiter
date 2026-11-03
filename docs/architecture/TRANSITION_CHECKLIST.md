@@ -13,8 +13,8 @@
 
 ## B. Contratos universais
 
-- [ ] Estado cinemático e referenciais estáveis, incluindo corpos e veículos.
-- [ ] Serviço comum de efemérides/estado no tempo e transformações de referencial.
+- [x] Estado cinemático e referenciais estáveis, incluindo corpos e veículos — M1 `reference-frames.ts`, adapters and regression tests; not yet a universal runtime state provider.
+- [x] Serviço comum de efemérides/estado no tempo e transformações de referencial — M1 `frameOrigin`, `celestialState`, `transformState`; solar/body translating frames only.
 - [ ] Análise orbital comum AP/PE/energia/elementos com corpo e referencial explícitos.
 - [ ] Propagação/coast e integração finita com massa/energia/consumo e testes de continuidade.
 - [ ] Interface de solver de manobra e execução de burn separadas.
@@ -35,9 +35,9 @@
 
 ## D. Migração e verificação
 
-- [ ] Preservar fixtures de referência: voo local, circularização, impacto, escape, flyby, correção, ciência, comunicação e reload.
-- [ ] Implementar adaptadores e substituir um pipeline por vez, sem big-bang rewrite.
-- [ ] Validar invariantes e tolerâncias numéricas, determinismo e tempo particionado.
+- [ ] Preservar fixtures de referência: voo local, circularização, impacto, escape, flyby, correção, ciência, comunicação e reload — M0 regression coverage and physical orbital/flyby goldens added; full quantitative golden matrix still incomplete.
+- [x] Implementar adaptadores e substituir um pipeline por vez, sem big-bang rewrite — M1 local/celestial/probe adapters and SOI handoff; no further pipeline migration authorized.
+- [x] Validar invariantes e tolerâncias numéricas, determinismo e tempo particionado — M0 temporal tests, M1 round-trip and SOI continuity, orbital/flyby goldens.
 - [ ] Definir política segura de migração de saves antes de modificar formato.
 - [ ] Demonstrar local e interplanetário pelo mesmo executor de operações.
 - [ ] Remover duplicações somente após migração e regressões aprovadas.
