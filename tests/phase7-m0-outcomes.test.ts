@@ -25,9 +25,12 @@ describe('phase 7 M0 physical outcomes',()=>{
   expect(result).not.toBeNull();
   expect(result.arrival.timeS).toBe(5e6);
   expect(result.closestDistanceM).toBeLessThanOrEqual(result.arrivalMissM);
-  // Recorded physical miss from the deterministic pre-M1 transfer window.
-  expect(result.closestDistanceM).toBeCloseTo(756056017.9902873,2);
-  expect(result.closestAltitudeM).toBeCloseTo(743339890.9914939,2);
+  // Keep the pre-M1 numerical reference with a 1 ppm cross-platform tolerance.
+  // Iterative coast propagation differs by ~174 m on Linux at a 756 Mm scale.
+  const referenceDistanceM=756056017.9902873;
+  expect(Math.abs(result.closestDistanceM-referenceDistanceM)).toBeLessThanOrEqual(referenceDistanceM*1e-6);
+  expect(result.closestAltitudeM).toBeCloseTo(result.closestDistanceM-target.radius,6);
+  expect(result.closestAltitudeM).toBeGreaterThan(target.radius*10);
   expect(simulateLambertPhysicalTransfer(world,home.id,target.id,1e6,5e6,{...standard,fuelKg:0})).toBeNull();
  });
  it('maintains communication range boundary exactly',()=>{
