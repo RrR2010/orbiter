@@ -1,6 +1,6 @@
 # ADR-0022 — Identidade e observação read-only no M2
 
-**Data:** 2026-11-02. **Estado:** proposta implementada na branch da Fase 8; pendente de gate e merge.
+**Data:** 2026-11-02. **Estado:** implementada e validada localmente na branch da Fase 8; CI manual e merge pendentes.
 
 ## Contexto
 
@@ -20,4 +20,4 @@ Usar os três caminhos físicos já existentes, mas com saída comum via `refere
 - Repetir consultas a sondas pode repropagar trajetória e afetar FPS em cenas densas; mensurar em navegador antes de qualquer otimização por cache. Não fazer cache de cursor/eventos sem garantir época e imutabilidade.
 - As simulações e o renderer continuam especializados, por design; M3–M7 não são parte desta decisão.
 
-**Evidências:** `src/ui/state-provider.ts`, `tests/phase8-m2-state-provider.test.ts`, `docs/systems/state-observation.md`. A aprovação final depende do validate no HEAD, smoke e CI manual.
+**Evidências:** `src/ui/state-provider.ts`, `tests/phase8-m2-state-provider.test.ts`, `docs/systems/state-observation.md`. Validação local relatada 234/234 e smoke funcional 7/7; aprovação final depende do CI manual verde no HEAD e merge.
