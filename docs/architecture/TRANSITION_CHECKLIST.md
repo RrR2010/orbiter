@@ -18,7 +18,7 @@
 - [ ] Análise orbital comum AP/PE/energia/elementos com corpo e referencial explícitos.
 - [ ] Propagação/coast e integração finita com massa/energia/consumo e testes de continuidade.
 - [ ] Interface de solver de manobra e execução de burn separadas.
-- [ ] Objetivos de operações reusáveis, condições, falhas e composição de planos — M3 na branch Fase 9: identidade, intenção, estados e causalidade tipados, com adaptadores de leitura para voo local/interplanetário. Grafo de execução e executor compartilhado permanecem M4; validação/CI pendentes.
+- [ ] Objetivos de operações reusáveis, condições, falhas e composição de planos — M3 na branch Fase 9: identidade, intenção, estados e causalidade tipados, com adaptadores de leitura para voo local/interplanetário. Grafo de execução e executor compartilhado permanecem M4; validação local 240/240 aprovada; CI final pendente.
 - [ ] Política de autonomia (fixo, condicional, intenção, deliberativo) independente da física.
 - [ ] Modelo de veículos e componentes (energia, integridade, comunicações, ciência).
 - [ ] Conhecimento por civilização separado de World Truth, estimativas/incertezas.
