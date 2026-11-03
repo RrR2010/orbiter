@@ -67,13 +67,12 @@ export function localOperationRecord(c:Readonly<Civilization>,mission:Readonly<M
   parameters:{kind:'assessment',targetId:mission.targetId}});
  const events:DomainEvent[]=[];
  for(const event of c.events){
-  if(event.missionId!==id||event.time>untilS)continue;
+  if(event.missionId!==id||event.time>untilS||!['preparation','launch','success','failure'].includes(event.kind))continue;
   const operationId=event.kind==='preparation'||event.kind==='launch'?launchId:endId;
   if(operationId===endId&&!drafts.some(d=>d.id===endId))drafts.push({id:endId,epochS:event.time,kind:'assessment',
    parameters:{kind:'assessment',targetId:mission.targetId}});
   const kind:DomainEvent['kind']=event.kind==='preparation'?'preparation':event.kind==='launch'?'ignition':
    event.kind==='success'?'completion':'failure';
-  if(event.kind!=='preparation'&&event.kind!=='launch'&&event.kind!=='success'&&event.kind!=='failure')continue;
   events.push(strategicEvent(id,operationId,event,kind));
  }
  return assemble(id,ownerId,entityId,'local',untilS,drafts,cp,events);
