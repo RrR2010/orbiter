@@ -14,7 +14,7 @@ const mark=(ops:MissionOperation[],checkpoints:readonly PhysicalCheckpoint[],eve
  const byOperation=(id:string)=>events.filter(e=>e.operationId===id).sort(compare);
  return ops.map(op=>{
   const lastEvent=byOperation(op.id).at(-1);
-  if(lastEvent)return {...op,status:lastEvent.outcome==='failure'?'failed':'confirmed',
+  if(lastEvent&&!(op.kind==='launch'&&lastEvent.kind==='preparation'))return {...op,status:lastEvent.outcome==='failure'?'failed':'confirmed',
    result:lastEvent.outcome==='failure'?{kind:'failed' as const,eventId:lastEvent.id}:{kind:'confirmed' as const,eventId:lastEvent.id}};
   const checkpoint=checkpoints.filter(cp=>cp.operationId===op.id).sort(compare).at(-1);
   return checkpoint?{...op,status:'observed' as const,result:{kind:'observed' as const,checkpointId:checkpoint.id}}:op;
@@ -111,7 +111,6 @@ export function interplanetaryOperationRecord(c:Readonly<Civilization>,timeline:
    epochS:state.timeS,frameId:solarFrame,state:fromHeliocentricProbe(entityId,state),
    status:'physical-observation',source:'interplanetary-manifest'});
  };
- const launchOp=`operation/${entityId}/milestone/${departureIndex}`;
  if(departureConfirmed&&manifest.preCorrectionCoastStart){
   const handoff=manifest.preCorrectionCoastStart;
   const handoffId=`operation/${entityId}/handoff`;
