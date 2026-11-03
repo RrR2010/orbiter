@@ -22,7 +22,8 @@ export type MissionOperation=Readonly<{
 }>;
 export type PhysicalCheckpoint=Readonly<{
  id:string;missionId:string;operationId:string;epochS:number;frameId:FrameId;
- state:StateVector;source:'local-flight-v2'|'interplanetary-manifest';
+ checkpointKind:'coast'|'burn-start'|'burn-progress'|'burn-end'|'impact'|'goal'|'partial'|'abort'|'handoff'|'correction';
+ detail:string|null;state:StateVector;source:'local-flight-v2'|'interplanetary-manifest';
  status:'physical-observation';
 }>;
 export type DomainEvent=Readonly<{
