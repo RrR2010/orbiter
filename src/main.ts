@@ -1,14 +1,15 @@
 import {launchPadPosition,launchCameraZoom} from './ui/mission-camera';
+import {createStateProvider,localVehicleEntityId,probeEntityId,bodyEntityId,stateTelemetry} from './ui/state-provider';
+import {solarFrame} from './simulation/reference-frames';
 import {hudIcon,type HudIcon} from './ui/hud-icons';
 import {missionTelemetry,metricText} from './ui/mission-telemetry';
 import {analyzeTrajectory} from './simulation/spaceflight/conics';
 import {gravityForRadius} from './simulation/spaceflight/gravity';
 import {missionSymbols} from './rendering/mission-symbols';
-import {interplanetaryProbeSymbols} from './rendering/interplanetary-probe-symbols';
 import {interplanetaryMissionView} from './simulation/interplanetary-mission-view';
 import {interplanetaryScheduleLabels} from './ui/interplanetary-schedule-labels';
 import {pickMission} from './rendering/pick-mission';
-import {SimulationClock,WARP_LEVELS,type ActiveWarp} from './core/clock';import {generateWorld,AU,positionsAt} from './simulation/world';import {PlanetariumRenderer,type Camera} from './rendering/canvas';import {SAVE_KEY,parseSave,serializeSave} from './persistence/save';import './style.css';import {formatSimulatedTime} from './ui/time';import {OBSERVATORY_KEY,parseObservatory,selectBody,focusBody,trackBody,panFollow,updateFollow,cancelCameraZoom,resetView,bodyTelemetry,distanceLabel,timeLabel} from './ui/observatory';import {pickBody} from './rendering/pick';import {createCivilization,parseCivilization,serializeCivilization,advanceCivilization,technology,RESOURCE_CAP,RESOURCE_INCOME_PER_DAY,LAUNCH_RESOURCE_COST} from './simulation/civilization';
+import {SimulationClock,WARP_LEVELS,type ActiveWarp} from './core/clock';import {generateWorld,AU} from './simulation/world';import {PlanetariumRenderer,type Camera} from './rendering/canvas';import {SAVE_KEY,parseSave,serializeSave} from './persistence/save';import './style.css';import {formatSimulatedTime} from './ui/time';import {OBSERVATORY_KEY,parseObservatory,selectBody,focusBody,trackBody,panFollow,updateFollow,cancelCameraZoom,resetView,bodyTelemetry,distanceLabel,timeLabel} from './ui/observatory';import {pickBody} from './rendering/pick';import {createCivilization,parseCivilization,serializeCivilization,advanceCivilization,technology,RESOURCE_CAP,RESOURCE_INCOME_PER_DAY,LAUNCH_RESOURCE_COST} from './simulation/civilization';
 const root=document.querySelector<HTMLDivElement>('#app');if(!root)throw new Error('Missing app root');root.innerHTML=`<canvas id="sky" aria-label="Mapa de órbitas animadas"></canvas><header class="hud"><div class="brand"><strong>ORBITER</strong><small>Primeira Era Espacial · Fase 4</small></div><div class="controls"><label for="seed">Universo</label><input id="seed" maxlength="120" aria-label="Seed do universo"><button id="create">Gerar</button><button id="pause">Pausar</button><label for="warp">Velocidade</label><select id="warp" aria-label="Velocidade do tempo"><option value="1">1×</option><option value="100">100×</option><option value="10000">10.000×</option><option value="100000">100.000×</option><option value="1000000">1.000.000×</option></select><button id="overview">Visão geral</button><button id="ambient">Modo ambiente</button><button id="fullscreen">Tela cheia</button></div></header><section id="observatory" class="observatory"><div class="panel-heading"><strong>Observatório</strong><button id="close-inspector" aria-label="Ocultar painel">×</button></div><label for="body-list">Explorar corpos</label><select id="body-list" aria-label="Selecionar corpo celeste"><option value="">Nenhum corpo selecionado</option></select><div id="inspector" aria-live="off"></div><details open id="space-program-section"><summary>Programa espacial</summary><div id="civilization"></div><label class="launch-watch"><input id="watch-launch" type="checkbox"> Reduzir para 1× quando uma missão entrar em preparação</label><div id="mission-feed"></div></details><div class="panel-actions"><button id="focus">Focar</button><button id="follow">Acompanhar</button><button id="unfollow">Parar acompanhamento</button></div><fieldset><legend>Camadas</legend><label><input type="checkbox" id="layer-orbits" checked> Órbitas</label><label><input type="checkbox" id="layer-labels" checked> Rótulos</label><label><input type="checkbox" id="layer-belt" checked> Cinturão</label></fieldset><details class="settings"><summary>Configurações da câmera</summary><label for="camera-speed">Velocidade da transição</label><select id="camera-speed"><option value="1">Suave</option><option value="3">Normal</option><option value="7">Rápida</option><option value="20">Quase instantânea</option></select></details></section><section id="mission-hud" class="mission-hud" aria-label="Telemetria da missão" hidden></section><section id="launch-agenda" class="launch-agenda" aria-label="Agenda de lançamentos" hidden></section><div id="flight-spotlight" class="flight-spotlight" role="status" hidden></div><button id="show-inspector" class="show-inspector" hidden>Mostrar observatório</button><aside class="info"><span id="clock"></span><span id="bodies"></span><span id="status" role="status"></span><span class="hint">Arraste para mover · Scroll ou +/-: zoom · Espaço: pausa · 1–5: velocidade · Esc: desmarcar · F: seguir · H: painel</span></aside>`;
 const el=<T extends HTMLElement>(id:string):T=>{const e=document.getElementById(id);if(!e)throw new Error('Missing '+id);return e as T;};const canvas=el<HTMLCanvasElement>('sky'),renderer=new PlanetariumRenderer(canvas),seedInput=el<HTMLInputElement>('seed'),warpInput=el<HTMLSelectElement>('warp'),pause=el<HTMLButtonElement>('pause'),status=el<HTMLSpanElement>('status');let saved:ReturnType<typeof parseSave>=null;try{saved=parseSave(localStorage.getItem(SAVE_KEY));}catch{status.textContent='Armazenamento indisponível.';}let world=generateWorld(saved?.seed??'orbiter-001'),clock=new SimulationClock(saved?.time??0,saved?.warp??100);const CIV_KEY='orbiter.civilization.v2';let civilization=(()=>{try{return parseCivilization(localStorage.getItem(CIV_KEY),world,clock.time);}catch{return createCivilization(world,clock.time);}})();const camera:Camera=saved?.camera??{x:0,y:0,zoom:1};seedInput.value=world.seed;let storedObservatory:string|null=null;try{storedObservatory=localStorage.getItem(OBSERVATORY_KEY);}catch{status.textContent='Preferências indisponíveis.';}const observatory=parseObservatory(storedObservatory);const panel=el<HTMLElement>('observatory'),bodyList=el<HTMLSelectElement>('body-list'),inspector=el<HTMLDivElement>('inspector');function populateBodies():void{bodyList.replaceChildren(new Option('Nenhum corpo selecionado',''));for(const body of world.bodies){const depth=body.kind==='moon'?'　　':body.kind==='planet'?'　':'';bodyList.add(new Option(depth+body.name+' · '+body.kind,body.id));}}function persistObservatory():void{try{localStorage.setItem(OBSERVATORY_KEY,JSON.stringify(observatory));}catch{status.textContent='Preferências não salvas.';}}function syncObservatory():void{el<HTMLSelectElement>('camera-speed').value=String(observatory.cameraSpeed);bodyList.value=observatory.selectedId??'';for(const layer of ['orbits','labels','belt'] as const)el<HTMLInputElement>('layer-'+layer).checked=observatory.layers[layer];panel.classList.toggle('hidden-panel',observatory.ambient);el<HTMLButtonElement>('show-inspector').hidden=!observatory.ambient;el<HTMLButtonElement>('ambient').textContent=observatory.ambient?'Mostrar UI':'Modo ambiente';}// Phase 4 information architecture: navigation, missions and view settings are separate.
 const observatoryTabs=document.createElement('nav');observatoryTabs.className='observatory-tabs';observatoryTabs.setAttribute('aria-label','Seções do observatório');
@@ -107,6 +108,9 @@ function renderMissionPanel():void{
  if(mission&&!hud.hidden){
   const body=world.bodies.find(b=>b.id===mission.originId);
   const t=body?missionTelemetry(mission,body.radius,clock.time):null;
+  const observed=body?stateTelemetry(createStateProvider(world,civilization),localVehicleEntityId(mission.id),clock.time,`body:${body.id}`):null;
+  const observedSpeed=observed?Math.hypot(observed.velocityMs.x,observed.velocityMs.y):null;
+  const observedAltitude=observed&&body?Math.max(0,Math.hypot(observed.positionM.x,observed.positionM.y)-body.radius):null;
   const heading=document.createElement('div');heading.className='mission-hud-heading';
   const title=document.createElement('strong');title.textContent=mission.id+' · '+(t?.phase??'N/D');
   const subtitle=document.createElement('small');subtitle.textContent=(body?.name??mission.originId)+' · referencial planetocêntrico';
@@ -120,8 +124,8 @@ function renderMissionPanel():void{
   };
   const primary=document.createElement('div');primary.className='mission-hud-primary';
   primary.append(
-   instrument('altitude','ALTITUDE',metricText(t?.altitudeM??null,'km')),
-   instrument('velocity','VELOCIDADE',metricText(t?.speedMs??null,'km/s')),
+   instrument('altitude','ALTITUDE',metricText(observedAltitude,'km')),
+   instrument('velocity','VELOCIDADE',metricText(observedSpeed,'km/s')),
    instrument('fuel','PROPELENTE',metricText(t?.fuelFraction??null,'%'),'mission-hud-fuel')
   );
   const orbit=document.createElement('div');orbit.className='mission-hud-orbit';
@@ -138,7 +142,7 @@ function renderMissionPanel():void{
   orbit.append(orbitTitle,apsides);
   const secondary=document.createElement('div');secondary.className='mission-hud-secondary';
   secondary.append(
-   instrument('mass','MASSA',metricText(t?.massKg??null,'kg')),
+   instrument('mass','MASSA',metricText(observed?.massKg??null,'kg')),
    instrument('deltaV','ΔV RESTANTE',metricText(t?.deltaVMs??null,'m/s')),
    instrument('isp','ISP',metricText(t?.ispS??null,'s'))
   );
@@ -151,7 +155,7 @@ function renderMissionPanel():void{
  if(probeTimeline&&!observatory.ambient){
   const view=interplanetaryMissionView(probeTimeline);
   const schedule=interplanetaryScheduleLabels(probeTimeline,clock.time);
-  const physical=interplanetaryProbeSymbols(civilization,clock.time,world).find(s=>s.missionId===trackedMissionId);
+  const physical=stateTelemetry(createStateProvider(world,civilization),probeEntityId(probeTimeline.missionId),clock.time,solarFrame);
   const destination=world.bodies.find(b=>b.id===view.targetId);
   const heading=document.createElement('div');heading.className='mission-hud-heading';
   const title=document.createElement('strong');title.textContent=view.missionId+' · '+({
@@ -163,13 +167,13 @@ function renderMissionPanel():void{
   heading.append(title,subtitle);
   const primary=document.createElement('div');primary.className='mission-hud-primary';
   const metrics:[string,string][]=[
-   ['VELOCIDADE',physical?(Math.hypot(physical.state.velocity.x,physical.state.velocity.y)/1000).toFixed(2)+' km/s':'N/D'],
-   ['PROPELENTE',view.phase==='scheduled'?'N/D':view.fuelRemainingKg.toFixed(1)+' kg'],
+   ['VELOCIDADE',physical?(Math.hypot(physical.velocityMs.x,physical.velocityMs.y)/1000).toFixed(2)+' km/s':'N/D'],
+   ['PROPELENTE',physical?.fuelKg===null||!physical?'N/D':physical.fuelKg.toFixed(1)+' kg'],
    ['DISTÂNCIA AO ALVO','N/D']
   ];
   if(physical&&destination?.orbit){
-   const center=positionsAt(world,clock.time).get(view.targetId);
-   if(center)metrics[2][1]=(Math.hypot(physical.position.x-center.x,physical.position.y-center.y)/1000).toFixed(0)+' km';
+   const center=createStateProvider(world,civilization).at(bodyEntityId(view.targetId),clock.time,solarFrame)?.positionM;
+   if(center)metrics[2][1]=(Math.hypot(physical.positionM.x-center.x,physical.positionM.y-center.y)/1000).toFixed(0)+' km';
   }
   for(const [label,value] of metrics){
    const item=document.createElement('div');item.className='mission-hud-instrument';
@@ -239,14 +243,15 @@ function inspectCivilization():void{const section=el<HTMLElement>('space-program
  el<HTMLElement>('flight-spotlight').classList.toggle('cinematic',visual.cinematic);
  if(spotlightUntil&&now>=spotlightUntil){el<HTMLElement>('flight-spotlight').hidden=true;spotlightUntil=0;}updateFollow(camera,observatory,world,clock.time,elapsed);if(trackedMissionId){
  const mission=civilization.missions.find(m=>m.id===trackedMissionId);
- const marker=missionSymbols(world,civilization,clock.time).find(s=>s.mission.id===trackedMissionId);
- const interplanetary=interplanetaryProbeSymbols(civilization,clock.time,world).find(s=>s.missionId===trackedMissionId);
- const target=mission?.status==='preparing'?launchPadPosition(world,mission,clock.time):marker?.position;
+ const provider=createStateProvider(world,civilization);
+ const target=mission?.status==='preparing'?launchPadPosition(world,mission,clock.time):
+  mission?(provider.at(localVehicleEntityId(trackedMissionId),clock.time,solarFrame)?.positionM??
+   (!mission.flight?missionSymbols(world,civilization,clock.time).find(s=>s.mission.id===trackedMissionId)?.position:undefined)):
+  provider.at(probeEntityId(trackedMissionId),clock.time,solarFrame)?.positionM;
  if(target){camera.x=target.x+missionFollowOffset.x;camera.y=target.y+missionFollowOffset.y;}
- else if(interplanetary){camera.x=interplanetary.position.x+missionFollowOffset.x;camera.y=interplanetary.position.y+missionFollowOffset.y;}
  else if(civilization.interplanetaryTimelines?.some(t=>t.missionId===trackedMissionId)){
   const timeline=civilization.interplanetaryTimelines.find(t=>t.missionId===trackedMissionId)!;
-  if(clock.time<timeline.manifest.departureS){const origin=positionsAt(world,clock.time).get(timeline.manifest.originId);
+  if(clock.time<timeline.manifest.departureS){const origin=provider.at(bodyEntityId(timeline.manifest.originId),clock.time,solarFrame)?.positionM;
    if(origin){camera.x=origin.x+missionFollowOffset.x;camera.y=origin.y+missionFollowOffset.y;}}
  }
  else if(!civilization.interplanetaryTimelines?.some(t=>t.missionId===trackedMissionId)&&mission?.status!=='preparing'){trackedMissionId=null;missionFollowOffset={x:0,y:0};}
