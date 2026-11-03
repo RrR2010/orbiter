@@ -33,8 +33,8 @@ function assemble(missionId:string,ownerId:string,entityId:string,pipeline:Missi
  validateMissionOperationRecord(record);
  return record;
 }
-function strategicEvent(missionId:string,operationId:string,event:SpaceEvent,kind:DomainEvent['kind']):DomainEvent{
- return {id:eventId(event.id),missionId,operationId,epochS:event.time,kind,
+function strategicEvent(missionId:string,operationId:string,event:SpaceEvent,kind:DomainEvent['kind'],suffix=''):DomainEvent{
+ return {id:eventId(event.id)+suffix,missionId,operationId,epochS:event.time,kind,
   source:'strategic-event',sourceId:event.id,
   outcome:event.kind==='failure'?'failure':event.kind==='success'?'success':'recorded',detail:event.detail};
 }
@@ -131,7 +131,7 @@ export function interplanetaryOperationRecord(c:Readonly<Civilization>,timeline:
    const opId=`operation/${entityId}/transmit/${observationId}`;
    drafts.push({id:opId,epochS:manifest.milestones[encounterIndex].timeS,kind:'transmit',
     parameters:{kind:'transmit',observationId}});
-   events.push(strategicEvent(id,opId,event,'science-received'));
+   events.push(strategicEvent(id,opId,event,'science-received',`/science/${observationId}`));
   }else if(event.missionId===id&&event.kind==='failure'&&event.detail.startsWith('Interplanetary radio link out of range')){
    const opId=`operation/${entityId}/transmit/radio-failure/${event.id}`;
    drafts.push({id:opId,epochS:manifest.milestones[encounterIndex].timeS,kind:'transmit',
