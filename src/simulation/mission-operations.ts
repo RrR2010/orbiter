@@ -8,7 +8,7 @@ export type OperationParameters=
  |Readonly<{kind:'burn';thrustN:number|null;ispS:number|null}>
  |Readonly<{kind:'coast';centralBodyId:EntityId}>
  |Readonly<{kind:'handoff';fromFrameId:FrameId;toFrameId:FrameId}>
- |Readonly<{kind:'correction';deltaVMs:number;fuelSpentKg:number}>
+ |Readonly<{kind:'correction';deltaVMs:number|null;fuelSpentKg:number|null}>
  |Readonly<{kind:'observation';targetId:EntityId}>
  |Readonly<{kind:'transmit';observationId:string}>
  |Readonly<{kind:'assessment';targetId:EntityId}>;
