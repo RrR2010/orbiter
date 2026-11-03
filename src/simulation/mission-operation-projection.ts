@@ -76,7 +76,8 @@ export function localOperationRecord(c:Readonly<Civilization>,mission:Readonly<M
    }
    if(mission.status!=='preparing'&&checkpoint.timeS<=untilS)
     cp.push({id:`checkpoint/${entityId}/${i}`,missionId:id,operationId,epochS:checkpoint.timeS,
-     frameId:bodyFrame(mission.originId),state:fromLocalFlight(entityId,mission.originId,checkpoint.state),
+     frameId:bodyFrame(mission.originId),checkpointKind:checkpoint.kind,detail:checkpoint.reason,
+     state:fromLocalFlight(entityId,mission.originId,checkpoint.state),
      source:'local-flight-v2',status:'physical-observation'});
   });
  }
@@ -130,7 +131,8 @@ export function interplanetaryOperationRecord(c:Readonly<Civilization>,timeline:
  const correctionConfirmed=correctionIndex>=0&&correctionIndex<timeline.cursor;
  const add=(name:string,state:FlightState,operationId:string):void=>{
   if(state.timeS<=untilS)cp.push({id:`checkpoint/${entityId}/${name}`,missionId:id,operationId,
-   epochS:state.timeS,frameId:solarFrame,state:fromHeliocentricProbe(entityId,state),
+   epochS:state.timeS,frameId:solarFrame,checkpointKind:name==='handoff'?'handoff':'correction',detail:null,
+   state:fromHeliocentricProbe(entityId,state),
    status:'physical-observation',source:'interplanetary-manifest'});
  };
  if(departureConfirmed&&manifest.preCorrectionCoastStart){
