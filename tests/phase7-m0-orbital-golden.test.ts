@@ -32,4 +32,16 @@ describe('phase 7 numerical golden: achieved orbital insertion',()=>{
   expect(restored.massKg).toBe(state.massKg);
   expect(restored.fuelKg).toBe(state.fuelKg);
  });
+ it('reproduces a successful nonorbital objective without misclassifying it as insertion',()=>{
+  const world=generateWorld('phase-five-injection');
+  const planet=world.bodies.find(body=>body.kind==='planet')!;
+  const result=resolveAutonomousFlightV2(
+   createAutonomousFlightV2(world.seed,'phase7-discovery-11',planet,100,4),
+   gravityForRadius(planet.radius));
+  expect(result.outcome).toBe('achieved');
+  expect(result.goalAchieved).toBe(true);
+  expect(result.orbital).toBe(false);
+  expect(result.terminal.fuelKg).toBeCloseTo(760.8731029769342,5);
+  expect(result.terminal.timeS).toBeCloseTo(973.7292176692088,5);
+ });
 });
