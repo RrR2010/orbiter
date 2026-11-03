@@ -48,7 +48,8 @@ export function localOperationRecord(c:Readonly<Civilization>,mission:Readonly<M
  const cp:PhysicalCheckpoint[]=[];
  const flight=mission.flight;
  const assessmentAt=flight?.checkpoints.find(checkpoint=>
-  checkpoint.kind==='goal'||checkpoint.kind==='partial'||checkpoint.kind==='abort'||checkpoint.kind==='impact')?.timeS;
+  (checkpoint.kind==='goal'||checkpoint.kind==='partial'||checkpoint.kind==='abort'||checkpoint.kind==='impact')&&
+  !checkpoint.reason.startsWith('Ascent '))?.timeS;
  const endEpoch=assessmentAt??(mission.resolvedAt>0?mission.resolvedAt:flight?.terminal.timeS);
  if(endEpoch!==undefined)drafts.push({id:endId,epochS:endEpoch,kind:'assessment',
   parameters:{kind:'assessment',targetId:mission.targetId}});
