@@ -11,14 +11,16 @@ const localId=(id:string):string=>`local/${id}`;
 const probeId=(id:string):string=>`probe/${id}`;
 const eventId=(id:string):string=>`source/${id}`;
 const mark=(ops:MissionOperation[],checkpoints:readonly PhysicalCheckpoint[],events:readonly DomainEvent[]):MissionOperation[]=>{
- const byOperation=(id:string)=>events.filter(e=>e.operationId===id).sort(compare);
+ const lastEventByOperation=new Map<string,DomainEvent>(),lastCheckpointByOperation=new Map<string,PhysicalCheckpoint>();
+ for(const event of [...events].sort(compare))lastEventByOperation.set(event.operationId,event);
+ for(const checkpoint of [...checkpoints].sort(compare))lastCheckpointByOperation.set(checkpoint.operationId,checkpoint);
  return ops.map((op):MissionOperation=>{
-  const lastEvent=byOperation(op.id).at(-1);
+  const lastEvent=lastEventByOperation.get(op.id);
   if(lastEvent&&!(op.kind==='launch'&&lastEvent.kind==='preparation')){
    if(lastEvent.outcome==='failure')return {...op,status:'failed',result:{kind:'failed',eventId:lastEvent.id}};
    return {...op,status:'confirmed',result:{kind:'confirmed',eventId:lastEvent.id}};
   }
-  const checkpoint=checkpoints.filter(cp=>cp.operationId===op.id).sort(compare).at(-1);
+  const checkpoint=lastCheckpointByOperation.get(op.id);
   return checkpoint?{...op,status:'observed' as const,result:{kind:'observed' as const,checkpointId:checkpoint.id}}:op;
  });
 };
