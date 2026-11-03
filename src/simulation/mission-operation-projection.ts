@@ -86,7 +86,7 @@ export function interplanetaryOperationRecord(c:Readonly<Civilization>,timeline:
   const kind=milestoneKind(m.kind);
   return {id:`operation/${entityId}/milestone/${i}`,epochS:m.timeS,kind,
    parameters:kind==='launch'?{kind:'launch' as const,originId:manifest.originId}:
-    kind==='correction'?{kind:'correction' as const,deltaVMs:manifest.courseCorrectionDeltaVMs,fuelSpentKg:manifest.courseCorrectionFuelKg}:
+    kind==='correction'?{kind:'correction' as const,deltaVMs:i<timeline.cursor?manifest.courseCorrectionDeltaVMs:null,fuelSpentKg:i<timeline.cursor?manifest.courseCorrectionFuelKg:null}:
      kind==='observation'?{kind:'observation' as const,targetId:manifest.targetId}:
       {kind:'assessment' as const,targetId:manifest.targetId}};
  });
